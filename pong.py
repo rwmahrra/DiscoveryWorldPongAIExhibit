@@ -11,7 +11,7 @@ class Pong:
     MAX_SCORE = 5
     WIDTH = 160
     HEIGHT = 192
-    SPEEDUP = 1
+    SPEEDUP = 3
     ACTIONS = ["UP", "DOWN", "NONE"]
     GRACE_PADDLE = 4
 
