@@ -52,11 +52,12 @@ def run_simulations(n):
     Timer.start(f'{n} games')
     r.wait()  # Wait on the results
     Timer.stop(f'{n} games')
+    games = games[0]
     states = np.ndarray(shape=(0, Pong.HEIGHT//4, Pong.WIDTH//4), dtype=np.float32)
     actions = np.ndarray(shape=(0, 2, 3), dtype=np.float32)
     rewards = np.ndarray(shape=(0, 2), dtype=np.float32)
     for game in games:
-        game_states, game_actions, game_rewards = game[0]
+        game_states, game_actions, game_rewards = game
         states = np.concatenate((game_states, states), axis=0)
         actions = np.concatenate((game_actions, actions), axis=0)
         rewards = np.concatenate((game_rewards, rewards), axis=0)
@@ -64,7 +65,7 @@ def run_simulations(n):
 
 
 if __name__ == '__main__':
-    simulated_games = run_simulations(100000)
+    simulated_games = run_simulations(1000)
     s, a, r = simulated_games
-    dqn = DQN()
-    dqn.retrain(simulated_games)
+    #dqn = DQN()
+    #dqn.retrain(simulated_games)
