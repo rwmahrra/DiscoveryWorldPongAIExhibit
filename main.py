@@ -67,5 +67,8 @@ def run_simulations(n):
 if __name__ == '__main__':
     simulated_games = run_simulations(1000)
     s, a, r = simulated_games
-    #dqn = DQN()
-    #dqn.retrain(simulated_games)
+    np.save('states.npy', s)
+    np.save('actions.npy', a)
+    np.save('rewards.npy', r)
+    dqn = DQN()
+    dqn.retrain(simulated_games)
