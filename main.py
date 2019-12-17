@@ -8,6 +8,7 @@ from utils import Timer, encode_action
 import multiprocessing
 from ai import DQN
 import subprocess
+import os
 
 
 def simulate_pong(task_id):
@@ -65,10 +66,9 @@ def run_simulations(n):
 
 
 if __name__ == '__main__':
-    simulated_games = run_simulations(1000)
-    s, a, r = simulated_games
-    np.save('states.npy', s)
-    np.save('actions.npy', a)
-    np.save('rewards.npy', r)
-    dqn = DQN()
-    dqn.retrain(simulated_games)
+    for i in range(100):
+        simulated_games = run_simulations(1)
+        s, a, r = simulated_games
+        dqn = DQN()
+        dqn.retrain((s, a, r))
+        dqn.save(f'{i}.h5')

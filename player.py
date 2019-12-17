@@ -49,6 +49,9 @@ class DeepQPlayer:
         self.game_memory = []
         self.brain = brain
 
+    def set_model(self, model):
+        self.brain = model
+
     def move(self, state):
         predictions = self.brain.infer(state)
         best = np.argmax(predictions)

@@ -2,6 +2,8 @@ import numpy as np
 from keras.layers import Dense
 from keras.models import Sequential
 from pong import Pong
+import cv2
+import os
 from utils import encode_action
 
 
@@ -10,18 +12,43 @@ class DQN:
         self.gamma = gamma
         # creates a generic neural network architecture
         self.model = Sequential()
+        self.get_last_file()
 
         # hidden layer takes a pre-processed frame as input, and has 200 units
         self.model.add(Dense(200, input_dim=(Pong.HEIGHT//4 * Pong.WIDTH//4), activation='relu', kernel_initializer='glorot_uniform'))
 
         # output layer
-        self.model.add(Dense(3, activation='linear', kernel_initializer='glorot_uniform'))
+        self.model.add(Dense(3, activation='softmax', kernel_initializer='glorot_uniform'))
 
         # compile the model using traditional Machine Learning losses and optimizers
         self.model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+        file = self.get_last_file()
+        print(file)
+        if file is not None:
+            self.load_model(file)
 
-    def load_model(self):
-        pass
+    def get_last_file(self):
+        files = [f for f in os.listdir("models") if os.path.isfile(os.path.join("models", f))]
+        ids = [int(os.path.split(f)[1].split('.')[0]) for f in files]
+        max = -1
+        for id in ids:
+            if id > max:
+                max = id
+        if max == -1:
+            return None
+        return os.path.join("models", f"{id}.h5")
+
+    def load_model(self, path):
+        print("Loading " + path)
+        self.model.load_weights(path)
+
+    def show_weights(self, neuron):
+        weights = self.model.get_weights()[0][:, neuron]
+        weights = weights.reshape(Pong.HEIGHT // 4, Pong.WIDTH // 4)
+
+        weights = cv2.resize(weights, (Pong.WIDTH, Pong.HEIGHT)) + 0.5
+        cv2.imshow(f"DQN neuron weights {neuron}", weights)
+        cv2.waitKey(0)
 
     def infer(self, state):
         state = state.flatten()
@@ -47,3 +74,9 @@ class DQN:
             running_add = running_add * self.gamma + r[t]
             discounted_r[t] = running_add
         return discounted_r
+
+    def save(self, name):
+        if not os.path.exists('./models'):
+            os.makedirs('./models')
+        print('saving to ' + name)
+        self.model.save('./models/' + name)
