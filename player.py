@@ -5,6 +5,7 @@ from keras.layers import Dense
 from keras.models import Sequential
 from ai import DQN
 import cv2
+from random import random, choice
 
 
 class HumanPlayer:
@@ -40,14 +41,15 @@ class BotPlayer:
 
 
 class DeepQPlayer:
+    EPSILON = 0
 
-    def __init__(self, brain=DQN(), left=False, right=False):
+    def __init__(self, left=False, right=False):
         # import necessary modules from keras
         self.left = left
         self.right = right
         self.new_memory = []
         self.game_memory = []
-        self.brain = brain
+        self.brain = DQN()
 
     def set_model(self, model):
         self.brain = model
@@ -55,4 +57,7 @@ class DeepQPlayer:
     def move(self, state):
         predictions = self.brain.infer(state)
         best = np.argmax(predictions)
-        return Pong.ACTIONS[best]
+        if random() < DeepQPlayer.EPSILON:
+            return Pong.ACTIONS[best]
+        else:
+            return choice(Pong.ACTIONS)

@@ -11,7 +11,7 @@ import subprocess
 import os
 
 
-def simulate_pong(task_id):
+def simulate_pong(task_id, show=False):
     try:
         states = np.ndarray(shape=(0, Pong.HEIGHT//4, Pong.WIDTH//4), dtype=np.float32)
         actions = np.ndarray(shape=(0, 2, 3), dtype=np.float32)
@@ -37,6 +37,10 @@ def simulate_pong(task_id):
             states = np.concatenate((states, np.expand_dims(last_state, axis=0)), axis=0)
             actions = np.concatenate((actions, np.expand_dims(action, axis=0)), axis=0)
             rewards = np.concatenate((rewards, np.asarray([[reward_l, reward_r]], dtype=np.float32)), axis=0)
+            if (show):
+                print(right_action)
+                env.show(2)
+                env.show_state(2)
         l, r = env.get_score()
         print(f"Finished game {task_id}, {l} - {r}")
         return states, actions, rewards
@@ -64,11 +68,26 @@ def run_simulations(n):
         rewards = np.concatenate((game_rewards, rewards), axis=0)
     return states, actions, rewards
 
+def test_nnet(model):
+    s = np.load('./test_data/states.npy')
+    for i in range(20):
+        predictions = model.infer(s[i])
+        for j in predictions:
+            print(j)
 
+dqn = DQN(resume=False)
+#dqn.show_weights(0)
+#dqn.load_model('models/0.h5')
+#dqn.show_weights(0)
 if __name__ == '__main__':
+    player.DeepQPlayer.EPSILON = 0
     for i in range(100):
-        simulated_games = run_simulations(1)
+        test_nnet(dqn)
+        simulated_games = run_simulations(1000)
         s, a, r = simulated_games
+        r = (r + 1) / 2
         dqn = DQN()
         dqn.retrain((s, a, r))
+        #dqn.show_weights(0)
         dqn.save(f'{i}.h5')
+        player.DeepQPlayer.EPSILON = int(0.5 + (i / 200))
