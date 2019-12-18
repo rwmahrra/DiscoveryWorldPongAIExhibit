@@ -64,7 +64,7 @@ class DQN:
         states = np.stack([state.flatten().astype("float32") for state in states], axis=0)
         actions = actions[:, 1]
 
-        self.model.fit(x=states, y=actions, sample_weight=rewards, epochs=8)
+        self.model.fit(x=states, y=actions, sample_weight=rewards, epochs=20)
         self.model.save("pong_dqn_100000.h5")
 
     def discount_rewards(self, r):

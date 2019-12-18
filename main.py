@@ -50,7 +50,7 @@ def simulate_pong(task_id, show=False):
 
 def run_simulations(n):
     count = multiprocessing.cpu_count()
-    pool = multiprocessing.Pool(processes=count)
+    pool = multiprocessing.Pool(processes=count - 1)
     games = []
     tasks = range(n)
     r = pool.map_async(simulate_pong, tasks, callback=games.append)
@@ -77,17 +77,18 @@ def test_nnet(model):
 
 dqn = DQN(resume=False)
 #dqn.show_weights(0)
-#dqn.load_model('models/0.h5')
+
 #dqn.show_weights(0)
 if __name__ == '__main__':
     player.DeepQPlayer.EPSILON = 0
     for i in range(100):
-        test_nnet(dqn)
-        simulated_games = run_simulations(1000)
+        #test_nnet(dqn)
+        simulated_games = run_simulations(100)
         s, a, r = simulated_games
         r = (r + 1) / 2
         dqn = DQN()
         dqn.retrain((s, a, r))
         #dqn.show_weights(0)
         dqn.save(f'{i}.h5')
+        dqn.load_model(f'models/{i}.h5')
         player.DeepQPlayer.EPSILON = int(0.5 + (i / 200))
