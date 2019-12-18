@@ -62,7 +62,7 @@ def run_simulations(n, threaded=True):
         tasks = range(n)
         Timer.start(f'{n} games')
         for task in tasks:
-            games.append(simulate_pong(task))
+            games.append([simulate_pong(task)])
         Timer.stop(f'{n} games')
     games = games[0]
     states = np.ndarray(shape=(0, Pong.HEIGHT // 4, Pong.WIDTH // 4), dtype=np.float32)
@@ -91,7 +91,7 @@ if __name__ == '__main__':
     player.DeepQPlayer.EPSILON = 0
     for i in range(100):
         #test_nnet(dqn)
-        simulated_games = run_simulations(100, threaded=False)
+        simulated_games = run_simulations(1, threaded=False)
         s, a, r = simulated_games
         r = (r + 1) / 2
         dqn = DQN()
