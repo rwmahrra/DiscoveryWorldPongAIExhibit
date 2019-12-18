@@ -48,17 +48,24 @@ def simulate_pong(task_id, show=False):
         print(e)
 
 
-def run_simulations(n):
-    count = multiprocessing.cpu_count()
-    pool = multiprocessing.Pool(processes=count - 1)
+def run_simulations(n, threaded=True):
     games = []
     tasks = range(n)
-    r = pool.map_async(simulate_pong, tasks, callback=games.append)
-    Timer.start(f'{n} games')
-    r.wait()  # Wait on the results
-    Timer.stop(f'{n} games')
+    if threaded:
+        count = multiprocessing.cpu_count()
+        pool = multiprocessing.Pool(processes=count - 1)
+        r = pool.map_async(simulate_pong, tasks, callback=games.append)
+        Timer.start(f'{n} games')
+        r.wait()  # Wait on the results
+        Timer.stop(f'{n} games')
+    else:
+        tasks = range(n)
+        Timer.start(f'{n} games')
+        for task in tasks:
+            games.append(simulate_pong(task))
+        Timer.stop(f'{n} games')
     games = games[0]
-    states = np.ndarray(shape=(0, Pong.HEIGHT//4, Pong.WIDTH//4), dtype=np.float32)
+    states = np.ndarray(shape=(0, Pong.HEIGHT // 4, Pong.WIDTH // 4), dtype=np.float32)
     actions = np.ndarray(shape=(0, 2, 3), dtype=np.float32)
     rewards = np.ndarray(shape=(0, 2), dtype=np.float32)
     for game in games:
@@ -67,6 +74,7 @@ def run_simulations(n):
         actions = np.concatenate((game_actions, actions), axis=0)
         rewards = np.concatenate((game_rewards, rewards), axis=0)
     return states, actions, rewards
+
 
 def test_nnet(model):
     s = np.load('./test_data/states.npy')
@@ -83,7 +91,7 @@ if __name__ == '__main__':
     player.DeepQPlayer.EPSILON = 0
     for i in range(100):
         #test_nnet(dqn)
-        simulated_games = run_simulations(100)
+        simulated_games = run_simulations(100, threaded=False)
         s, a, r = simulated_games
         r = (r + 1) / 2
         dqn = DQN()
