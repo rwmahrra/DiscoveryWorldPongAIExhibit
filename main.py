@@ -21,20 +21,16 @@ def simulate_pong(task_id, show=False):
         right = player.DeepQPlayer(right=True)  #player.HumanPlayer('up', 'down')
         left = player.BotPlayer(env, left=True)
         last_screen = None
-        screen = env.reset()
+        state = env.reset()
         done = False
         while not done:
-            if last_screen is None:
-                state = screen - np.zeros_like(screen, dtype=np.float32)
-            else:
-                state = screen - last_screen
             left_action = left.move(state)
             right_action = right.move(state)
             action = np.stack((encode_action(left_action), encode_action(right_action)))
-            last_state = state
+            start_state = state
             state, reward, done = env.step(left_action, right_action)
             reward_l, reward_r = reward
-            states = np.concatenate((states, np.expand_dims(last_state, axis=0)), axis=0)
+            states = np.concatenate((states, np.expand_dims(start_state, axis=0)), axis=0)
             actions = np.concatenate((actions, np.expand_dims(action, axis=0)), axis=0)
             rewards = np.concatenate((rewards, np.asarray([[reward_l, reward_r]], dtype=np.float32)), axis=0)
             if (show):
@@ -83,15 +79,38 @@ def test_nnet(model):
         for j in predictions:
             print(j)
 
+def test_model(id):
+    dqn = DQN(resume=False)
+    dqn.load_model(f"./models/{id}.h5")
+    env = Pong()
+    #player.DeepQPlayer.EPSILON = 1
+    right = player.DeepQPlayer(right=True)
+    right.set_model(dqn)
+    left = player.BotPlayer(env, left=True)
+    last_screen = None
+    state = env.reset()
+    done = False
+    while not done:
+        left_action = left.move(state)
+        right_action = right.move(state)
+        print(right_action)
+        state, reward, done = env.step(left_action, right_action)
+        env.show(2)
+        env.show_state(2)
+    l, r = env.get_score()
+    print(f"Finished game with model {id}, {l} - {r}")
+
+
 dqn = DQN(resume=False)
 #dqn.show_weights(0)
 
 #dqn.show_weights(0)
 if __name__ == '__main__':
+
     player.DeepQPlayer.EPSILON = 0
-    for i in range(100):
+    for i in range(1000):
         #test_nnet(dqn)
-        simulated_games = run_simulations(1, threaded=False)
+        simulated_games = run_simulations(500, threaded=True)
         s, a, r = simulated_games
         r = (r + 1) / 2
         dqn = DQN()
@@ -100,3 +119,4 @@ if __name__ == '__main__':
         dqn.save(f'{i}.h5')
         dqn.load_model(f'models/{i}.h5')
         player.DeepQPlayer.EPSILON = int(0.5 + (i / 200))
+
