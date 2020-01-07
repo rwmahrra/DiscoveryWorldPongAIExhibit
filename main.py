@@ -106,11 +106,29 @@ dqn = DQN(resume=False)
 
 #dqn.show_weights(0)
 if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser(description="Run pong simulations and periodically retrain a DQN on the generated data")
+    parser.add_argument("-v", "--verbose", action="store_true")
+    parser.add_argument("--batch", type=int, help="number of simulations", default=500)
+    parser.add_argument("--repeats", type=int, help="the exponent", default=1000)
+
+    batch_size = 500
+    repeats = 1000
+    args = parser.parse_args()
+
+    if args.verbose:
+        pass
+    if args.batch:
+        batch_size = args.batch
+    if args.repeats:
+        repeats = args.repeats
+
+    print(f'Beginning {repeats} training loops of {batch_size} simulations.')
 
     player.DeepQPlayer.EPSILON = 0
-    for i in range(1000):
+    for i in range(repeats):
         #test_nnet(dqn)
-        simulated_games = run_simulations(500, threaded=True)
+        simulated_games = run_simulations(batch_size, threaded=True)
         s, a, r = simulated_games
         r = (r + 1) / 2
         dqn = DQN()
