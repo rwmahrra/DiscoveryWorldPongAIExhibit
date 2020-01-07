@@ -44,12 +44,16 @@ def simulate_pong(task_id, show=False):
         print(e)
 
 
-def run_simulations(n, threaded=True):
+def run_simulations(n, threads):
     games = []
     tasks = range(n)
-    if threaded:
+    if threads != 0:
         count = multiprocessing.cpu_count()
-        pool = multiprocessing.Pool(processes=count - 1)
+        to_use = count - 1
+        if threads > 0:
+            to_use = min(threads, count)
+        pool = multiprocessing.Pool(processes=to_use)
+        print(f"Running on {to_use} threads")
         r = pool.map_async(simulate_pong, tasks, callback=games.append)
         Timer.start(f'{n} games')
         r.wait()  # Wait on the results
@@ -110,10 +114,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run pong simulations and periodically retrain a DQN on the generated data")
     parser.add_argument("-v", "--verbose", action="store_true")
     parser.add_argument("--batch", type=int, help="number of simulations", default=500)
-    parser.add_argument("--repeats", type=int, help="the exponent", default=1000)
+    parser.add_argument("--repeats", type=int, help="number of times to simulate and retrain", default=1000)
+    parser.add_argument("--threads", type=int, help="number of threads to run. 0 to run sequentially, -1 for max", default=-1)
 
     batch_size = 500
     repeats = 1000
+    threads = -1
     args = parser.parse_args()
 
     if args.verbose:
@@ -122,13 +128,19 @@ if __name__ == '__main__':
         batch_size = args.batch
     if args.repeats:
         repeats = args.repeats
-
-    print(f'Beginning {repeats} training loops of {batch_size} simulations.')
+    if args.threads or args.threads == 0:
+        threads = args.threads
+    if threads == 0:
+        print(f'Beginning {repeats} training loops of {batch_size} simulations without parallel processing.')
+    elif threads > 0:
+        print(f'Beginning {repeats} training loops of {batch_size} simulations, requesting {threads} threads.')
+    else:
+        print(f'Beginning {repeats} training loops of {batch_size} simulations on all available threads.')
 
     player.DeepQPlayer.EPSILON = 0
     for i in range(repeats):
         #test_nnet(dqn)
-        simulated_games = run_simulations(batch_size, threaded=True)
+        simulated_games = run_simulations(batch_size, threads=threads)
         s, a, r = simulated_games
         r = (r + 1) / 2
         dqn = DQN()
