@@ -14,6 +14,7 @@ class DQN:
         self.model = Sequential()
         self.epsilon = epsilon
         self.get_last_file()
+        print("Constructing DQN")
 
         # hidden layer takes a pre-processed frame as input, and has 200 units
         self.model.add(Dense(200, input_dim=(Pong.HEIGHT//4 * Pong.WIDTH//4), activation='relu', kernel_initializer='glorot_uniform'))
@@ -23,6 +24,7 @@ class DQN:
 
         # compile the model using traditional Machine Learning losses and optimizers
         self.model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
         if resume:
             file = self.get_last_file()
             if file is not None:
@@ -65,6 +67,7 @@ class DQN:
         actions = actions[:, 1]
 
         self.model.fit(x=states, y=actions, sample_weight=rewards, epochs=20)
+
     def discount_rewards(self, r):
         """ take 1D float array of rewards and compute discounted reward """
         discounted_r = np.zeros_like(r, dtype=np.float32)

@@ -43,13 +43,16 @@ class BotPlayer:
 class DeepQPlayer:
     EPSILON = 0
 
-    def __init__(self, left=False, right=False):
+    def __init__(self, left=False, right=False, brain=None):
         # import necessary modules from keras
         self.left = left
         self.right = right
         self.new_memory = []
         self.game_memory = []
-        self.brain = DQN()
+        if brain is None:
+            self.brain = DQN()
+        else:
+            self.brain = brain
 
     def set_model(self, model):
         self.brain = model

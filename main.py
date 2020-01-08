@@ -1,3 +1,8 @@
+# DISABLE GPUs for nicer threading
+import os
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+
 from pong import Pong
 from random import choice
 import time
@@ -8,15 +13,12 @@ from utils import Timer, encode_action
 import multiprocessing
 from ai import DQN
 import subprocess
-import os
-
 
 def simulate_pong(task_id, show=False):
     try:
         states = np.ndarray(shape=(0, Pong.HEIGHT//4, Pong.WIDTH//4), dtype=np.float32)
         actions = np.ndarray(shape=(0, 2, 3), dtype=np.float32)
         rewards = np.ndarray(shape=(0, 2), dtype=np.float32)
-
         env = Pong()
         right = player.DeepQPlayer(right=True)  #player.HumanPlayer('up', 'down')
         left = player.BotPlayer(env, left=True)
@@ -58,13 +60,14 @@ def run_simulations(n, threads):
         Timer.start(f'{n} games')
         r.wait()  # Wait on the results
         Timer.stop(f'{n} games')
+        games = games[0]
     else:
         tasks = range(n)
         Timer.start(f'{n} games')
         for task in tasks:
-            games.append([simulate_pong(task)])
+            games.append(simulate_pong(task))
         Timer.stop(f'{n} games')
-    games = games[0]
+
     states = np.ndarray(shape=(0, Pong.HEIGHT // 4, Pong.WIDTH // 4), dtype=np.float32)
     actions = np.ndarray(shape=(0, 2, 3), dtype=np.float32)
     rewards = np.ndarray(shape=(0, 2), dtype=np.float32)
@@ -105,7 +108,7 @@ def test_model(id):
     print(f"Finished game with model {id}, {l} - {r}")
 
 
-dqn = DQN(resume=False)
+#dqn = DQN(resume=False)
 #dqn.show_weights(0)
 
 #dqn.show_weights(0)
@@ -139,7 +142,6 @@ if __name__ == '__main__':
 
     player.DeepQPlayer.EPSILON = 0
     for i in range(repeats):
-        #test_nnet(dqn)
         simulated_games = run_simulations(batch_size, threads=threads)
         s, a, r = simulated_games
         r = (r + 1) / 2
