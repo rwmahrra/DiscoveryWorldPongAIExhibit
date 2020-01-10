@@ -12,7 +12,7 @@ class Pong:
     WIDTH = 160
     HEIGHT = 192
     SPEEDUP = 3
-    ACTIONS = ["UP", "DOWN", "NONE"]
+    ACTIONS = ["UP", "DOWN"]
     GRACE_PADDLE = 4
 
     @staticmethod

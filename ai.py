@@ -20,7 +20,7 @@ class DQN:
         self.model.add(Dense(200, input_dim=(Pong.HEIGHT//4 * Pong.WIDTH//4), activation='relu', kernel_initializer='glorot_uniform'))
 
         # output layer
-        self.model.add(Dense(3, activation='softmax', kernel_initializer='glorot_uniform'))
+        self.model.add(Dense(2, activation='softmax', kernel_initializer='glorot_uniform'))
 
         # compile the model using traditional Machine Learning losses and optimizers
         self.model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
