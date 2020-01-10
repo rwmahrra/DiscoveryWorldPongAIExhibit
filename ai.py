@@ -42,8 +42,14 @@ class DQN:
         return os.path.join("models", f"{id}.h5")
 
     def load_model(self, path):
-        print("Loading " + path)
-        self.model.load_weights(path)
+        try:
+            print("Loading " + path)
+            self.model.load_weights(path)
+            print("Successfully loaded")
+        except Exception as e:
+            print("Error loading model")
+            print(e)
+            raise(e)
 
     def show_weights(self, neuron):
         weights = self.model.get_weights()[0][:, neuron]
