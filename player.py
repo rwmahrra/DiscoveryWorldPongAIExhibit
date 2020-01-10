@@ -37,7 +37,7 @@ class BotPlayer:
             else:
                 return "UP" if randint(0, 1) == 1 else "DOWN"
         else:
-            return "NONE"
+            return "UP" if randint(0, 1) == 1 else "DOWN"
 
 
 class DeepQPlayer:

@@ -17,7 +17,7 @@ import subprocess
 def simulate_pong(task_id, show=False):
     try:
         states = np.ndarray(shape=(0, Pong.HEIGHT//4, Pong.WIDTH//4), dtype=np.float32)
-        actions = np.ndarray(shape=(0, 2, 3), dtype=np.float32)
+        actions = np.ndarray(shape=(0, 2, 2), dtype=np.float32)
         rewards = np.ndarray(shape=(0, 2), dtype=np.float32)
         env = Pong()
         right = player.DeepQPlayer(right=True)  #player.HumanPlayer('up', 'down')
@@ -69,7 +69,7 @@ def run_simulations(n, threads):
         Timer.stop(f'{n} games')
 
     states = np.ndarray(shape=(0, Pong.HEIGHT // 4, Pong.WIDTH // 4), dtype=np.float32)
-    actions = np.ndarray(shape=(0, 2, 3), dtype=np.float32)
+    actions = np.ndarray(shape=(0, 2, 2), dtype=np.float32)
     rewards = np.ndarray(shape=(0, 2), dtype=np.float32)
     for game in games:
         game_states, game_actions, game_rewards = game
@@ -116,9 +116,9 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description="Run pong simulations and periodically retrain a DQN on the generated data")
     parser.add_argument("-v", "--verbose", action="store_true")
-    parser.add_argument("--batch", type=int, help="number of simulations", default=500)
+    parser.add_argument("--batch", type=int, help="number of simulations", default=5)
     parser.add_argument("--repeats", type=int, help="number of times to simulate and retrain", default=1000)
-    parser.add_argument("--threads", type=int, help="number of threads to run. 0 to run sequentially, -1 for max", default=-1)
+    parser.add_argument("--threads", type=int, help="number of threads to run. 0 to run sequentially, -1 for max", default=0)
 
     batch_size = 500
     repeats = 1000
