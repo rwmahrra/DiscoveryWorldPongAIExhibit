@@ -12,6 +12,7 @@ import player
 from utils import Timer, encode_action
 import multiprocessing
 from ai import DQN
+from keras import backend as K
 import subprocess
 
 def simulate_pong(task_id, show=False):
@@ -35,6 +36,7 @@ def simulate_pong(task_id, show=False):
             states = np.concatenate((states, np.expand_dims(start_state, axis=0)), axis=0)
             actions = np.concatenate((actions, np.expand_dims(action, axis=0)), axis=0)
             rewards = np.concatenate((rewards, np.asarray([[reward_l, reward_r]], dtype=np.float32)), axis=0)
+            K.clear_session()
             if (show):
                 print(right_action)
                 env.show(2)
@@ -61,6 +63,7 @@ def run_simulations(n, threads):
         r.wait()  # Wait on the results
         Timer.stop(f'{n} games')
         games = games[0]
+
     else:
         tasks = range(n)
         Timer.start(f'{n} games')
