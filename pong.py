@@ -222,18 +222,18 @@ class Pong:
         state = cv2.resize(state, (int(w/4), int(h/4)))
         return state
 
-    def show(self, scale=1):
+    def show(self, scale=1,  duration=1):
         l, r = self.get_score()
         to_render = cv2.resize(self.last_screen, (int(Pong.WIDTH * scale), int(Pong.HEIGHT * scale)))
         cv2.imshow(f"Pong", to_render)
-        cv2.waitKey(1)
+        cv2.waitKey(duration)
 
-    def show_state(self, scale=1):
+    def show_state(self, scale=1, duration=1):
         l, r = self.get_score()
         h, w = self.last_state.shape
         to_render = cv2.resize(self.last_state, (int(w * scale), int(h * scale)))
         cv2.imshow(f"Pong State", to_render)
-        cv2.waitKey(1)
+        cv2.waitKey(duration)
 
     def draw_rect(self, screen, x, y, w, h, color):
         screen[y:y+h+1, x:x+w+1] = color

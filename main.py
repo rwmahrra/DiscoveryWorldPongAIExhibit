@@ -86,27 +86,6 @@ def test_nnet(model):
         for j in predictions:
             print(j)
 
-def test_model(id):
-    dqn = DQN(resume=False)
-    dqn.load_model(f"./models/{id}.h5")
-    env = Pong()
-    #player.DeepQPlayer.EPSILON = 1
-    right = player.DeepQPlayer(right=True)
-    right.set_model(dqn)
-    left = player.BotPlayer(env, left=True)
-    last_screen = None
-    state = env.reset()
-    done = False
-    while not done:
-        left_action = left.move(state)
-        right_action = right.move(state)
-        print(right_action)
-        state, reward, done = env.step(left_action, right_action)
-        env.show(2)
-        env.show_state(2)
-    l, r = env.get_score()
-    print(f"Finished game with model {id}, {l} - {r}")
-
 
 #dqn = DQN(resume=False)
 #dqn.show_weights(0)
@@ -118,7 +97,7 @@ if __name__ == '__main__':
     parser.add_argument("-v", "--verbose", action="store_true")
     parser.add_argument("--batch", type=int, help="number of simulations", default=5)
     parser.add_argument("--repeats", type=int, help="number of times to simulate and retrain", default=1000)
-    parser.add_argument("--threads", type=int, help="number of threads to run. 0 to run sequentially, -1 for max", default=0)
+    parser.add_argument("--threads", type=int, help="number of threads to run. 0 to run sequentially, -1 for max", default=-1)
 
     batch_size = 500
     repeats = 1000
