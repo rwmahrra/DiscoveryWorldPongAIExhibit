@@ -9,7 +9,7 @@ import time
 import cv2
 import numpy as np
 import player
-from utils import Timer, encode_action
+from utils import Timer, get_resume_index, get_last_file, encode_action
 import multiprocessing
 from ai import DQN
 from keras import backend as K
@@ -36,7 +36,6 @@ def simulate_pong(task_id, show=False):
             states = np.concatenate((states, np.expand_dims(start_state, axis=0)), axis=0)
             actions = np.concatenate((actions, np.expand_dims(action, axis=0)), axis=0)
             rewards = np.concatenate((rewards, np.asarray([[reward_l, reward_r]], dtype=np.float32)), axis=0)
-            K.clear_session()
             if (show):
                 print(right_action)
                 env.show(2)
@@ -121,9 +120,15 @@ if __name__ == '__main__':
         print(f'Beginning {repeats} training loops of {batch_size} simulations, requesting {threads} threads.')
     else:
         print(f'Beginning {repeats} training loops of {batch_size} simulations on all available threads.')
-
     player.DeepQPlayer.EPSILON = 0
+    begin_index = get_resume_index()
+    if begin_index is None:
+        begin_index = 0
+    else:
+        begin_index += 1
+
     for i in range(repeats):
+        i += begin_index
         simulated_games = run_simulations(batch_size, threads=threads)
         s, a, r = simulated_games
         r = (r + 1) / 2
@@ -131,6 +136,7 @@ if __name__ == '__main__':
         dqn.retrain((s, a, r))
         #dqn.show_weights(0)
         dqn.save(f'{i}.h5')
-        dqn.load_model(f'models/{i}.h5')
+        K.clear_session()
+        dqn = DQN()
         player.DeepQPlayer.EPSILON = int(0.5 + (i / 200))
 

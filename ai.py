@@ -8,7 +8,8 @@ from utils import encode_action
 
 from matplotlib import pyplot as plt
 from vis.visualization import visualize_saliency
-from vis.utils import utils
+from vis.utils import utils as visutils
+import utils
 from keras import activations
 
 
@@ -18,7 +19,6 @@ class DQN:
         # creates a generic neural network architecture
         self.model = Sequential()
         self.epsilon = epsilon
-        self.get_last_file()
         print("Constructing DQN")
 
         # hidden layer takes a pre-processed frame as input, and has 200 units
@@ -31,20 +31,10 @@ class DQN:
         self.model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
         if resume:
-            file = self.get_last_file()
+            file = utils.get_last_file()
             if file is not None:
                 self.load_model(file)
 
-    def get_last_file(self):
-        files = [f for f in os.listdir("models") if os.path.isfile(os.path.join("models", f))]
-        ids = [int(os.path.split(f)[1].split('.')[0]) for f in files]
-        max = -1
-        for id in ids:
-            if id > max:
-                max = id
-        if max == -1:
-            return None
-        return os.path.join("models", f"{id}.h5")
 
     def load_model(self, path):
         try:
@@ -75,7 +65,7 @@ class DQN:
 
         # Swap softmax with linear
         self.model.layers[layer_idx].activation = activations.linear
-        self.model = utils.apply_modifications(self.model)
+        self.model = visutils.apply_modifications(self.model)
         print(frame.shape)
         grads = visualize_saliency(self.model, layer_idx, filter_indices=[class_idx], seed_input=frame.flatten())
         print(grads)
