@@ -22,7 +22,7 @@ class DQN:
         print("Constructing DQN")
 
         # hidden layer takes a pre-processed frame as input, and has 200 units
-        self.model.add(Dense(200, input_dim=(Pong.HEIGHT//4 * Pong.WIDTH//4), activation='relu', kernel_initializer='glorot_uniform'))
+        self.model.add(Dense(200, input_dim=(Pong.HEIGHT//2 * Pong.WIDTH//2), activation='relu', kernel_initializer='glorot_uniform'))
 
         # output layer
         self.model.add(Dense(2, activation='softmax', kernel_initializer='glorot_uniform'))
@@ -48,7 +48,7 @@ class DQN:
 
     def show_weights(self, neuron):
         weights = self.model.get_weights()[0][:, neuron]
-        weights = weights.reshape(Pong.HEIGHT // 4, Pong.WIDTH // 4)
+        weights = weights.reshape(Pong.HEIGHT // 2, Pong.WIDTH // 2)
 
         weights = cv2.resize(weights, (Pong.WIDTH, Pong.HEIGHT)) + 0.5
         print(weights)

@@ -18,7 +18,7 @@ import subprocess
 
 def simulate_pong(task_id, show=False):
     try:
-        states = np.ndarray(shape=(0, Pong.HEIGHT//4, Pong.WIDTH//4), dtype=np.float32)
+        states = np.ndarray(shape=(0, Pong.HEIGHT//2, Pong.WIDTH//2), dtype=np.float32)
         actions = np.ndarray(shape=(0, 2, 2), dtype=np.float32)
         rewards = np.ndarray(shape=(0, 2), dtype=np.float32)
         env = Pong()
@@ -71,7 +71,7 @@ def run_simulations(n, threads):
             games.append(simulate_pong(task))
         Timer.stop(f'{n} games')
 
-    states = np.ndarray(shape=(0, Pong.HEIGHT // 4, Pong.WIDTH // 4), dtype=np.float32)
+    states = np.ndarray(shape=(0, Pong.HEIGHT // 2, Pong.WIDTH // 2), dtype=np.float32)
     actions = np.ndarray(shape=(0, 2, 2), dtype=np.float32)
     rewards = np.ndarray(shape=(0, 2), dtype=np.float32)
 
@@ -102,7 +102,7 @@ if __name__ == '__main__':
     parser.add_argument("-v", "--verbose", action="store_true")
     parser.add_argument("--batch", type=int, help="number of simulations", default=5)
     parser.add_argument("--repeats", type=int, help="number of times to simulate and retrain", default=1000)
-    parser.add_argument("--threads", type=int, help="number of threads to run. 0 to run sequentially, -1 for max", default=-1)
+    parser.add_argument("--threads", type=int, help="number of threads to run. 0 to run sequentially, -1 for max", default=0)
 
     batch_size = 500
     repeats = 1000

@@ -41,8 +41,6 @@ def visualize_game_memory():
 def test_model(id):
     dqn = DQN(resume=False)
     dqn.load_model(f"./models/{id}.h5")
-    #for i in range(200):
-    #    dqn.show_weights(i)
     env = Pong()
     player.DeepQPlayer.EPSILON = 1
     right = player.DeepQPlayer(right=True)
@@ -61,6 +59,12 @@ def test_model(id):
         env.show_state(2, 0)
     l, r = env.get_score()
     print(f"Finished game with model {id}, {l} - {r}")
+
+def view_weights(id):
+    dqn = DQN(resume=False)
+    dqn.load_model(f"./models/{id}.h5")
+    for i in range(200):
+        dqn.show_weights(i)
 
 def debug_step():
     env = Pong()
@@ -81,4 +85,5 @@ def debug_step():
         env.show_state(duration=0)
 
 
-test_model(5)
+#view_train_progression(91, 0)
+test_model(0)

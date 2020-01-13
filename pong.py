@@ -221,7 +221,7 @@ class Pong:
     def preprocess_screen(self, state):
         state = cv2.cvtColor(state, cv2.COLOR_BGR2GRAY)
         h, w = state.shape
-        state = cv2.resize(state, (int(w/4), int(h/4)))
+        state = cv2.resize(state, (w//2, h//2))
         state[state < 250] = 0
         state /= 255
         #print(np.unique(state))
