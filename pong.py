@@ -21,6 +21,8 @@ class Pong:
             return "UP"
         elif keyboard.is_pressed(down):
             return "DOWN"
+        else:
+            return "NONE"
 
     @staticmethod
     def random_action():
@@ -220,6 +222,9 @@ class Pong:
         state = cv2.cvtColor(state, cv2.COLOR_BGR2GRAY)
         h, w = state.shape
         state = cv2.resize(state, (int(w/4), int(h/4)))
+        state[state < 250] = 0
+        state /= 255
+        #print(np.unique(state))
         return state
 
     def show(self, scale=1,  duration=1):

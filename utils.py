@@ -1,6 +1,7 @@
 import time
 import numpy as np
 import os
+import cv2
 
 class Timer:
     timers = {}
@@ -13,6 +14,17 @@ class Timer:
     def stop(name):
         t = time.time() - Timer.timers[name]
         print(f'Finished {name} in {round(t, 5)}s')
+
+
+def discount_rewards(r, gamma=0.99):
+    """ take 1D float array of rewards and compute discounted reward """
+    discounted_r = np.zeros_like(r, dtype=np.float32)
+    running_add = 0
+    for t in reversed(range(0, r.size)):
+        if r[t] != 0: running_add = 0  # reset the sum, since this was a game boundary (pong specific!)
+        running_add = running_add * gamma + r[t]
+        discounted_r[t] = running_add
+    return discounted_r
 
 
 def encode_action(action):
@@ -32,6 +44,7 @@ def get_last_file():
         return os.path.join("models", f"{id}.h5")
     else:
         return None
+
 
 def get_resume_index():
     files = [f for f in os.listdir("models") if os.path.isfile(os.path.join("models", f))]

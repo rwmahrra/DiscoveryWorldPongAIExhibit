@@ -4,7 +4,7 @@ from keras.models import Sequential
 from pong import Pong
 import cv2
 import os
-from utils import encode_action
+from utils import encode_action, discount_rewards
 
 from matplotlib import pyplot as plt
 from vis.visualization import visualize_saliency
@@ -80,21 +80,11 @@ class DQN:
 
     def retrain(self, games):
         states, actions, rewards = games
-        rewards = self.discount_rewards(rewards[:, 1])
+        rewards = discount_rewards(rewards[:, 1], gamma=self.gamma)
         states = np.stack([state.flatten().astype("float32") for state in states], axis=0)
         actions = actions[:, 1]
-
+        print(np.unique(states[0]))
         self.model.fit(x=states, y=actions, sample_weight=rewards, epochs=20)
-
-    def discount_rewards(self, r):
-        """ take 1D float array of rewards and compute discounted reward """
-        discounted_r = np.zeros_like(r, dtype=np.float32)
-        running_add = 0
-        for t in reversed(range(0, r.size)):
-            if r[t] != 0: running_add = 0  # reset the sum, since this was a game boundary (pong specific!)
-            running_add = running_add * self.gamma + r[t]
-            discounted_r[t] = running_add
-        return discounted_r
 
     def save(self, name):
         if not os.path.exists('./models'):

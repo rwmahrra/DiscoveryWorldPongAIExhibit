@@ -15,6 +15,7 @@ from ai import DQN
 from keras import backend as K
 import subprocess
 
+
 def simulate_pong(task_id, show=False):
     try:
         states = np.ndarray(shape=(0, Pong.HEIGHT//4, Pong.WIDTH//4), dtype=np.float32)
@@ -36,7 +37,7 @@ def simulate_pong(task_id, show=False):
             states = np.concatenate((states, np.expand_dims(start_state, axis=0)), axis=0)
             actions = np.concatenate((actions, np.expand_dims(action, axis=0)), axis=0)
             rewards = np.concatenate((rewards, np.asarray([[reward_l, reward_r]], dtype=np.float32)), axis=0)
-            if (show):
+            if show:
                 print(right_action)
                 env.show(2)
                 env.show_state(2)
@@ -73,11 +74,13 @@ def run_simulations(n, threads):
     states = np.ndarray(shape=(0, Pong.HEIGHT // 4, Pong.WIDTH // 4), dtype=np.float32)
     actions = np.ndarray(shape=(0, 2, 2), dtype=np.float32)
     rewards = np.ndarray(shape=(0, 2), dtype=np.float32)
+
     for game in games:
         game_states, game_actions, game_rewards = game
         states = np.concatenate((game_states, states), axis=0)
         actions = np.concatenate((game_actions, actions), axis=0)
         rewards = np.concatenate((game_rewards, rewards), axis=0)
+    print(f"Lasted average {states.shape[0] / n} frames")
     return states, actions, rewards
 
 
