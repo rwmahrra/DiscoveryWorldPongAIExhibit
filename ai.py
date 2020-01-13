@@ -4,7 +4,7 @@ from keras.models import Sequential
 from pong import Pong
 import cv2
 import os
-from utils import encode_action, discount_rewards
+from utils import normalize_states, discount_rewards
 
 from matplotlib import pyplot as plt
 from vis.visualization import visualize_saliency
@@ -83,7 +83,8 @@ class DQN:
         rewards = discount_rewards(rewards[:, 1], gamma=self.gamma)
         states = np.stack([state.flatten().astype("float32") for state in states], axis=0)
         actions = actions[:, 1]
-        print(np.unique(states[0]))
+        states = normalize_states(states)
+        #print(np.unique(states[1]))
         self.model.fit(x=states, y=actions, sample_weight=rewards, epochs=20)
 
     def save(self, name):

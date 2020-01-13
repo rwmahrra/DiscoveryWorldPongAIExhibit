@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 import math
 import keyboard
+from utils import normalize_states
 import matplotlib.pyplot as plt
 from random import choice, randint
 
@@ -223,8 +224,7 @@ class Pong:
         h, w = state.shape
         state = cv2.resize(state, (w//2, h//2))
         state[state < 250] = 0
-        state /= 255
-        #print(np.unique(state))
+
         return state
 
     def show(self, scale=1,  duration=1):
@@ -237,7 +237,7 @@ class Pong:
         l, r = self.get_score()
         h, w = self.last_state.shape
         to_render = cv2.resize(self.last_state, (int(w * scale), int(h * scale)))
-        cv2.imshow(f"Pong State", to_render)
+        cv2.imshow(f"Pong State", normalize_states(to_render))
         cv2.waitKey(duration)
 
     def draw_rect(self, screen, x, y, w, h, color):

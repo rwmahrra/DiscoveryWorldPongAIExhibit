@@ -38,6 +38,12 @@ def encode_action(action):
         raise NameError(f"Action {action} does not exist")
 
 
+def normalize_states(states):
+    states += 255
+    states /= 510
+    return states
+
+
 def get_last_file():
     id = get_resume_index()
     if id:
