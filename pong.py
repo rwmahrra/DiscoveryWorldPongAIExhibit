@@ -9,7 +9,7 @@ from random import choice, randint
 
 class Pong:
     PADDING = 10
-    MAX_SCORE = 5
+    MAX_SCORE = 1
     WIDTH = 160
     HEIGHT = 192
     SPEEDUP = 3
