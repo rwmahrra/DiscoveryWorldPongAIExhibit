@@ -57,9 +57,11 @@ class DeepQPlayer:
     def set_model(self, model):
         self.brain = model
 
-    def move(self, state):
+    def move(self, state, debug=False):
         predictions = self.brain.infer(state)
         best = np.argmax(predictions)
+        if debug:
+            print(predictions)
         if random() < DeepQPlayer.EPSILON:
             return Pong.ACTIONS[best]
         else:

@@ -11,6 +11,7 @@ from vis.visualization import visualize_saliency
 from vis.utils import utils as visutils
 import utils
 from keras import activations
+from keras.optimizers import Adam
 
 
 class DQN:
@@ -28,7 +29,8 @@ class DQN:
         self.model.add(Dense(2, activation='softmax', kernel_initializer='glorot_uniform'))
 
         # compile the model using traditional Machine Learning losses and optimizers
-        self.model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+        opt = Adam(learning_rate=0.0001)
+        self.model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
         if resume:
             file = utils.get_last_file()
@@ -78,14 +80,14 @@ class DQN:
         predictions = self.model.predict(state)[0]
         return predictions
 
-    def retrain(self, games):
+    def retrain(self, games, epochs=20):
         states, actions, rewards = games
         rewards = discount_rewards(rewards[:, 1], gamma=self.gamma)
         states = np.stack([state.flatten().astype("float32") for state in states], axis=0)
         actions = actions[:, 1]
         states = normalize_states(states)
         #print(np.unique(states[1]))
-        self.model.fit(x=states, y=actions, sample_weight=rewards, epochs=20)
+        self.model.fit(x=states, y=actions, sample_weight=rewards, epochs=epochs)
 
     def save(self, name):
         if not os.path.exists('./models'):

@@ -39,8 +39,7 @@ def encode_action(action):
 
 
 def normalize_states(states):
-    states += 255
-    states /= 510
+    states /= 255
     return states
 
 

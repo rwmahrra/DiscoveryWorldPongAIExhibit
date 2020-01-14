@@ -103,10 +103,12 @@ if __name__ == '__main__':
     parser.add_argument("--batch", type=int, help="number of simulations", default=5)
     parser.add_argument("--repeats", type=int, help="number of times to simulate and retrain", default=1000)
     parser.add_argument("--threads", type=int, help="number of threads to run. 0 to run sequentially, -1 for max", default=0)
+    parser.add_argument("--epochs", type=int, help="number of epochs to train after simulation batches", default=20)
 
     batch_size = 500
     repeats = 1000
     threads = -1
+    epochs = 20
     args = parser.parse_args()
 
     if args.verbose:
@@ -117,6 +119,8 @@ if __name__ == '__main__':
         repeats = args.repeats
     if args.threads or args.threads == 0:
         threads = args.threads
+    if args.epochs:
+        epochs = args.epochs
     if threads == 0:
         print(f'Beginning {repeats} training loops of {batch_size} simulations without parallel processing.')
     elif threads > 0:
@@ -136,7 +140,7 @@ if __name__ == '__main__':
         s, a, r = simulated_games
         r = (r + 1) / 2
         dqn = DQN()
-        dqn.retrain((s, a, r))
+        dqn.retrain((s, a, r), epochs=epochs)
         #dqn.show_weights(0)
         dqn.save(f'{i}.h5')
         K.clear_session()

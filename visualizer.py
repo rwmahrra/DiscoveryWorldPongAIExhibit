@@ -51,7 +51,7 @@ def test_model(id):
     done = False
     while not done:
         left_action = left.move(state)
-        right_action = right.move(state)
+        right_action = right.move(state, debug=True)
         print(right_action)
         state, reward, done = env.step(left_action, right_action)
         #dqn.show_attention_map(state)
@@ -85,6 +85,6 @@ def debug_step():
         env.show_state(duration=0)
 
 
-#view_weights(7)
-test_model(7)
 #view_train_progression(2, 0)
+test_model(2)
+#debug_step()
