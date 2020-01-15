@@ -150,5 +150,5 @@ if __name__ == '__main__':
             dqn.save(f'{i}.h5')
         K.clear_session()
         dqn = DQN()
-        player.DeepQPlayer.EPSILON = 0.5 + (i / 1000)
+        player.DeepQPlayer.EPSILON = 0.5 + (i / repeats)
 
