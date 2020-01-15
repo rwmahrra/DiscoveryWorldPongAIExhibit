@@ -60,9 +60,10 @@ class DeepQPlayer:
     def move(self, state, debug=False):
         predictions = self.brain.infer(state)
         best = np.argmax(predictions)
+        prob = predictions[best]
         if debug:
             print(predictions)
         if random() < DeepQPlayer.EPSILON:
-            return Pong.ACTIONS[best]
+            return Pong.ACTIONS[best], prob
         else:
-            return choice(Pong.ACTIONS)
+            return choice(Pong.ACTIONS), 0.5

@@ -9,7 +9,7 @@ import time
 import cv2
 import numpy as np
 import player
-from utils import Timer, get_resume_index, get_last_file, encode_action
+from utils import Timer, get_resume_index, encode_gradient, encode_action
 import multiprocessing
 from ai import DQN
 from keras import backend as K
@@ -29,8 +29,8 @@ def simulate_pong(task_id, show=False):
         done = False
         while not done:
             left_action = left.move(state)
-            right_action = right.move(state)
-            action = np.stack((encode_action(left_action), encode_action(right_action)))
+            right_action, prob = right.move(state)
+            action = np.stack((encode_action(left_action), encode_gradient(right_action, prob)))
             start_state = state
             state, reward, done = env.step(left_action, right_action)
             reward_l, reward_r = reward
@@ -100,15 +100,17 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description="Run pong simulations and periodically retrain a DQN on the generated data")
     parser.add_argument("-v", "--verbose", action="store_true")
-    parser.add_argument("--batch", type=int, help="number of simulations", default=5)
-    parser.add_argument("--repeats", type=int, help="number of times to simulate and retrain", default=1000)
+    parser.add_argument("--batch", type=int, help="number of simulations", default=1)
+    parser.add_argument("--repeats", type=int, help="number of times to simulate and retrain", default=10000)
     parser.add_argument("--threads", type=int, help="number of threads to run. 0 to run sequentially, -1 for max", default=0)
-    parser.add_argument("--epochs", type=int, help="number of epochs to train after simulation batches", default=20)
+    parser.add_argument("--epochs", type=int, help="number of epochs to train after simulation batches", default=1)
+    parser.add_argument("--save_interval", type=int, help="number of train cycles to run before saving", default=50)
 
     batch_size = 500
     repeats = 1000
     threads = -1
     epochs = 20
+    save_interval = 50
     args = parser.parse_args()
 
     if args.verbose:
@@ -121,6 +123,8 @@ if __name__ == '__main__':
         threads = args.threads
     if args.epochs:
         epochs = args.epochs
+    if args.save_interval:
+        save_interval = args.save_interval
     if threads == 0:
         print(f'Beginning {repeats} training loops of {batch_size} simulations without parallel processing.')
     elif threads > 0:
@@ -138,11 +142,12 @@ if __name__ == '__main__':
         i += begin_index
         simulated_games = run_simulations(batch_size, threads=threads)
         s, a, r = simulated_games
-        r = (r + 1) / 2
         dqn = DQN()
         dqn.retrain((s, a, r), epochs=epochs)
         #dqn.show_weights(0)
-        dqn.save(f'{i}.h5')
+        dqn.save('temp.h5')
+        if i % save_interval == 0:
+            dqn.save(f'{i}.h5')
         K.clear_session()
         dqn = DQN()
         player.DeepQPlayer.EPSILON = 0.5 + (i / 1000)

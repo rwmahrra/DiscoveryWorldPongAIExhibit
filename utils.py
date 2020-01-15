@@ -38,6 +38,17 @@ def encode_action(action):
         raise NameError(f"Action {action} does not exist")
 
 
+def encode_gradient(action, prob):
+    if action == "UP":
+        return np.asarray([1, 0], dtype=np.float32) - prob
+    elif action == "DOWN":
+        return np.asarray([0, 1], dtype=np.float32) - prob
+    elif action == "NONE":
+        return np.asarray([0, 0], dtype=np.float32) - prob
+    else:
+        raise NameError(f"Action {action} does not exist")
+
+
 def normalize_states(states):
     states /= 255
     return states

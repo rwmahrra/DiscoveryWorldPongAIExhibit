@@ -32,11 +32,10 @@ class DQN:
         opt = Adam(learning_rate=0.0001)
         self.model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
+        temp_file = './models/temp.h5'
         if resume:
-            file = utils.get_last_file()
-            if file is not None:
-                self.load_model(file)
-
+            if os.path.exists(temp_file):
+                self.load_model(temp_file)
 
     def load_model(self, path):
         try:
@@ -82,12 +81,16 @@ class DQN:
 
     def retrain(self, games, epochs=20):
         states, actions, rewards = games
-        rewards = discount_rewards(rewards[:, 1], gamma=self.gamma)
+        rewards = rewards[:, 1]
         states = np.stack([state.flatten().astype("float32") for state in states], axis=0)
         actions = actions[:, 1]
-        states = normalize_states(states)
-        #print(np.unique(states[1]))
-        self.model.fit(x=states, y=actions, sample_weight=rewards, epochs=epochs)
+
+        rewards = discount_rewards(rewards, gamma=self.gamma)
+        actions[:, 0] *= rewards
+        actions[:, 1] *= rewards
+        Y = actions
+        X = normalize_states(states)
+        self.model.fit(x=X, y=Y, epochs=epochs)
 
     def save(self, name):
         if not os.path.exists('./models'):

@@ -85,7 +85,7 @@ def debug_step():
         env.show_state(duration=0)
 
 
-#view_weights(999)
+test_model(4004)
 #view_train_progression(100, 0)
-test_model(999)
+#view_weights(4004)
 #debug_step()
