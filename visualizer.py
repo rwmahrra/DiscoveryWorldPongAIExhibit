@@ -12,9 +12,9 @@ import subprocess
 
 
 
-def view_train_progression(number, neuron):
+def view_train_progression(number, neuron=0, interval=50):
     dqns = []
-    for i in range(number + 1):
+    for i in range(0, number + 1, 50):
         dqn = DQN(resume=False)
         dqn.load_model(f"./models/{i}.h5")
         dqns.append(dqn)
@@ -51,7 +51,7 @@ def test_model(id):
     done = False
     while not done:
         left_action = left.move(state)
-        right_action = right.move(state, debug=True)
+        right_action, prob = right.move(state, debug=True)
         print(right_action)
         state, reward, done = env.step(left_action, right_action)
         #dqn.show_attention_map(state)
@@ -60,11 +60,11 @@ def test_model(id):
     l, r = env.get_score()
     print(f"Finished game with model {id}, {l} - {r}")
 
-def view_weights(id):
+def view_weights(id, layer=0):
     dqn = DQN(resume=False)
     dqn.load_model(f"./models/{id}.h5")
     for i in range(200):
-        dqn.show_weights(i)
+        dqn.show_weights(i, layer=layer)
 
 def debug_step():
     env = Pong()
@@ -85,7 +85,7 @@ def debug_step():
         env.show_state(duration=0)
 
 
-test_model(4004)
-#view_train_progression(100, 0)
-#view_weights(4004)
+#test_model(4650)
+#view_train_progression(4850, neuron=199, interval=50)
+view_weights(4850, 0, layer=1)
 #debug_step()

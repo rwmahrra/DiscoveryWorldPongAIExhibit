@@ -29,7 +29,7 @@ class DQN:
         self.model.add(Dense(2, activation='softmax', kernel_initializer='glorot_uniform'))
 
         # compile the model using traditional Machine Learning losses and optimizers
-        opt = Adam(learning_rate=0.0001)
+        opt = Adam(learning_rate=0.001)
         self.model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
         temp_file = './models/temp.h5'
@@ -47,8 +47,8 @@ class DQN:
             print(e)
             raise(e)
 
-    def show_weights(self, neuron):
-        weights = self.model.get_weights()[0][:, neuron]
+    def show_weights(self, neuron, layer=0):
+        weights = self.model.get_weights()[layer][:, neuron]
         weights = weights.reshape(Pong.HEIGHT // 2, Pong.WIDTH // 2)
 
         weights = cv2.resize(weights, (Pong.WIDTH, Pong.HEIGHT)) + 0.5
