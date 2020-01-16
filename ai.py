@@ -1,5 +1,5 @@
 import numpy as np
-from keras.layers import Dense
+from keras.layers import Dense, Convolution2D, Reshape, Flatten
 from keras.models import Sequential
 from pong import Pong
 import cv2
@@ -20,13 +20,16 @@ class DQN:
         # creates a generic neural network architecture
         self.model = Sequential()
         self.epsilon = epsilon
-        print("Constructing DQN")
+        print("Constructing CNN")
 
         # hidden layer takes a pre-processed frame as input, and has 200 units
-        self.model.add(Dense(200, input_dim=(Pong.HEIGHT//2 * Pong.WIDTH//2), activation='relu', kernel_initializer='glorot_uniform'))
 
-        # output layer
-        self.model.add(Dense(2, activation='softmax', kernel_initializer='glorot_uniform'))
+        self.model.add(Reshape((1, Pong.HEIGHT//2, Pong.WIDTH//2), input_shape=(Pong.HEIGHT//2 * Pong.WIDTH//2,)))
+        self.model.add(Convolution2D(32, kernel_size=(6, 6), strides=(3, 3), padding='same', activation='relu', kernel_initializer='he_uniform'))
+        self.model.add(Flatten())
+        self.model.add(Dense(64, activation='relu', kernel_initializer='he_uniform'))
+        self.model.add(Dense(32, activation='relu', kernel_initializer='he_uniform'))
+        self.model.add(Dense(2, activation='softmax'))
 
         # compile the model using traditional Machine Learning losses and optimizers
         opt = Adam(learning_rate=0.001)

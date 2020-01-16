@@ -201,11 +201,15 @@ class Pong:
             reward_l = -1
             reward_r = 1
             self.ball.reset()
+            self.left.reset()
+            self.right.reset()
         elif self.ball.x > Pong.WIDTH:
             self.score_left += 1
             reward_l = 1
             reward_r = -1
             self.ball.reset()
+            self.left.reset()
+            self.right.reset()
         self.ball.update()
         done = False
         if self.score_right >= Pong.MAX_SCORE or self.score_left >= Pong.MAX_SCORE:
