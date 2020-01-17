@@ -16,7 +16,7 @@ from keras import backend as K
 import subprocess
 
 
-def simulate_pong(task_id, show=False):
+def simulate_pong(task_id, show=True):
     try:
         states = np.ndarray(shape=(0, Pong.HEIGHT//2, Pong.WIDTH//2), dtype=np.float32)
         actions = np.ndarray(shape=(0, 2, 2), dtype=np.float32)
@@ -104,6 +104,8 @@ if __name__ == '__main__':
     parser.add_argument("--repeats", type=int, help="number of times to simulate and retrain", default=10000)
     parser.add_argument("--threads", type=int, help="number of threads to run. 0 to run sequentially, -1 for max", default=0)
     parser.add_argument("--epochs", type=int, help="number of epochs to train after simulation batches", default=1)
+    parser.add_argument("--epsilon_min", type=int, help="minimum greed", default=0.1)
+    parser.add_argument("--epsilon_decay", type=int, help="rate at which greed sustains (1 for no decay)", default=0.999)
     parser.add_argument("--save_interval", type=int, help="number of train cycles to run before saving", default=50)
 
     batch_size = 500
@@ -111,6 +113,8 @@ if __name__ == '__main__':
     threads = -1
     epochs = 20
     save_interval = 50
+    epsilon_decay = 0.999
+    epsilon_min = 0.1
     args = parser.parse_args()
 
     if args.verbose:
@@ -125,13 +129,17 @@ if __name__ == '__main__':
         epochs = args.epochs
     if args.save_interval:
         save_interval = args.save_interval
+    if args.epsilon_decay:
+        epsilon_decay = args.epsilon_decay
+    if args.epsilon_min:
+        epsilon_min = args.epsilon_min
     if threads == 0:
         print(f'Beginning {repeats} training loops of {batch_size} simulations without parallel processing.')
     elif threads > 0:
         print(f'Beginning {repeats} training loops of {batch_size} simulations, requesting {threads} threads.')
     else:
         print(f'Beginning {repeats} training loops of {batch_size} simulations on all available threads.')
-    player.DeepQPlayer.EPSILON = 0
+    player.DeepQPlayer.EPSILON = 1
     begin_index = get_resume_index()
     if begin_index is None:
         begin_index = 0
@@ -150,5 +158,6 @@ if __name__ == '__main__':
             dqn.save(f'{i}.h5')
         K.clear_session()
         dqn = DQN()
-        player.DeepQPlayer.EPSILON = 1#0.5 + (i / repeats)
+        player.DeepQPlayer.EPSILON *= epsilon_decay
+        player.DeepQPlayer.EPSILON = max(player.DeepQPlayer.EPSILON, epsilon_min)
 

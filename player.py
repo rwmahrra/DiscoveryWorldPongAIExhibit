@@ -64,6 +64,6 @@ class DeepQPlayer:
         if debug:
             print(predictions)
         if random() < DeepQPlayer.EPSILON:
-            return Pong.ACTIONS[best], prob
+            return choice(Pong.ACTIONS), np.array([1/3, 1/3, 1/3])
         else:
-            return choice(Pong.ACTIONS), 0.5
+            return Pong.ACTIONS[best], predictions

@@ -20,6 +20,7 @@ class DQN:
         # creates a generic neural network architecture
         self.model = Sequential()
         self.epsilon = epsilon
+        self.learning_rate = 0.001
         print("Constructing CNN")
 
         # hidden layer takes a pre-processed frame as input, and has 200 units
@@ -32,7 +33,7 @@ class DQN:
         self.model.add(Dense(2, activation='softmax'))
 
         # compile the model using traditional Machine Learning losses and optimizers
-        opt = Adam(learning_rate=0.001)
+        opt = Adam(learning_rate=self.learning_rate)
         self.model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
         temp_file = './models/temp.h5'

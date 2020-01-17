@@ -42,7 +42,7 @@ def test_model(id):
     dqn = DQN(resume=False)
     dqn.load_model(f"./models/{id}.h5")
     env = Pong()
-    player.DeepQPlayer.EPSILON = 1
+    player.DeepQPlayer.EPSILON = 0
     right = player.DeepQPlayer(right=True)
     right.set_model(dqn)
     left = player.BotPlayer(env, left=True)
@@ -85,7 +85,7 @@ def debug_step():
         env.show_state(duration=0)
 
 
-#test_model(2200)
+test_model(50)
 #view_train_progression(4850, neuron=199, interval=50)
-view_weights(1300, 0)
+#view_weights(1300, 0)
 #debug_step()
