@@ -35,7 +35,7 @@ class BotPlayer:
             elif self.ball.y < self.paddle.y:
                 return "UP"
             else:
-                return "UP" if randint(0, 1) == 1 else "DOWN"
+                return "NONE" if randint(0, 1) == 1 else "DOWN"
         else:
             return "UP" if randint(0, 1) == 1 else "DOWN"
 

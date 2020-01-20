@@ -1,8 +1,11 @@
 import gym
 import numpy as np
+from player import BotPlayer
+from pong import Pong
 from keras.models import Sequential
 from keras.layers import Dense, Reshape, Flatten
 from keras.optimizers import Adam
+import cv2
 from keras.layers.convolutional import Convolution2D
 
 
@@ -21,7 +24,7 @@ class PGAgent:
 
     def _build_model(self):
         model = Sequential()
-        model.add(Reshape((1, 80, 80), input_shape=(self.state_size,)))
+        model.add(Reshape((1, Pong.WIDTH//2, Pong.HEIGHT//2), input_shape=(self.state_size,)))
         model.add(Convolution2D(32, 6, 6, subsample=(3, 3), border_mode='same',
                                 activation='relu', init='he_uniform'))
         model.add(Flatten())
@@ -55,15 +58,17 @@ class PGAgent:
                 running_add = 0
             running_add = running_add * self.gamma + rewards[t]
             discounted_rewards[t] = running_add
-        return discounted_rewards
+        return discounted_rewards.astype(np.float32)
 
     def train(self):
         gradients = np.vstack(self.gradients)
+        #print(gradients)
         rewards = np.vstack(self.rewards)
         rewards = self.discount_rewards(rewards)
         gradients *= rewards
         X = np.squeeze(np.vstack([self.states]))
         Y = self.probs + self.learning_rate * np.squeeze(np.vstack([gradients]))
+        #print(Y)
         self.model.train_on_batch(X, Y)
         self.states, self.probs, self.gradients, self.rewards = [], [], [], []
 
@@ -72,6 +77,9 @@ class PGAgent:
 
     def save(self, name):
         self.model.save_weights(name)
+
+def preprocess_pong(I):
+    return I.astype(np.float32).ravel()
 
 def preprocess(I):
     I = I[35:195]
@@ -82,25 +90,30 @@ def preprocess(I):
     return I.astype(np.float).ravel()
 
 if __name__ == "__main__":
-    env = gym.make("Pong-v0")
+    actions = ["UP", "DOWN"]
+    #env = gym.make("Pong-v0")
+    env = Pong()
+    bot = BotPlayer(env, left=True)
     state = env.reset()
     prev_x = None
     score = 0
     episode = 0
 
-    state_size = 80 * 80
-    action_size = env.action_space.n
+    state_size = Pong.HEIGHT//2 * Pong.WIDTH//2
+    action_size = 2 #env.action_space.n
     agent = PGAgent(state_size, action_size)
     #agent.load('pong.h5')
     while True:
-        #env.render()
+        env.show()
 
-        cur_x = preprocess(state)
-        x = cur_x - prev_x if prev_x is not None else np.zeros(state_size)
-        prev_x = cur_x
+        x = preprocess_pong(state)
+        #x = cur_x - prev_x if prev_x is not None else np.zeros(state_size)
+        bot_action = bot.move(state)
 
         action, prob = agent.act(x)
-        state, reward, done, info = env.step(action)
+
+        state, reward, done = env.step(bot_action, actions[action])
+        reward = reward[1]
         score += reward
         agent.memorize(x, action, prob, reward)
 

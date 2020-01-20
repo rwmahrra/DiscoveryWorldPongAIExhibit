@@ -9,7 +9,7 @@ from random import choice, randint
 
 class Pong:
     PADDING = 10
-    MAX_SCORE = 1
+    MAX_SCORE = 21
     WIDTH = 160
     HEIGHT = 192
     SPEEDUP = 3
@@ -198,15 +198,15 @@ class Pong:
 
         if self.ball.x < 0:
             self.score_right += 1
-            reward_l = -1
-            reward_r = 1
+            reward_l = -1.0
+            reward_r = 1.0
             self.ball.reset()
             self.left.reset()
             self.right.reset()
         elif self.ball.x > Pong.WIDTH:
             self.score_left += 1
-            reward_l = 1
-            reward_r = -1
+            reward_l = 1.0
+            reward_r = -1.0
             self.ball.reset()
             self.left.reset()
             self.right.reset()
