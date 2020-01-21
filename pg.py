@@ -36,6 +36,10 @@ class PGAgent:
         return model
 
     def memorize(self, state, action, prob, reward):
+        #print(f'State: {state.dtype} {state.shape} min {np.amin(state)} max {np.amax(state)} {state}')
+        #print(f'Action: {action.dtype} {action.shape} min {np.amin(action)} max {np.amax(action)} {action}')
+        #print(f'Prob: {prob.dtype} {prob.shape} min {np.amin(prob)} max {np.amax(prob)} {prob}')
+        #print(f'Reward: {type(reward)} {reward}')
         y = np.zeros([self.action_size])
         y[action] = 1
         self.gradients.append(np.array(y).astype('float32') - prob)
@@ -79,7 +83,9 @@ class PGAgent:
         self.model.save_weights(name)
 
 def preprocess_pong(I):
-    return I.astype(np.float32).ravel()
+    I[I == 255] = 1
+    I[I == -255] = -1
+    return I.astype(np.float).ravel()
 
 def preprocess(I):
     I = I[35:195]
@@ -113,7 +119,7 @@ if __name__ == "__main__":
         action, prob = agent.act(x)
 
         state, reward, done = env.step(bot_action, actions[action])
-        reward = reward[1]
+        reward = float(reward[1])
         score += reward
         agent.memorize(x, action, prob, reward)
 
