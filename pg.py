@@ -72,6 +72,11 @@ class PGAgent:
         gradients *= rewards
         X = np.squeeze(np.vstack([self.states]))
         Y = self.probs + self.learning_rate * np.squeeze(np.vstack([gradients]))
+        #for i in range(len(X)):
+        #    cv2.imshow("test", X[i].reshape((Pong.HEIGHT//2, Pong.WIDTH//2)))
+        #    print(self.probs[i])
+        #    print(Y[i])
+        #    cv2.waitKey(0)
         #print(Y)
         self.model.train_on_batch(X, Y)
         self.states, self.probs, self.gradients, self.rewards = [], [], [], []
@@ -108,22 +113,29 @@ if __name__ == "__main__":
     state_size = Pong.HEIGHT//2 * Pong.WIDTH//2
     action_size = 2 #env.action_space.n
     agent = PGAgent(state_size, action_size)
-    #agent.load('pong.h5')
+    #agent.load('./models/0.h5')
+    last_action = None
+    i = 0
     while True:
-        env.show()
+        #env.show()
 
         x = preprocess_pong(state)
         #x = cur_x - prev_x if prev_x is not None else np.zeros(state_size)
         bot_action = bot.move(state)
-
-        action, prob = agent.act(x)
-
-        state, reward, done = env.step(bot_action, actions[action])
-        reward = float(reward[1])
+        if last_action is None or i % 3 == 0:
+            action, prob = agent.act(x)
+            last_action = action
+            state, reward, done = env.step(bot_action, actions[action])
+            reward = float(reward[1])
+            agent.memorize(x, action, prob, reward)
+        else:
+            state, reward, done = env.step(bot_action, actions[last_action])
+            reward = float(reward[1])
         score += reward
-        agent.memorize(x, action, prob, reward)
 
+        i += 1
         if done:
+            i = 0
             episode += 1
             agent.train()
             print('Episode: %d - Score: %f.' % (episode, score))
