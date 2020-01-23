@@ -104,43 +104,51 @@ if __name__ == "__main__":
     actions = ["UP", "DOWN"]
     #env = gym.make("Pong-v0")
     env = Pong()
-    bot = BotPlayer(env, left=True)
     state = env.reset()
     prev_x = None
-    score = 0
+    score_1 = 0
+    score_2 = 0
     episode = 0
 
     state_size = Pong.HEIGHT//2 * Pong.WIDTH//2
     action_size = 2 #env.action_space.n
-    agent = PGAgent(state_size, action_size)
+    agent1 = PGAgent(state_size, action_size)
+    agent2 = PGAgent(state_size, action_size)
     #agent.load('./models/0.h5')
-    last_action = None
+    last_action_1 = None
+    last_action_2 = None
     i = 0
     while True:
-        #env.show()
+        env.show()
 
         x = preprocess_pong(state)
         #x = cur_x - prev_x if prev_x is not None else np.zeros(state_size)
-        bot_action = bot.move(state)
-        if last_action is None or i % 3 == 0:
-            action, prob = agent.act(x)
-            last_action = action
-            state, reward, done = env.step(bot_action, actions[action])
-            reward = float(reward[1])
-            agent.memorize(x, action, prob, reward)
+        if last_action_1 is None or last_action_2 is None or i % 3 == 0:
+            action1, prob1 = agent1.act(x)
+            action2, prob2 = agent2.act(x)
+            last_action_1 = action1
+            last_action_2 = action2
+            state, reward, done = env.step(actions[action2], actions[action1])
+            reward_1 = float(reward[1])
+            reward_2 = float(reward[0])
+            agent1.memorize(x, action1, prob1, reward_1)
+            agent2.memorize(x, action2, prob2, reward_2)
         else:
-            state, reward, done = env.step(bot_action, actions[last_action])
+            state, reward, done = env.step(actions[last_action_2], actions[last_action_1])
             reward = float(reward[1])
-        score += reward
+        score_1 += reward_1
+        score_2 += reward_2
 
         i += 1
         if done:
             i = 0
             episode += 1
-            agent.train()
-            print('Episode: %d - Score: %f.' % (episode, score))
+            agent1.train()
+            agent2.train()
+            print('Episode: %d - Score: %f - %f.' % (episode, score_1, score_2))
             score = 0
             state = env.reset()
             prev_x = None
             if episode > 1 and episode % 50 == 0:
-                agent.save(f'./models/{episode}.h5')
+                agent1.save(f'./models/1/{episode}.h5')
+                agent2.save(f'./models/2/{episode}.h5')
