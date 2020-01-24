@@ -24,6 +24,7 @@ class PGAgent:
 
     def _build_model(self):
         model = Sequential()
+        #model.add(Reshape((1, 80, 80), input_shape=(self.state_size,)))
         model.add(Reshape((1, Pong.WIDTH//2, Pong.HEIGHT//2), input_shape=(self.state_size,)))
         model.add(Convolution2D(32, 6, 6, subsample=(3, 3), border_mode='same',
                                 activation='relu', init='he_uniform'))
@@ -114,7 +115,7 @@ if __name__ == "__main__":
     action_size = 2 #env.action_space.n
     agent1 = PGAgent(state_size, action_size)
     agent2 = PGAgent(state_size, action_size)
-    #agent.load('./models/0.h5')
+    agent.load('./models/30400.h5')
     last_action_1 = None
     last_action_2 = None
     i = 0

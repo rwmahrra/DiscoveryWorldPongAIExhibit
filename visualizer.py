@@ -8,6 +8,7 @@ from utils import Timer, encode_action, discount_rewards
 import multiprocessing
 from ai import DQN
 from main import run_simulations
+from pg import PGAgent
 import subprocess
 
 
@@ -84,8 +85,19 @@ def debug_step():
         env.show(duration=0)
         env.show_state(duration=0)
 
+def visualize_conv():
+    state_size = 80 * 80
+    action_size = 6 #env.action_space.n
+    agent = PGAgent(state_size, action_size)
+    agent.load('./models/7200.h5')
+    m = agent.model
+    conv = m.get_weights()[0]
+    for i in range(80):
+        cv2.imshow("conv", cv2.resize(conv[:, :, i, 0], (360,360)))
+        cv2.waitKey(0)
 
-test_model(50)
+visualize_conv()
+#test_model(50)
 #view_train_progression(4850, neuron=199, interval=50)
 #view_weights(1300, 0)
 #debug_step()
