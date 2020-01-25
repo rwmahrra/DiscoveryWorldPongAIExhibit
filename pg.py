@@ -3,7 +3,7 @@ from pong import Pong
 from keras.models import Sequential
 from keras.layers import Dense, Reshape, Flatten
 from keras.optimizers import Adam
-from player import HumanPlayer
+#from player import HumanPlayer
 from keras.layers.convolutional import Convolution2D
 
 
@@ -117,7 +117,7 @@ if __name__ == "__main__":
         episode = start_index
         agent1.load(f'./models/1/{start_index}.h5')
         agent2.load(f'./models/2/{start_index}.h5')
-    player = HumanPlayer('w', 's')
+    #player = HumanPlayer('w', 's')
     last_action_1 = None
     last_action_2 = None
     i = 0
@@ -131,13 +131,13 @@ if __name__ == "__main__":
             action2, prob2 = agent2.act(x)
             last_action_1 = action1
             last_action_2 = action2
-            state, reward, done = env.step(actions[action2], player.move(state))
+            state, reward, done = env.step(actions[action2], actions[action1])
             reward_1 = float(reward[1])
             reward_2 = float(reward[0])
             agent1.memorize(x, action1, prob1, reward_1)
             agent2.memorize(x, action2, prob2, reward_2)
         else:
-            state, reward, done = env.step(actions[last_action_2], player.move(state))
+            state, reward, done = env.step(actions[last_action_2], actions[action1])
             reward = float(reward[1])
         score_1 += reward_1
         score_2 += reward_2
