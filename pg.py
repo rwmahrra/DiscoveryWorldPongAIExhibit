@@ -1,12 +1,9 @@
-import gym
 import numpy as np
-from player import BotPlayer
 from pong import Pong
 from keras.models import Sequential
 from keras.layers import Dense, Reshape, Flatten
 from keras.optimizers import Adam
 from player import HumanPlayer
-import cv2
 from keras.layers.convolutional import Convolution2D
 
 
