@@ -4,3 +4,4 @@ __pycache__/
 test_data
 models
 model_archive
+scripts/temp.sh

@@ -9,6 +9,8 @@ import multiprocessing
 from ai import DQN
 from main import run_simulations
 from pg import PGAgent
+from keras.models import Model
+from matplotlib import pyplot
 import subprocess
 
 
@@ -85,18 +87,74 @@ def debug_step():
         env.show(duration=0)
         env.show_state(duration=0)
 
-def visualize_conv():
-    state_size = 80 * 80
-    action_size = 6 #env.action_space.n
+def load_model(atari=False):
+    state_size = (Pong.WIDTH // 2) * (Pong.HEIGHT // 2)
+    action_size = 2 #env.action_space.n
+    if atari:
+        state_size = 80 * 80
+        action_size = 6
     agent = PGAgent(state_size, action_size)
-    agent.load('./models/7200.h5')
-    m = agent.model
-    conv = m.get_weights()[0]
-    for i in range(80):
-        cv2.imshow("conv", cv2.resize(conv[:, :, i, 0], (360,360)))
-        cv2.waitKey(0)
+    agent.load('./models/1/7350.h5')
+    return agent.model
 
-visualize_conv()
+def visualize_conv_features():
+    # load the model
+    model = load_model()
+    # redefine model to output right after the first hidden layer
+    model = Model(inputs=model.inputs, outputs=model.layers[1].output)
+    model.summary()
+    # load the image with the required shape
+    img = np.load("./example_down.npy")
+    img = img.flatten()
+    # expand dimensions so that it represents a single 'sample'
+    img = np.expand_dims(img, axis=0)
+    # get feature map for first hidden layer
+    feature_maps = model.predict(img)
+    # plot all 64 maps in an 8x8 squares
+    square = 5
+    ix = 1
+    for _ in range(square):
+        for _ in range(square):
+            # specify subplot and turn of axis
+            ax = pyplot.subplot(square, square, ix)
+            ax.set_xticks([])
+            ax.set_yticks([])
+            print(feature_maps[0, :, :, ix - 1].shape)
+            # plot filter channel in grayscale
+            pyplot.imshow(feature_maps[0, :, :, ix - 1].reshape(9, 3), cmap='gray')
+            ix += 1
+    # show the figure
+    pyplot.show()
+    cv2.imshow("test image", img.reshape(Pong.HEIGHT // 2, Pong.WIDTH // 2))
+    cv2.waitKey(0)
+
+def visualize_conv_filters():
+
+    model = load_model()
+    # retrieve weights from the second hidden layer
+    filters, biases = model.layers[1].get_weights()
+    # normalize filter values to 0-1 so we can visualize them
+    f_min, f_max = filters.min(), filters.max()
+    filters = (filters - f_min) / (f_max - f_min)
+    # plot first few filters
+    n_filters, ix = 6, 1
+    for i in range(n_filters):
+        # get the filter
+        f = filters[:, :, :, i]
+        # plot each channel separately
+        for j in range(3):
+            # specify subplot and turn of axis
+            ax = pyplot.subplot(n_filters, 3, ix)
+            ax.set_xticks([])
+            ax.set_yticks([])
+            # plot filter channel in grayscale
+            pyplot.imshow(f[:, :, j], cmap='gray')
+            ix += 1
+    # show the figure
+    pyplot.show()
+
+#visualize_conv_filters()
+visualize_conv_features()
 #test_model(50)
 #view_train_progression(4850, neuron=199, interval=50)
 #view_weights(1300, 0)
