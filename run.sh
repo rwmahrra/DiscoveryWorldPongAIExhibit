@@ -29,16 +29,9 @@
 #SBATCH --gpus=4
 # The number of CPUs to request per GPU
 #SBATCH --cpus-per-gpu=8
-# Kill the job if it takes longer than the specified time
-# format: <days>-<hours>:<minutes>
-# SBATCH --time=0-9:0
-####
-#
-# Here's the actual job code.
-#
-####
-SBATCH --output=pong_job.out
-SBATCH --job-name=PongAI
+# Naming
+#SBATCH --output=pong_job.out
+#SBATCH --job-name=PongAI
 
 # Activate the anaconda environment. Must use this form in scripts.
 #. /usr/local/anaconda3/bin/activate
