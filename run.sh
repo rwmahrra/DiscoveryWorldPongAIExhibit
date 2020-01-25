@@ -41,6 +41,6 @@
 # Activate the anaconda environment. Must use this form in scripts.
 #. /usr/local/anaconda3/bin/activate
 # Your job
-python3 lab2.py
+python3 pg.py
 # Deactivate the anaconda environment
 # conda deactivate

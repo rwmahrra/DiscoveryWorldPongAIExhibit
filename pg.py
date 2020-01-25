@@ -103,6 +103,7 @@ def preprocess(I):
     return I.astype(np.float).ravel()
 
 if __name__ == "__main__":
+    start_index = None
     actions = ["UP", "DOWN"]
     #env = gym.make("Pong-v0")
     env = Pong()
@@ -110,20 +111,21 @@ if __name__ == "__main__":
     prev_x = None
     score_1 = 0
     score_2 = 0
-    episode = 0
-
     state_size = Pong.HEIGHT//2 * Pong.WIDTH//2
     action_size = 2 #env.action_space.n
     agent1 = PGAgent(state_size, action_size)
     agent2 = PGAgent(state_size, action_size)
-    agent1.load('./models/1/12000.h5')
-    agent2.load('./models/2/12000.h5')
+    episode = 0
+    if start_index is not None:
+        episode = start_index
+        agent1.load(f'./models/1/{start_index}.h5')
+        agent2.load(f'./models/2/{start_index}.h5')
     player = HumanPlayer('w', 's')
     last_action_1 = None
     last_action_2 = None
     i = 0
     while True:
-        env.show(4)
+        #env.show(4)
 
         x = preprocess_pong(state)
         #x = cur_x - prev_x if prev_x is not None else np.zeros(state_size)

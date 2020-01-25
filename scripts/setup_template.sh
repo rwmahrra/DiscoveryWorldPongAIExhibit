@@ -6,3 +6,4 @@ git clone {{REMOTE}} job
 cd job || exit
 git checkout {{BRANCH}}
 sbatch run.sh
+bash
