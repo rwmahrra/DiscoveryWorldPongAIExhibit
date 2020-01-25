@@ -7,8 +7,6 @@ import os
 from utils import normalize_states, discount_rewards
 
 from matplotlib import pyplot as plt
-from vis.visualization import visualize_saliency
-from vis.utils import utils as visutils
 import utils
 from keras import activations
 from keras.optimizers import Adam
@@ -59,23 +57,6 @@ class DQN:
         print(weights)
         cv2.imshow(f"DQN neuron weights {neuron}", weights)
         cv2.waitKey(0)
-
-    def show_attention_map(self, frame):
-        # Utility to search for layer index by name.
-        # Alternatively we can specify this as -1 since it corresponds to the last layer.
-        layer_idx = 1
-
-        # Specific prediction
-        class_idx = 2
-
-        # Swap softmax with linear
-        self.model.layers[layer_idx].activation = activations.linear
-        self.model = visutils.apply_modifications(self.model)
-        print(frame.shape)
-        grads = visualize_saliency(self.model, layer_idx, filter_indices=[class_idx], seed_input=frame.flatten())
-        print(grads)
-        # Plot with 'jet' colormap to visualize as a heatmap.
-        plt.imshow(grads, cmap='jet')
 
     def infer(self, state):
         state = state.flatten()
