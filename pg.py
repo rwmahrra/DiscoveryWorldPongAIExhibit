@@ -3,6 +3,7 @@ from pong import Pong
 from keras.models import Sequential
 from keras.layers import Dense, Reshape, Flatten
 from keras.optimizers import Adam
+import os
 #from player import HumanPlayer
 from keras.layers.convolutional import Convolution2D
 
@@ -100,6 +101,8 @@ def preprocess(I):
     return I.astype(np.float).ravel()
 
 if __name__ == "__main__":
+    os.makedirs("models/1", exist_ok=True)
+    os.makedirs("models/2", exist_ok=True)
     start_index = None
     actions = ["UP", "DOWN"]
     #env = gym.make("Pong-v0")
