@@ -7,3 +7,4 @@ git clone {{REMOTE}} job
 cd job || exit
 git checkout {{BRANCH}}
 sbatch run.sh
+tail -f pong_job.out

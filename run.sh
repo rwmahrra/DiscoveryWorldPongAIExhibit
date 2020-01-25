@@ -37,6 +37,8 @@
 # Here's the actual job code.
 #
 ####
+SBATCH --output=pong_job.out
+SBATCH --job-name=PongAI
 
 # Activate the anaconda environment. Must use this form in scripts.
 #. /usr/local/anaconda3/bin/activate
