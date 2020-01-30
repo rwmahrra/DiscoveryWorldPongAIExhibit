@@ -1,6 +1,7 @@
 import time
 import numpy as np
 import os
+import imageio
 import cv2
 
 class Timer:
@@ -60,6 +61,14 @@ def get_last_file():
         return os.path.join("models", f"{id}.h5")
     else:
         return None
+
+def save_video(states, path):
+    imageio.mimsave(path, states, fps=30)
+
+def write(value, file):
+    text_file = open(file, "a+")
+    text_file.write(value + '\n')
+    text_file.close()
 
 
 def get_resume_index():

@@ -4,12 +4,12 @@ from keras.models import Sequential
 from keras.layers import Dense, Reshape, Flatten
 from keras.optimizers import Adam
 import os
-#from player import HumanPlayer
 from keras.layers.convolutional import Convolution2D
-
+from utils import save_video, write
 
 class PGAgent:
-    def __init__(self, state_size, action_size):
+    def __init__(self, state_size, action_size, name="PGAgent"):
+        self.name = name
         self.state_size = state_size
         self.action_size = action_size
         self.gamma = 0.99
@@ -24,7 +24,7 @@ class PGAgent:
     def _build_model(self):
         model = Sequential()
         #model.add(Reshape((1, 80, 80), input_shape=(self.state_size,)))
-        model.add(Reshape((1, Pong.WIDTH//2, Pong.HEIGHT//2), input_shape=(self.state_size,)))
+        model.add(Reshape((1, Pong.WIDTH // 2, Pong.HEIGHT // 2), input_shape=(self.state_size,)))
         model.add(Convolution2D(32, 6, 6, subsample=(3, 3), border_mode='same',
                                 activation='relu', init='he_uniform'))
         model.add(Flatten())
@@ -78,7 +78,8 @@ class PGAgent:
         #    print(Y[i])
         #    cv2.waitKey(0)
         #print(Y)
-        self.model.train_on_batch(X, Y)
+        result = self.model.train_on_batch(X, Y)
+        write(str(result), f'analytics/{self.name}.csv')
         self.states, self.probs, self.gradients, self.rewards = [], [], [], []
 
     def load(self, name):
@@ -104,17 +105,18 @@ if __name__ == "__main__":
     os.makedirs("models/1", exist_ok=True)
     os.makedirs("models/2", exist_ok=True)
     start_index = None
-    actions = ["UP", "DOWN"]
+    render_states = []
+    actions = ["UP", "DOWN", "NONE"]
     #env = gym.make("Pong-v0")
     env = Pong()
     state = env.reset()
     prev_x = None
     score_1 = 0
     score_2 = 0
-    state_size = Pong.HEIGHT//2 * Pong.WIDTH//2
-    action_size = 2 #env.action_space.n
-    agent1 = PGAgent(state_size, action_size)
-    agent2 = PGAgent(state_size, action_size)
+    state_size = Pong.HEIGHT // 2 * Pong.WIDTH // 2
+    action_size = 3 #env.action_space.n
+    agent1 = PGAgent(state_size, action_size, "agent1")
+    agent2 = PGAgent(state_size, action_size, "agent2")
     episode = 0
     if start_index is not None:
         episode = start_index
@@ -125,11 +127,10 @@ if __name__ == "__main__":
     last_action_2 = None
     i = 0
     while True:
-        #env.show(4)
-
+        render_states.append(env.get_screen().astype(np.uint8))
         x = preprocess_pong(state)
         #x = cur_x - prev_x if prev_x is not None else np.zeros(state_size)
-        if last_action_1 is None or last_action_2 is None or i % 3 == 0:
+        if last_action_1 is None or last_action_2 is None or i % 10 == 0:
             action1, prob1 = agent1.act(x)
             action2, prob2 = agent2.act(x)
             last_action_1 = action1
@@ -141,9 +142,12 @@ if __name__ == "__main__":
             agent2.memorize(x, action2, prob2, reward_2)
         else:
             state, reward, done = env.step(actions[last_action_2], actions[action1])
-            reward = float(reward[1])
-        score_1 += reward_1
-        score_2 += reward_2
+            reward_1 = float(reward[1])
+            reward_2 = float(reward[0])
+        if reward_1 > 0:
+            score_1 += reward_1
+        if reward_2 > 0:
+            score_2 += reward_2
 
         i += 1
         if done:
@@ -152,9 +156,13 @@ if __name__ == "__main__":
             agent1.train()
             agent2.train()
             print('Episode: %d - Score: %f - %f.' % (episode, score_1, score_2))
-            score = 0
+            score_1 = 0
+            score_2 = 0
             state = env.reset()
             prev_x = None
-            if episode > 1 and episode % 50 == 0:
+
+            if episode % 250 == 0:
+                save_video(render_states, f'./analytics/{episode}.mp4')
                 agent1.save(f'./models/1/{episode}.h5')
                 agent2.save(f'./models/2/{episode}.h5')
+            render_states = []

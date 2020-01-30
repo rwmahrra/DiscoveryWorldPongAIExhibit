@@ -12,9 +12,9 @@ class Pong:
     MAX_SCORE = 21
     WIDTH = 160
     HEIGHT = 192
-    SPEEDUP = 3
-    ACTIONS = ["UP", "DOWN"]
-    GRACE_PADDLE = 4
+    SPEEDUP = 1
+    ACTIONS = ["UP", "DOWN", "NONE"]
+    GRACE_PADDLE = 10
 
     @staticmethod
     def read_key(up, down):
@@ -30,15 +30,18 @@ class Pong:
         return choice(Pong.ACTIONS)
 
     class Paddle:
-        EDGE_BUFFER = 10
+        EDGE_BUFFER = 0
+        HEIGHT = 20
+        SPEED = 1
+        WIDTH = 2
 
         def __init__(self, side):
             self.side = side
             self.x = 0
             self.y = int(Pong.HEIGHT / 2)
-            self.w = 3
-            self.h = 15
-            self.speed = 2 * Pong.SPEEDUP
+            self.w = self.WIDTH
+            self.h = self.HEIGHT
+            self.speed = self.SPEED * Pong.SPEEDUP
             if side == "left":
                 self.x = Pong.PADDING
             elif side == "right":
@@ -47,9 +50,9 @@ class Pong:
         def reset(self):
             self.x = 0
             self.y = int(Pong.HEIGHT / 2)
-            self.w = 3
-            self.h = 15
-            self.speed = 2 * Pong.SPEEDUP
+            self.w = self.WIDTH
+            self.h = self.HEIGHT
+            self.speed = self.SPEED * Pong.SPEEDUP
             if self.side == "left":
                 self.x = Pong.PADDING
             elif self.side == "right":
@@ -71,27 +74,31 @@ class Pong:
                 self.up()
             elif action == "DOWN":
                 self.down()
+            elif action == "NONE":
+                pass
 
     class Ball:  # 0, 30, -45, 225
+        DIAMETER = 2
+        SPEED = 1
         BOUNCE_ANGLES = [0, 60, 45, 30, -30, -45, -60]
 
         def __init__(self):
             self.x = math.floor(Pong.WIDTH / 2)
             self.y = math.floor(Pong.HEIGHT / 2)
-            self.speed = 1 * Pong.SPEEDUP
+            self.speed = self.SPEED * Pong.SPEEDUP
             self.velocity = (0, 0)
-            self.w = 4
+            self.w = self.DIAMETER
             self.right = None
-            self.h = 4
+            self.h = self.DIAMETER
 
         def reset(self):
             self.right = None
             self.x = math.floor(Pong.WIDTH / 2)
             self.y = math.floor(Pong.HEIGHT / 2)
-            self.speed = 1 * Pong.SPEEDUP
+            self.speed = self.SPEED * Pong.SPEEDUP
             self.velocity = (0, 0)
-            self.w = 4
-            self.h = 4
+            self.w = self.DIAMETER
+            self.h = self.DIAMETER
 
         def get_vector(self, deg, scale):
             rad = math.pi * deg / 180
@@ -174,46 +181,59 @@ class Pong:
             return self.right, self.ball
 
     def check_collision(self, ball, paddle):
-        if abs(ball.x - paddle.x) < (paddle.w + 2) / 2:
-            hit_position = ball.y - paddle.y
-            if abs(hit_position) < (paddle.h + Pong.GRACE_PADDLE) / 2:
-                return True, hit_position / ((paddle.h + Pong.GRACE_PADDLE) / 2)
+        ball_left = ball.x - (ball.w / 2)
+        ball_right = ball.x + (ball.w / 2)
+        ball_top = ball.y + (ball.h / 2)
+        ball_bottom = ball.y - (ball.h / 2)
+        paddle_left = paddle.x - (paddle.w / 2)
+        paddle_right = paddle.x + (paddle.w / 2)
+        paddle_top = paddle.y + (paddle.h / 2)
+        paddle_bottom = paddle.y - (paddle.h / 2)
+        left_collide = ball_left > paddle_left and ball_left < paddle_right
+        right_collide = ball_right > paddle_left and ball_right < paddle_right
+        top_collide = ball_top > paddle_bottom and ball_top < paddle_top
+        bottom_collide = ball_bottom < paddle_top and ball_bottom > paddle_bottom
+        if left_collide or right_collide:
+            if top_collide or bottom_collide:
+                return True, (ball.y - paddle.y) / (paddle.h / 2)
         return False, 0
 
-
-    def step(self, left_action, right_action):
+    def step(self, left_action, right_action, frames=3):
         reward_l = 0
         reward_r = 0
-        self.left.handle_action(left_action)
-        self.right.handle_action(right_action)
-
-        collide_left, pos = self.check_collision(self.ball, self.left)
-        if collide_left and not self.ball.right:
-            self.ball.bounce_angle(pos)
-            self.ball.right = True
-        collide_right, pos = self.check_collision(self.ball, self.right)
-        if collide_right and self.ball.right:
-            self.ball.bounce_angle(pos)
-            self.ball.right = False
-
-        if self.ball.x < 0:
-            self.score_right += 1
-            reward_l = -1.0
-            reward_r = 1.0
-            self.ball.reset()
-            self.left.reset()
-            self.right.reset()
-        elif self.ball.x > Pong.WIDTH:
-            self.score_left += 1
-            reward_l = 1.0
-            reward_r = -1.0
-            self.ball.reset()
-            self.left.reset()
-            self.right.reset()
-        self.ball.update()
         done = False
-        if self.score_right >= Pong.MAX_SCORE or self.score_left >= Pong.MAX_SCORE:
-            done = True
+        for i in range(frames):
+            if not done:
+                self.left.handle_action(left_action)
+                self.right.handle_action(right_action)
+
+                collide_left, pos = self.check_collision(self.ball, self.left)
+                if collide_left and not self.ball.right:
+                    self.ball.bounce_angle(pos)
+                    self.ball.right = True
+                collide_right, pos = self.check_collision(self.ball, self.right)
+                if collide_right and self.ball.right:
+                    self.ball.bounce_angle(pos)
+                    self.ball.right = False
+
+                if self.ball.x < 0:
+                    self.score_right += 1
+                    reward_l -= 1.0
+                    reward_r += 1.0
+                    self.ball.reset()
+                    self.left.reset()
+                    self.right.reset()
+                elif self.ball.x > Pong.WIDTH:
+                    self.score_left += 1
+                    reward_l += 1.0
+                    reward_r -= 1.0
+                    self.ball.reset()
+                    self.left.reset()
+                    self.right.reset()
+                self.ball.update()
+                done = False
+                if self.score_right >= Pong.MAX_SCORE or self.score_left >= Pong.MAX_SCORE:
+                    done = True
 
         screen = self.render()
         self.last_screen = screen
@@ -236,6 +256,9 @@ class Pong:
         to_render = cv2.resize(self.last_screen, (int(Pong.WIDTH * scale), int(Pong.HEIGHT * scale)))
         cv2.imshow(f"Pong", to_render)
         cv2.waitKey(duration)
+
+    def get_screen(self):
+        return self.last_screen
 
     def show_state(self, scale=1, duration=1):
         l, r = self.get_score()
