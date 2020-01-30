@@ -268,7 +268,7 @@ class Pong:
         cv2.waitKey(duration)
 
     def draw_rect(self, screen, x, y, w, h, color):
-        screen[y:y+h+1, x:x+w+1] = color
+        screen[max(y,0):y+h+1, max(x,0):x+w+1] = color
 
     def render(self):
         screen = np.zeros((Pong.HEIGHT, Pong.WIDTH, 3), dtype=np.float32)

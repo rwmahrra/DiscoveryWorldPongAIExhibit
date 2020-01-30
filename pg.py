@@ -4,6 +4,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Reshape, Flatten
 from keras.optimizers import Adam
 import os
+import cv2
 from keras.layers.convolutional import Convolution2D
 from utils import save_video, write
 
@@ -129,21 +130,19 @@ if __name__ == "__main__":
     while True:
         render_states.append(env.get_screen().astype(np.uint8))
         x = preprocess_pong(state)
+        env.show(2, 0)
         #x = cur_x - prev_x if prev_x is not None else np.zeros(state_size)
-        if last_action_1 is None or last_action_2 is None or i % 10 == 0:
-            action1, prob1 = agent1.act(x)
-            action2, prob2 = agent2.act(x)
-            last_action_1 = action1
-            last_action_2 = action2
-            state, reward, done = env.step(actions[action2], actions[action1])
-            reward_1 = float(reward[1])
-            reward_2 = float(reward[0])
-            agent1.memorize(x, action1, prob1, reward_1)
-            agent2.memorize(x, action2, prob2, reward_2)
-        else:
-            state, reward, done = env.step(actions[last_action_2], actions[action1])
-            reward_1 = float(reward[1])
-            reward_2 = float(reward[0])
+        #cv2.imshow("test", np.reshape(x, (Pong.HEIGHT //2 , Pong.WIDTH // 2)))
+        #cv2.waitKey(0)
+        action1, prob1 = agent1.act(x)
+        action2, prob2 = agent2.act(x)
+        last_action_1 = action1
+        last_action_2 = action2
+        state, reward, done = env.step(actions[action2], player.move(x), frames=5)
+        reward_1 = float(reward[1])
+        reward_2 = float(reward[0])
+        agent1.memorize(x, action1, prob1, reward_1)
+        agent2.memorize(x, action2, prob2, reward_2)
         if reward_1 > 0:
             score_1 += reward_1
         if reward_2 > 0:
