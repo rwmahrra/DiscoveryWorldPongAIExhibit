@@ -24,13 +24,7 @@ class PGAgent:
 
     def _build_model(self):
         model = Sequential()
-        #model.add(Reshape((1, 80, 80), input_shape=(self.state_size,)))
-        model.add(Reshape((1, Pong.WIDTH // 2, Pong.HEIGHT // 2), input_shape=(self.state_size,)))
-        model.add(Convolution2D(32, 6, 6, subsample=(3, 3), border_mode='same',
-                                activation='relu', init='he_uniform'))
-        model.add(Flatten())
-        model.add(Dense(64, activation='relu', init='he_uniform'))
-        model.add(Dense(32, activation='relu', init='he_uniform'))
+        model.add(Dense(200, activation='relu', init='he_uniform', input_shape=(self.state_size,)))
         model.add(Dense(self.action_size, activation='softmax'))
         opt = Adam(lr=self.learning_rate)
         model.compile(loss='categorical_crossentropy', optimizer=opt)
