@@ -130,7 +130,6 @@ if __name__ == "__main__":
     while True:
         render_states.append(env.get_screen().astype(np.uint8))
         x = preprocess_pong(state)
-        env.show(2, 0)
         #x = cur_x - prev_x if prev_x is not None else np.zeros(state_size)
         #cv2.imshow("test", np.reshape(x, (Pong.HEIGHT //2 , Pong.WIDTH // 2)))
         #cv2.waitKey(0)
@@ -138,7 +137,7 @@ if __name__ == "__main__":
         action2, prob2 = agent2.act(x)
         last_action_1 = action1
         last_action_2 = action2
-        state, reward, done = env.step(actions[action2], player.move(x), frames=5)
+        state, reward, done = env.step(actions[action2], actions[action1], frames=5)
         reward_1 = float(reward[1])
         reward_2 = float(reward[0])
         agent1.memorize(x, action1, prob1, reward_1)
