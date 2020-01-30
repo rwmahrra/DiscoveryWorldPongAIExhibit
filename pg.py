@@ -107,7 +107,7 @@ if __name__ == "__main__":
     os.makedirs("models/2", exist_ok=True)
     start_index = None
     render_states = []
-    actions = ["UP", "DOWN", "NONE"]
+    actions = ["UP", "DOWN"]
     #env = gym.make("Pong-v0")
     env = Pong()
     state = env.reset()
@@ -115,7 +115,7 @@ if __name__ == "__main__":
     score_1 = 0
     score_2 = 0
     state_size = Pong.HEIGHT // 2 * Pong.WIDTH // 2
-    action_size = 3 #env.action_space.n
+    action_size = 2 #env.action_space.n
     agent1 = PGAgent(state_size, action_size, "agent1")
     agent2 = PGAgent(state_size, action_size, "agent2")
     episode = 0
