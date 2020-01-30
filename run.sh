@@ -36,7 +36,7 @@
 # Activate the anaconda environment. Must use this form in scripts.
 #. /usr/local/anaconda3/bin/activate
 # Your job
-pip install --user -r requirements.txt
+pip3 install --user -r requirements.txt
 python3 pg.py
 # Deactivate the anaconda environment
 # conda deactivate
