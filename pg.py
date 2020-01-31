@@ -99,6 +99,7 @@ def preprocess(I):
 if __name__ == "__main__":
     os.makedirs("models/1", exist_ok=True)
     os.makedirs("models/2", exist_ok=True)
+    os.makedirs("analytics", exist_ok=True)
     start_index = None
     render_states = []
     actions = ["UP", "DOWN"]
