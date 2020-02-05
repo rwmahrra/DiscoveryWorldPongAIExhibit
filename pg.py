@@ -154,7 +154,7 @@ if __name__ == "__main__":
             state = env.reset()
             prev_x = None
 
-            if episode % 250 == 0:
+            if episode == 1 or episode % 250 == 0:
                 save_video(render_states, f'./analytics/{episode}.mp4')
                 agent1.save(f'./models/1/{episode}.h5')
                 agent2.save(f'./models/2/{episode}.h5')
