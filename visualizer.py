@@ -160,42 +160,10 @@ def visualize_conv_filters():
     pyplot.show()
 
 
-def plot_loss():
-    x1 = []
-    y1 = []
-    x2 = []
-    y2 = []
-
-    with open('./analytics/agent1.csv', 'r') as csvfile:
-        plots = csv.reader(csvfile, delimiter=',')
-        i = 0
-        for row in plots:
-            x1.append(i)
-            y1.append(float(row[0]))
-            i += 1
-
-    with open('./analytics/agent2.csv', 'r') as csvfile:
-        plots = csv.reader(csvfile, delimiter=',')
-        i = 0
-        for row in plots:
-            x2.append(i)
-            y2.append(float(row[0]))
-            i += 1
-
-    CAP = 2000
-    plt.plot(x1[:CAP], y1[:CAP], label='Agent 1')
-    plt.plot(x2[:CAP], y2[:CAP], label='Agent 2')
-    plt.xlabel('Episode')
-    plt.ylabel('Loss')
-    plt.title('Loss vs. Training Episode For Dueling Policy Gradient Agents')
-    plt.legend()
-    plt.show()
-
-
 #visualize_conv_filters()
 #visualize_conv_features()
 #test_model(50)
 #view_train_progression(4850, neuron=199, interval=50)
 #view_weights(1300, 0)
 #debug_step()
-plot_loss()
+#plot_loss()

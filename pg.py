@@ -6,7 +6,7 @@ from keras.optimizers import Adam
 import os
 import cv2
 from keras.layers.convolutional import Convolution2D
-from utils import save_video, write
+from utils import save_video, write, plot_loss
 
 class PGAgent:
     def __init__(self, state_size, action_size, name="PGAgent"):
@@ -100,6 +100,7 @@ if __name__ == "__main__":
     os.makedirs("models/1", exist_ok=True)
     os.makedirs("models/2", exist_ok=True)
     os.makedirs("analytics", exist_ok=True)
+    os.makedirs("analytics/plots", exist_ok=True)
     start_index = None
     render_states = []
     actions = ["UP", "DOWN"]
@@ -156,6 +157,8 @@ if __name__ == "__main__":
 
             if episode == 1 or episode % 50 == 0:
                 save_video(render_states, f'./analytics/{episode}.mp4')
+                plot_loss(f'./analytics/plots/{episode}.png')
+
                 agent1.save(f'./models/1/{episode}.h5')
                 agent2.save(f'./models/2/{episode}.h5')
             if episode == 10000:
