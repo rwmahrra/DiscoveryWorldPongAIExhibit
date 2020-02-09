@@ -12,7 +12,8 @@ from pg import PGAgent
 from keras.models import Model
 from matplotlib import pyplot
 import subprocess
-
+import matplotlib.pyplot as plt
+import csv
 
 
 def view_train_progression(number, neuron=0, interval=50):
@@ -41,6 +42,7 @@ def visualize_game_memory():
         cv2.imshow("state", state)
         cv2.waitKey(0)
 
+
 def test_model(id):
     dqn = DQN(resume=False)
     dqn.load_model(f"./models/{id}.h5")
@@ -63,11 +65,13 @@ def test_model(id):
     l, r = env.get_score()
     print(f"Finished game with model {id}, {l} - {r}")
 
+
 def view_weights(id, layer=0):
     dqn = DQN(resume=False)
     dqn.load_model(f"./models/{id}.h5")
     for i in range(200):
         dqn.show_weights(i, layer=layer)
+
 
 def debug_step():
     env = Pong()
@@ -87,15 +91,17 @@ def debug_step():
         env.show(duration=0)
         env.show_state(duration=0)
 
-def load_model(atari=False):
+
+def load_model(id=1, atari=False):
     state_size = (Pong.WIDTH // 2) * (Pong.HEIGHT // 2)
     action_size = 2 #env.action_space.n
     if atari:
         state_size = 80 * 80
         action_size = 6
     agent = PGAgent(state_size, action_size)
-    agent.load('./models/1/7350.h5')
+    agent.load(f'./models/2/{id}.h5')
     return agent.model
+
 
 def visualize_conv_features():
     # load the model
@@ -128,8 +134,8 @@ def visualize_conv_features():
     cv2.imshow("test image", img.reshape(Pong.HEIGHT // 2, Pong.WIDTH // 2))
     cv2.waitKey(0)
 
-def visualize_conv_filters():
 
+def visualize_conv_filters():
     model = load_model()
     # retrieve weights from the second hidden layer
     filters, biases = model.layers[1].get_weights()
@@ -153,9 +159,43 @@ def visualize_conv_filters():
     # show the figure
     pyplot.show()
 
+
+def plot_loss():
+    x1 = []
+    y1 = []
+    x2 = []
+    y2 = []
+
+    with open('./analytics/agent1.csv', 'r') as csvfile:
+        plots = csv.reader(csvfile, delimiter=',')
+        i = 0
+        for row in plots:
+            x1.append(i)
+            y1.append(float(row[0]))
+            i += 1
+
+    with open('./analytics/agent2.csv', 'r') as csvfile:
+        plots = csv.reader(csvfile, delimiter=',')
+        i = 0
+        for row in plots:
+            x2.append(i)
+            y2.append(float(row[0]))
+            i += 1
+
+    CAP = 2000
+    plt.plot(x1[:CAP], y1[:CAP], label='Agent 1')
+    plt.plot(x2[:CAP], y2[:CAP], label='Agent 2')
+    plt.xlabel('Episode')
+    plt.ylabel('Loss')
+    plt.title('Loss vs. Training Episode For Dueling Policy Gradient Agents')
+    plt.legend()
+    plt.show()
+
+
 #visualize_conv_filters()
-visualize_conv_features()
+#visualize_conv_features()
 #test_model(50)
 #view_train_progression(4850, neuron=199, interval=50)
 #view_weights(1300, 0)
 #debug_step()
+plot_loss()

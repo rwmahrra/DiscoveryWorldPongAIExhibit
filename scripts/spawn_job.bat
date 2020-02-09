@@ -10,7 +10,7 @@ FOR /F "tokens=*" %%g IN ('git rev-parse --abbrev-ref HEAD') do (SET BRANCH=%%g)
 FOR /F "tokens=*" %%g IN ('git config --get remote.origin.url') do (SET REMOTE=%%g)
 
 :: Grab datetime and create ID to easily identify run folder
-SET DATETIME=%date:~10,4%%date:~4,2%%date:~7,2%_%time:~0,2%%time:~3,2%%time:~6,2%
+SET DATETIME=%date:~10,4%%date:~4,2%%date:~7,2%_%time:~1,2%%time:~3,2%%time:~6,2%
 SET ID=%BRANCH%_%DATETIME%
 
 :: Copy and fill in template script
