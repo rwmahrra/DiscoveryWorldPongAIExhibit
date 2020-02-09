@@ -111,14 +111,6 @@ def plot_loss(path=None, show=False):
     x2 = []
     y2 = []
 
-    with open('./analytics/agent_l.csv', 'r') as csvfile:
-        plots = csv.reader(csvfile, delimiter=',')
-        i = 0
-        for row in plots:
-            x1.append(i)
-            y1.append(float(row[0]))
-            i += 1
-
     with open('./analytics/agent_r.csv', 'r') as csvfile:
         plots = csv.reader(csvfile, delimiter=',')
         i = 0
@@ -128,11 +120,10 @@ def plot_loss(path=None, show=False):
             i += 1
 
     CAP = 2000
-    plt.plot(x1[:CAP], y1[:CAP], label='Left Agent')
     plt.plot(x2[:CAP], y2[:CAP], label='Right Agent')
     plt.xlabel('Episode')
     plt.ylabel('Loss')
-    plt.title('Loss vs. Training Episode For Dueling Policy Gradient Agents')
+    plt.title('Loss vs. Training Episode For Policy Gradient Agent')
     plt.legend()
     if show:
         plt.show()
