@@ -31,5 +31,5 @@ if __name__ == "__main__":
             plot_loss(f'./analytics/plots/{episode}.png')
             agent_l.save(f'./models/l/{episode}.h5')
             agent_r.save(f'./models/r/{episode}.h5')
-            if episode == 10000:
-                exit(0)
+        if episode == 10000:
+            exit(0)

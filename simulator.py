@@ -9,6 +9,8 @@ CUSTOM_ACTIONS = ["UP", "DOWN"]
 ATARI_ACTIONS = [2, 3]  # Control indices for "UP", "DOWN"
 ATARI_ACTION_SIZE = 2
 CUSTOM_ACTION_SIZE = 2
+CUSTOM_STATE_SHAPE = Pong.HEIGHT // 2, Pong.WIDTH // 2
+ATARI_STATE_SHAPE = 80, 80
 CUSTOM_STATE_SIZE = Pong.HEIGHT // 2 * Pong.WIDTH // 2
 ATARI_STATE_SIZE = 80 * 80
 
@@ -26,7 +28,8 @@ def step(env, env_type, action_l=None, action_r=None, frames=5):
     if env_type == CUSTOM:
         return env.step(CUSTOM_ACTIONS[action_l], CUSTOM_ACTIONS[action_r], frames=frames)
     elif env_type == ATARI:
-        return env.step(ATARI_ACTIONS[action_r])
+        state, reward, done, _unused = env.step(ATARI_ACTIONS[action_r])
+        return state, (0, reward), done
     else:
         raise NotImplementedError
 
@@ -39,6 +42,7 @@ def simulate_game(env_type=CUSTOM, left=None, right=None):
         from pong import Pong
         env = Pong()
         state_size = CUSTOM_STATE_SIZE
+        state_shape = CUSTOM_STATE_SHAPE
         if type(left) == BotPlayer: left.attach_env(env)
         if type(right) == BotPlayer: right.attach_env(env)
 
@@ -47,6 +51,7 @@ def simulate_game(env_type=CUSTOM, left=None, right=None):
         env = gym.make("Pong-v0")
         if left is not None: raise NotImplementedError("Atari env does not support custom left player")
         state_size = ATARI_STATE_SIZE
+        state_shape = ATARI_STATE_SHAPE
     else:
         raise NotImplementedError
 
@@ -64,16 +69,17 @@ def simulate_game(env_type=CUSTOM, left=None, right=None):
     model_states = []
     score_l = 0
     score_r = 0
-    last_state = np.zeros(state_size)
+    last_state = np.zeros(state_shape)
     state = env.reset()
     while True:
         render_states.append(state.astype(np.uint8))
         current_state = preprocess(state, env_type)
         x = current_state - last_state
-        model_states.append(x)
+        model_states.append(x.astype(np.uint8))
         last_state = current_state
 
         action_l, prob_l, action_r, prob_r = None, None, None, None
+        x = x.ravel()
         if left is not None: action_l, prob_l = left.act(x)
         if right is not None: action_r, prob_r = right.act(x)
 
@@ -92,7 +98,7 @@ def simulate_game(env_type=CUSTOM, left=None, right=None):
         rewards_l.append(reward_l)
         rewards_r.append(action_r)
 
-        if reward_l > 0: score_l += reward_l
+        if reward_r < 0: score_l -= reward_r
         if reward_r > 0: score_r += reward_r
 
         if done:

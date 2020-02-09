@@ -244,7 +244,7 @@ class Pong:
 
     def render(self):
         screen = np.zeros((Pong.HEIGHT, Pong.WIDTH, 3), dtype=np.float32)
-        screen[:, :] = (0.0, 0.4, 0.7)
+        screen[:, :] = (0, 60, 140)
 
         # Draw middle grid lines
         #self.draw_rect(screen, 0, int(Pong.HEIGHT/2), int(Pong.WIDTH), 1, 255)
