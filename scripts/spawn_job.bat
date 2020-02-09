@@ -11,6 +11,10 @@ SET TARGET=%1
 FOR /F "tokens=*" %%g IN ('git rev-parse --abbrev-ref HEAD') do (SET BRANCH=%%g)
 FOR /F "tokens=*" %%g IN ('git config --get remote.origin.url') do (SET REMOTE=%%g)
 
+:: Fill in run.sh template fields
+powershell -Command "(gc run.sh) -replace '{{BRANCH}}', '%TARGET%' | Out-File -encoding ASCII run.sh"
+
+:: Check in code to target branch
 git branch -d %TARGET%
 git checkout -b %TARGET%
 git add .
@@ -35,8 +39,9 @@ git checkout %BRANCH%
 
 :: Clean up temp file after putty session ends
 del scripts\temp.sh
-EXIT 0
+EXIT /b 0
 
+:: Handle bad params
 :NO_ARGUMENT
 echo ERROR: Please provide an autojob name
 EXIT /b 1
