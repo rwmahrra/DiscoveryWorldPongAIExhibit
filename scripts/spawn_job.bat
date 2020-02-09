@@ -11,10 +11,11 @@ SET TARGET=%1
 FOR /F "tokens=*" %%g IN ('git rev-parse --abbrev-ref HEAD') do (SET BRANCH=%%g)
 FOR /F "tokens=*" %%g IN ('git config --get remote.origin.url') do (SET REMOTE=%%g)
 
+git branch -d %TARGET%
 git checkout -b %TARGET%
 git add .
 git commit -m "%TARGET% autojob"
-git push --set-upstream origin %TARGET%
+git push --set-upstream --force origin %TARGET%
 
 :: Grab datetime and create ID to easily identify run folder
 SET DATETIME=%date:~10,4%%date:~4,2%%date:~7,2%_%time:~1,2%%time:~3,2%%time:~6,2%
