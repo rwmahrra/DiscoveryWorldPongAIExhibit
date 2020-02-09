@@ -23,6 +23,7 @@ if __name__ == "__main__":
         episode += 1
         states, left, right, meta = simulator.simulate_game(simulator.ATARI, right=agent_r)
         render_states, model_states, (score_l, score_r) = meta
+        actions, probs, rewards = right
         #agent_l.train(states, *left)
         agent_r.train(states, *right)
 

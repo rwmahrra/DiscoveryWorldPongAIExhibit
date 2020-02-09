@@ -101,9 +101,9 @@ class PGAgent:
         gradients *= rewards
 
         X = np.squeeze(np.vstack([states]))
-        Y = probs + self.learning_rate * np.squeeze(np.vstack([gradients]))
-
+        Y = self.probs + self.learning_rate * np.squeeze(np.vstack([gradients]))
         result = self.model.train_on_batch(X, Y)
+        self.probs = []
         write(str(result), f'analytics/{self.name}.csv')
 
     def load(self, name):

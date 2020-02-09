@@ -96,7 +96,7 @@ def simulate_game(env_type=CUSTOM, left=None, right=None):
         actions_l.append(action_l)
         actions_r.append(action_r)
         rewards_l.append(reward_l)
-        rewards_r.append(action_r)
+        rewards_r.append(reward_r)
 
         if reward_r < 0: score_l -= reward_r
         if reward_r > 0: score_r += reward_r
