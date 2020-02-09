@@ -144,12 +144,8 @@ class Pong:
                 self.bounce(y=True)
 
     def __init__(self):
-        # Holds last preprocessed, non-diffed state
-        self.last_processed_screen = None
         # Holds last raw screen pixels for rendering
         self.last_screen = None
-        # Holds last state passed to the agents
-        self.last_state = None
 
         self.score_left = 0
         self.score_right = 0
@@ -158,7 +154,6 @@ class Pong:
         self.ball = Pong.Ball()
 
     def reset(self):
-        self.last_processed_screen = None
         self.score_left = 0
         self.score_right = 0
         self.left.reset()
@@ -166,10 +161,7 @@ class Pong:
         self.ball.reset()
         screen = self.render()
         self.last_screen = screen
-        state = self.preprocess_screen(screen)
-        self.last_processed_screen = state
-        self.last_state = state
-        return state
+        return screen
 
     def get_score(self):
         return self.score_left, self.score_right
@@ -236,20 +228,7 @@ class Pong:
                     done = True
 
         screen = self.render()
-        self.last_screen = screen
-        processed_screen = self.preprocess_screen(screen)
-        state = processed_screen - self.last_processed_screen
-        self.last_processed_screen = processed_screen
-        self.last_state = state
-        return state, (reward_l, reward_r), done
-
-    def preprocess_screen(self, state):
-        state = cv2.cvtColor(state, cv2.COLOR_BGR2GRAY)
-        h, w = state.shape
-        state = cv2.resize(state, (w//2, h//2))
-        state[state < 250] = 0
-
-        return state
+        return screen, (reward_l, reward_r), done
 
     def show(self, scale=1,  duration=1):
         l, r = self.get_score()
@@ -259,13 +238,6 @@ class Pong:
 
     def get_screen(self):
         return self.last_screen
-
-    def show_state(self, scale=1, duration=1):
-        l, r = self.get_score()
-        h, w = self.last_state.shape
-        to_render = cv2.resize(self.last_state, (int(w * scale), int(h * scale)))
-        cv2.imshow(f"Pong State", normalize_states(to_render))
-        cv2.waitKey(duration)
 
     def draw_rect(self, screen, x, y, w, h, color):
         screen[max(y,0):y+h+1, max(x,0):x+w+1] = color

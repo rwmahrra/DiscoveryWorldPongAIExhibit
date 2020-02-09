@@ -1,6 +1,7 @@
 import time
 import numpy as np
 import os
+import cv2
 import imageio
 import csv
 import matplotlib.pyplot as plt
@@ -28,6 +29,24 @@ def discount_rewards(r, gamma=0.99):
         discounted_r[t] = running_add
     return discounted_r
 
+
+def preprocess_gym(I):
+  """ prepro 210x160x3 uint8 frame into 6400 (80x80) 1D float vector """
+  I = I[35:195] # crop
+  I = I[::2,::2,0] # downsample by factor of 2
+  I[I == 144] = 0 # erase background (background type 1)
+  I[I == 109] = 0 # erase background (background type 2)
+  I[I != 0] = 1 # everything else (paddles, ball) just set to 1
+  return I.astype(np.float).ravel()
+
+
+def preprocess_custom(I):
+    state = cv2.cvtColor(I, cv2.COLOR_BGR2GRAY)
+    h, w = state.shape
+    state = cv2.resize(state, (w // 2, h // 2))
+    state[state < 250] = 0
+    state[state == 255] = 1
+    return state.astype(np.float).ravel()
 
 def encode_action(action):
     if action == "UP":
@@ -63,8 +82,10 @@ def get_last_file():
     else:
         return None
 
+
 def save_video(states, path):
     imageio.mimsave(path, states, fps=30)
+
 
 def write(value, file):
     text_file = open(file, "a+")
@@ -90,7 +111,7 @@ def plot_loss(path=None, show=False):
     x2 = []
     y2 = []
 
-    with open('./analytics/agent1.csv', 'r') as csvfile:
+    with open('./analytics/agent_l.csv', 'r') as csvfile:
         plots = csv.reader(csvfile, delimiter=',')
         i = 0
         for row in plots:
@@ -98,7 +119,7 @@ def plot_loss(path=None, show=False):
             y1.append(float(row[0]))
             i += 1
 
-    with open('./analytics/agent2.csv', 'r') as csvfile:
+    with open('./analytics/agent_r.csv', 'r') as csvfile:
         plots = csv.reader(csvfile, delimiter=',')
         i = 0
         for row in plots:
@@ -107,8 +128,8 @@ def plot_loss(path=None, show=False):
             i += 1
 
     CAP = 2000
-    plt.plot(x1[:CAP], y1[:CAP], label='Agent 1')
-    plt.plot(x2[:CAP], y2[:CAP], label='Agent 2')
+    plt.plot(x1[:CAP], y1[:CAP], label='Left Agent')
+    plt.plot(x2[:CAP], y2[:CAP], label='Right Agent')
     plt.xlabel('Episode')
     plt.ylabel('Loss')
     plt.title('Loss vs. Training Episode For Dueling Policy Gradient Agents')

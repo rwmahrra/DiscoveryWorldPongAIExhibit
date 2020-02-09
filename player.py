@@ -1,11 +1,12 @@
-from pong import Pong
 from random import randint
-import numpy as np
-from keras.layers import Dense
-from keras.models import Sequential
 from ai import DQN
-import cv2
 from random import random, choice
+import numpy as np
+from pong import Pong
+from keras.models import Sequential
+from keras.layers import Dense, Reshape, Flatten
+from keras.optimizers import Adam
+from utils import save_video, write, plot_loss
 
 
 class HumanPlayer:
@@ -23,11 +24,16 @@ class RandomPlayer:
 
 
 class BotPlayer:
-    def __init__(self, game, left=False, right=False):
+    def __init__(self, env=None, left=False, right=False):
         self.left = left
         self.right = right
-        self.paddle, self.ball = game.get_bot_data(left=left, right=right)
+        if env is not None:
+            self.paddle, self.ball = env.get_bot_data(left=left, right=right)
 
+    def attach_env(self, env):
+        self.paddle, self.ball = env.get_bot_data(left=self.left, right=self.right)
+
+    # Takes state to preserve interface
     def move(self, state):
         if self.left and not self.ball.right or self.right and self.ball.right:
             if self.ball.y > self.paddle.y:
@@ -38,6 +44,73 @@ class BotPlayer:
                 return "NONE" if randint(0, 1) == 1 else "DOWN"
         else:
             return "UP" if randint(0, 1) == 1 else "DOWN"
+
+
+class PGAgent:
+    def __init__(self, state_size, action_size, name="PGAgent"):
+        self.name = name
+        self.state_size = state_size
+        self.action_size = action_size
+        self.gamma = 0.99
+        self.learning_rate = 0.001
+        self.states = []
+        self.gradients = []
+        self.rewards = []
+        self.probs = []
+        self.model = self._build_model()
+        self.model.summary()
+
+    def _build_model(self):
+        model = Sequential()
+        model.add(Dense(200, activation='relu', init='he_uniform', input_shape=(self.state_size,)))
+        model.add(Dense(self.action_size, activation='softmax'))
+        opt = Adam(lr=self.learning_rate)
+        model.compile(loss='categorical_crossentropy', optimizer=opt)
+        return model
+
+    def act(self, state):
+        state = state.reshape([1, state.shape[0]])
+        aprob = self.model.predict(state, batch_size=1).flatten()
+        self.probs.append(aprob)
+        prob = aprob / np.sum(aprob)
+        action = np.random.choice(self.action_size, 1, p=prob)[0]
+        return action, prob
+
+    def discount_rewards(self, rewards):
+        discounted_rewards = np.zeros_like(rewards)
+        running_add = 0
+        for t in reversed(range(0, rewards.size)):
+            if rewards[t] != 0:
+                running_add = 0
+            running_add = running_add * self.gamma + rewards[t]
+            discounted_rewards[t] = running_add
+        return discounted_rewards.astype(np.float32)
+
+    def train(self, states, actions, probs, rewards):
+        gradients = []
+        for i in range(len(actions)):
+            action = actions[i]
+            prob = probs[i]
+            y = np.zeros([self.action_size])
+            y[action] = 1
+            gradients.append(np.array(y).astype('float32') - prob)
+
+        gradients = np.vstack(gradients)
+        rewards = np.vstack(rewards)
+        rewards = self.discount_rewards(rewards)
+        gradients *= rewards
+
+        X = np.squeeze(np.vstack([states]))
+        Y = probs + self.learning_rate * np.squeeze(np.vstack([gradients]))
+
+        result = self.model.train_on_batch(X, Y)
+        write(str(result), f'analytics/{self.name}.csv')
+
+    def load(self, name):
+        self.model.load_weights(name)
+
+    def save(self, name):
+        self.model.save_weights(name)
 
 
 class DeepQPlayer:
