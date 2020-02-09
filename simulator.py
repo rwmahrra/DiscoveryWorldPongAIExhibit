@@ -24,7 +24,7 @@ def preprocess(state, env_type):
         raise NotImplementedError
 
 
-def step(env, env_type, action_l=None, action_r=None, frames=5):
+def step(env, env_type, action_l=None, action_r=None, frames=10):
     if env_type == CUSTOM:
         return env.step(CUSTOM_ACTIONS[action_l], CUSTOM_ACTIONS[action_r], frames=frames)
     elif env_type == ATARI:
