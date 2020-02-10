@@ -70,9 +70,7 @@ class PGAgent:
 
     def act(self, state):
         state = state.reshape([1, state.shape[0]])
-        aprob = self.model.predict(state, batch_size=1).flatten()
-        self.probs.append(aprob)
-        prob = aprob / np.sum(aprob)
+        prob = self.model.predict(state, batch_size=1).flatten()
         action = np.random.choice(self.action_size, 1, p=prob)[0]
         return action, prob
 
@@ -101,9 +99,8 @@ class PGAgent:
         gradients *= rewards
 
         X = np.squeeze(np.vstack([states]))
-        Y = self.probs + self.learning_rate * np.squeeze(np.vstack([gradients]))
+        Y = probs + self.learning_rate * np.squeeze(np.vstack([gradients]))
         result = self.model.train_on_batch(X, Y)
-        self.probs = []
         write(str(result), f'analytics/{self.name}.csv')
 
     def load(self, name):
