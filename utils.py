@@ -119,8 +119,7 @@ def plot_loss(path=None, show=False):
             y2.append(float(row[0]))
             i += 1
 
-    CAP = 2000
-    plt.plot(x2[:CAP], y2[:CAP], label='Right Agent')
+    plt.plot(x2, y2, label='Right Agent')
     plt.xlabel('Episode')
     plt.ylabel('Loss')
     plt.title('Loss vs. Training Episode For Policy Gradient Agent')

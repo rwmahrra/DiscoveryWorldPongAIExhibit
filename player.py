@@ -33,17 +33,20 @@ class BotPlayer:
     def attach_env(self, env):
         self.paddle, self.ball = env.get_bot_data(left=self.left, right=self.right)
 
+    def act(self, state):
+        return self.move(), 1
+
     # Takes state to preserve interface
-    def move(self, state):
+    def move(self):
         if self.left and not self.ball.right or self.right and self.ball.right:
             if self.ball.y > self.paddle.y:
-                return "DOWN"
+                return 1
             elif self.ball.y < self.paddle.y:
-                return "UP"
+                return 0
             else:
-                return "NONE" if randint(0, 1) == 1 else "DOWN"
+                return 0 if randint(0, 1) == 1 else 1
         else:
-            return "UP" if randint(0, 1) == 1 else "DOWN"
+            return 0 if randint(0, 1) == 1 else 1
 
 
 class PGAgent:

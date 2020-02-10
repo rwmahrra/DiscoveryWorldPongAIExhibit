@@ -1,7 +1,7 @@
 import os
 from utils import save_video, plot_loss
 import simulator
-from player import PGAgent
+from player import PGAgent, BotPlayer
 
 if __name__ == "__main__":
     os.makedirs("models/l", exist_ok=True)
@@ -10,8 +10,8 @@ if __name__ == "__main__":
     os.makedirs("analytics/plots", exist_ok=True)
     start_index = None
 
-    #agent_l = PGAgent(simulator.CUSTOM_STATE_SIZE, simulator.CUSTOM_ACTION_SIZE, "agent_l")
-    agent_r = PGAgent(simulator.ATARI_STATE_SIZE, simulator.ATARI_ACTION_SIZE, "agent_r")
+    agent_l = BotPlayer(left=True)
+    agent_r = PGAgent(simulator.CUSTOM_STATE_SIZE, simulator.CUSTOM_ACTION_SIZE, "agent_r")
 
     episode = 0
     if start_index is not None:
@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     while True:
         episode += 1
-        states, left, right, meta = simulator.simulate_game(simulator.ATARI, right=agent_r)
+        states, left, right, meta = simulator.simulate_game(simulator.CUSTOM, left=agent_l, right=agent_r)
         render_states, model_states, (score_l, score_r) = meta
         actions, probs, rewards = right
         #agent_l.train(states, *left)
