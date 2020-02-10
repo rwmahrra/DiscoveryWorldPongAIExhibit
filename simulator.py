@@ -1,7 +1,7 @@
 import utils
 import numpy as np
 from pong import Pong
-from player import BotPlayerq
+from player import BotPlayer
 
 CUSTOM = 0
 ATARI = 1
