@@ -8,7 +8,6 @@ from utils import Timer, encode_action, discount_rewards
 import multiprocessing
 from ai import DQN
 from main import run_simulations
-from pg import PGAgent
 from keras.models import Model
 from matplotlib import pyplot
 import subprocess
@@ -73,6 +72,12 @@ def view_weights(id, layer=0):
         dqn.show_weights(i, layer=layer)
 
 
+def get_weight_image(model, neuron=0, layer=0, size=(Pong.HEIGHT // 2, Pong.WIDTH // 2)):
+    weights = model.get_weights()[layer][:, neuron]
+    image = weights.reshape(Pong.HEIGHT // 2, Pong.WIDTH // 2)
+    return image
+
+
 def debug_step():
     env = Pong()
     right = player.HumanPlayer('up', 'down')
@@ -90,17 +95,6 @@ def debug_step():
 
         env.show(duration=0)
         env.show_state(duration=0)
-
-
-def load_model(id=1, atari=False):
-    state_size = (Pong.WIDTH // 2) * (Pong.HEIGHT // 2)
-    action_size = 2 #env.action_space.n
-    if atari:
-        state_size = 80 * 80
-        action_size = 6
-    agent = PGAgent(state_size, action_size)
-    agent.load(f'./models/2/{id}.h5')
-    return agent.model
 
 
 def visualize_conv_features():

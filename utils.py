@@ -83,8 +83,8 @@ def get_last_file():
         return None
 
 
-def save_video(states, path):
-    imageio.mimsave(path, states, fps=30)
+def save_video(states, path, fps=30):
+    imageio.mimsave(path, states, fps=fps)
 
 
 def write(value, file):
