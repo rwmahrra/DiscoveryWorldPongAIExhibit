@@ -34,9 +34,10 @@ def step(env, env_type, action_l=None, action_r=None, frames=10):
         raise NotImplementedError
 
 
-def simulate_game(env_type=CUSTOM, left=None, right=None):
+def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1):
     env = None
     state_size = None
+    games_remaining = batch
 
     if env_type == CUSTOM:
         from pong import Pong
@@ -102,6 +103,11 @@ def simulate_game(env_type=CUSTOM, left=None, right=None):
         if reward_r > 0: score_r += reward_r
 
         if done:
+            games_remaining -= 1
             print('Score: %f - %f.' % (score_l, score_r))
-            metadata = (render_states, model_states, (score_l, score_r))
-            return states, (actions_l, probs_l, rewards_l), (actions_r, probs_r, rewards_r), metadata
+            if games_remaining == 0:
+                metadata = (render_states, model_states, (score_l, score_r))
+                return states, (actions_l, probs_l, rewards_l), (actions_r, probs_r, rewards_r), metadata
+            else:
+                score_l, score_r = 0, 0
+                state = env.reset()

@@ -129,3 +129,30 @@ def plot_loss(path=None, show=False):
     if path:
         plt.savefig(path)
     plt.cla()
+
+
+def plot_score(path=None, show=False):
+    x = []
+    yl = []
+    yr = []
+
+    with open('analytics/scores.csv', 'r') as csvfile:
+        plots = csv.reader(csvfile, delimiter=',')
+        i = 0
+        for row in plots:
+            x.append(i)
+            yl.append(float(row[0]))
+            yr.append(float(row[1]))
+            i += 1
+
+    plt.plot(x, yl, label='Left Agent')
+    plt.plot(x, yr, label='Right Agent')
+    plt.xlabel('Episode')
+    plt.ylabel('Score')
+    plt.title('Agent Score By Episode')
+    plt.legend()
+    if show:
+        plt.show()
+    if path:
+        plt.savefig(path)
+    plt.cla()
