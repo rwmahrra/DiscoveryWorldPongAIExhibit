@@ -74,7 +74,7 @@ def view_weights(id, layer=0):
 
 def get_weight_image(model, neuron=0, layer=0, size=(Pong.HEIGHT // 2, Pong.WIDTH // 2)):
     weights = model.get_weights()[layer][:, neuron]
-    image = weights.reshape(Pong.HEIGHT // 2, Pong.WIDTH // 2)
+    image = weights.reshape(size)
     return image
 
 

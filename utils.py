@@ -105,19 +105,29 @@ def get_resume_index():
     return max
 
 
-def plot_loss(path=None, show=False):
+def plot_loss(path=None, show=False, include_left=True):
     x1 = []
     y1 = []
     x2 = []
     y2 = []
 
-    with open('./analytics/agent_r.csv', 'r') as csvfile:
-        plots = csv.reader(csvfile, delimiter=',')
-        i = 0
-        for row in plots:
-            x2.append(i)
-            y2.append(float(row[0]))
-            i += 1
+    if include_left:
+        with open('./analytics/agent_l.csv', 'r') as csvfile:
+            plots = csv.reader(csvfile, delimiter=',')
+            i = 0
+            for row in plots:
+                x1.append(i)
+                y1.append(float(row[0]))
+                i += 1
+
+        with open('./analytics/agent_r.csv', 'r') as csvfile:
+            plots = csv.reader(csvfile, delimiter=',')
+            i = 0
+            for row in plots:
+                x2.append(i)
+                y2.append(float(row[0]))
+                i += 1
+        plt.plot(x2, y2, label='Left Agent')
 
     plt.plot(x2, y2, label='Right Agent')
     plt.xlabel('Episode')

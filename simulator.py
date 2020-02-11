@@ -105,6 +105,7 @@ def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1):
         if done:
             games_remaining -= 1
             print('Score: %f - %f.' % (score_l, score_r))
+            utils.write(f'{score_l},{score_r}', f'analytics/scores.csv')
             if games_remaining == 0:
                 metadata = (render_states, model_states, (score_l, score_r))
                 return states, (actions_l, probs_l, rewards_l), (actions_r, probs_r, rewards_r), metadata
