@@ -34,7 +34,7 @@ def step(env, env_type, action_l=None, action_r=None, frames=10):
         raise NotImplementedError
 
 
-def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1):
+def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1, visualizer=None):
     env = None
     state_size = None
     games_remaining = batch
@@ -75,16 +75,19 @@ def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1):
     while True:
         render_states.append(state.astype(np.uint8))
         current_state = preprocess(state, env_type)
-        x = current_state - last_state
-        model_states.append(x.astype(np.uint8))
+        diff_state = current_state - last_state
+        model_states.append(diff_state.astype(np.uint8))
         last_state = current_state
 
         action_l, prob_l, action_r, prob_r = None, None, None, None
-        x = x.ravel()
+        x = diff_state.ravel()
         if left is not None: action_l, prob_l = left.act(x)
         if right is not None: action_r, prob_r = right.act(x)
 
         states.append(x)
+
+        if visualizer is not None:
+            visualizer.render_frame(diff_state)
 
         state, reward, done = step(env, env_type, action_l=action_l, action_r=action_r)
 
