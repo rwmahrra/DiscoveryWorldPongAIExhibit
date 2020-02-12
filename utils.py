@@ -119,16 +119,15 @@ def plot_loss(path=None, show=False, include_left=True):
                 x1.append(i)
                 y1.append(float(row[0]))
                 i += 1
+        plt.plot(x1, y1, label='Left Agent')
 
-        with open('./analytics/agent_r.csv', 'r') as csvfile:
-            plots = csv.reader(csvfile, delimiter=',')
-            i = 0
-            for row in plots:
-                x2.append(i)
-                y2.append(float(row[0]))
-                i += 1
-        plt.plot(x2, y2, label='Left Agent')
-
+    with open('./analytics/agent_r.csv', 'r') as csvfile:
+        plots = csv.reader(csvfile, delimiter=',')
+        i = 0
+        for row in plots:
+            x2.append(i)
+            y2.append(float(row[0]))
+            i += 1
     plt.plot(x2, y2, label='Right Agent')
     plt.xlabel('Episode')
     plt.ylabel('Loss')
