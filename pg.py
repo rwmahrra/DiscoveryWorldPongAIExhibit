@@ -1,6 +1,6 @@
 import os
-from utils import save_video, plot_loss, plot_score, write
 import simulator
+from utils import save_video, plot_loss, plot_score, write
 from player import PGAgent, BotPlayer
 from visualizer import get_weight_image
 
@@ -63,7 +63,7 @@ if __name__ == "__main__":
         if episode == 1 or episode % 50 == 0:
             save_video(render_states, f'./analytics/{episode}.mp4')
             if r_is_model: save_video(neuron_states, f'./analytics/{episode}_weights0.mp4', fps=60)
-            plot_loss(f'./analytics/plots/loss_{episode}.png')
+            plot_loss(f'./analytics/plots/loss_{episode}.png', include_left=False)
             plot_score(f'./analytics/plots/score_{episode}.png')
             if l_is_model: agent_l.save(f'./models/l/{episode}.h5')
             if r_is_model: agent_r.save(f'./models/r/{episode}.h5')
