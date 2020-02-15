@@ -12,7 +12,7 @@ FOR /F "tokens=*" %%g IN ('git rev-parse --abbrev-ref HEAD') do (SET BRANCH=%%g)
 FOR /F "tokens=*" %%g IN ('git config --get remote.origin.url') do (SET REMOTE=%%g)
 
 :: Temporarily hardcode github IP to work around DNS issues on cluster
-SET GITHUB_IP = 140.82.113.3
+SET GITHUB_IP = "140.82.113.3"
 
 :: Fill in run.sh template fields
 powershell -Command "(gc run.sh) -replace '{{BRANCH}}', '%TARGET%' | Out-File -encoding ASCII run.sh"
