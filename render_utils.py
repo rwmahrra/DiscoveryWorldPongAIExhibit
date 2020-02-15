@@ -36,23 +36,24 @@ def render_rescale(data, magnitude=2):
     return magnitude * data / scale
 
 
-def render_weights(canvas, l1_pos, l2_pos, w, threshold=0.2, values=None):
+def render_weights(canvas, l1_positions, l2_positions, w, threshold=0.2, values=None):
     # Find indices of top threshold% weight values
     render_cap = int(len(w) * threshold)
+    # Unravels the weights, create a new array of the sorted indices, and transforms the indices into 2d weight indices
+    # Then stacks up the array, squeezes out the extra dim, and cuts off everything after the max render cap
     to_render = np.dstack(np.unravel_index(np.argsort(-w.ravel()), w.shape)).squeeze()[:render_cap]
-    print(to_render.shape)
     for point in to_render:
-        o = point[1]
-        h = point[0]
-        o_pos = l2_pos[o]
-        h_pos = l1_pos[h]
-        weight = w[h][o]
+        l2 = point[1]  # layer 1 neuron index
+        l1 = point[0]  # layer 2 neuron index
+        l2_pos = l2_positions[l2]
+        l1_pos = l1_positions[l1]
+        weight = w[l1][l2]
         fill = WEIGHT_COLOR
         weight = abs(weight)
+        np.set_printoptions(threshold=np.inf)
         # Render activation if l1 activation values are supplied
         if values is not None:
-            value = values[h]
+            value = values[l1]
             if value >= ACTIVE_WEIGHT_THRESHOLD:
-                print(f'value: {value}')
                 fill = WEIGHT_COLOR_ACTIVE
-        canvas.create_line(*h_pos, *o_pos, width=weight, fill=fill)
+        canvas.create_line(*l1_pos, *l2_pos, width=weight, fill=fill)

@@ -74,7 +74,11 @@ def view_weights(id, layer=0):
 
 def get_weight_image(model, neuron=0, layer=0, size=(Pong.HEIGHT // 2, Pong.WIDTH // 2)):
     weights = model.get_weights()[layer][:, neuron]
-    image = weights.reshape(size)
+    # Normalize and scale weights to pixel values
+    weights /= np.max(weights)
+    weights += 1
+    weights *= 256
+    image = weights.reshape(size).astype(np.uint8)
     return image
 
 

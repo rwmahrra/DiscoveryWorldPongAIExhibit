@@ -72,6 +72,8 @@ def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1, visualizer=No
     score_r = 0
     last_state = np.zeros(state_shape)
     state = env.reset()
+    if visualizer is not None:
+        visualizer.base_render(preprocess(state, env_type))
     while True:
         render_states.append(state.astype(np.uint8))
         current_state = preprocess(state, env_type)
@@ -87,7 +89,7 @@ def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1, visualizer=No
         states.append(x)
 
         if visualizer is not None:
-            visualizer.render_frame(diff_state)
+            visualizer.render_frame(diff_state, current_state, prob_r)
 
         state, reward, done = step(env, env_type, action_l=action_l, action_r=action_r)
 

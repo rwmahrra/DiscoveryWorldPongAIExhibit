@@ -5,7 +5,7 @@ from player import PGAgent, BotPlayer
 from visualizer import get_weight_image
 
 GAME_BATCH = 10
-MODE = simulator.CUSTOM
+MODE = simulator.ATARI
 
 if __name__ == "__main__":
     # Ensure directory safety
@@ -15,7 +15,7 @@ if __name__ == "__main__":
     os.makedirs("analytics/plots", exist_ok=True)
 
     # Initialize for checks & scope
-    start_index = None
+    start_index = 10000
     agent_l = None
     state_size = None
     state_shape = None
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     # Optional checkpoint loading
     if start_index is not None:
         episode = start_index
-        if agent_l is not None: agent_l.load(f'./models/l/{start_index}.h5')
+        if l_is_model: agent_l.load(f'./models/l/{start_index}.h5')
         agent_r.load(f'./models/r/{start_index}.h5')
 
     # Store neuron images for fun
