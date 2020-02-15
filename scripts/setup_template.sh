@@ -11,6 +11,7 @@ rm -rf {{ID}}
 
 # Pull down code
 git clone {{REMOTE}} {{ID}}
+bash
 cd {{ID}} || exit
 git checkout {{BRANCH}}
 
