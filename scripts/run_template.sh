@@ -22,7 +22,7 @@
 # You _must_ specify the partition. Rosie's default is the 'teaching'
 # partition for interactive nodes. You must use the 'batch' partition
 # to submit jobs.
-#SBATCH --partition=batch
+#SBATCH --partition=teaching
 # The number of GPUs to request
 #SBATCH --gpus=1
 # The number of CPUs to request per GPU
