@@ -6,4 +6,3 @@ models
 model_archive
 scripts/temp.sh
 analytics
-run.sh
