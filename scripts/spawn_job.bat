@@ -28,6 +28,7 @@ git push --set-upstream --force origin %TARGET%
 SET DATETIME=%date:~10,4%%date:~4,2%%date:~7,2%_%time:~1,2%%time:~3,2%%time:~6,2%
 SET ID=%TARGET%_%DATETIME%
 
+echo GITHUB_IP
 :: Copy and fill in template script
 copy scripts\setup_template.sh scripts\temp.sh
 powershell -Command "(gc scripts\temp.sh) -replace '{{BRANCH}}', '%TARGET%' | Out-File -encoding ASCII scripts\temp.sh"
