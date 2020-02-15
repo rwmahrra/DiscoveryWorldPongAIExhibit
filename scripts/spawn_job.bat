@@ -1,5 +1,5 @@
 @title Autojob v1.0
-::@echo off
+@echo off
 
 :: Automatically retrieves code from source control and executes via SLURM
 :: Written by Xander Neuwirth, January 2020
