@@ -5,6 +5,7 @@ from player import BotPlayer
 
 CUSTOM = 0
 ATARI = 1
+HIT_PRACTICE = 2
 CUSTOM_ACTIONS = ["UP", "DOWN"]
 ATARI_ACTIONS = [2, 3]  # Control indices for "UP", "DOWN"
 ATARI_ACTION_SIZE = 2
@@ -16,7 +17,7 @@ ATARI_STATE_SIZE = 80 * 80
 
 
 def preprocess(state, env_type):
-    if env_type == CUSTOM:
+    if env_type == CUSTOM or env_type == HIT_PRACTICE:
         return utils.preprocess_custom(state)
     elif env_type == ATARI:
         return utils.preprocess_gym(state)
@@ -27,6 +28,8 @@ def preprocess(state, env_type):
 def step(env, env_type, action_l=None, action_r=None, frames=10):
     if env_type == CUSTOM:
         return env.step(CUSTOM_ACTIONS[action_l], CUSTOM_ACTIONS[action_r], frames=frames)
+    if env_type == HIT_PRACTICE:
+        return env.step(None, CUSTOM_ACTIONS[action_r], frames=frames)
     elif env_type == ATARI:
         state, reward, done, _unused = env.step(ATARI_ACTIONS[action_r])
         return state, (0, reward), done
@@ -46,7 +49,12 @@ def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1, visualizer=No
         state_shape = CUSTOM_STATE_SHAPE
         if type(left) == BotPlayer: left.attach_env(env)
         if type(right) == BotPlayer: right.attach_env(env)
-
+    elif env_type == HIT_PRACTICE:
+        from pong import Pong
+        env = Pong(hit_practice=True)
+        state_size = CUSTOM_STATE_SIZE
+        state_shape = CUSTOM_STATE_SHAPE
+        if type(right) == BotPlayer: right.attach_env(env)
     elif env_type == ATARI:
         import gym
         env = gym.make("Pong-v0")
@@ -90,7 +98,6 @@ def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1, visualizer=No
 
         if visualizer is not None:
             visualizer.render_frame(diff_state, current_state, prob_r)
-
         state, reward, done = step(env, env_type, action_l=action_l, action_r=action_r)
 
         reward_l = float(reward[0])

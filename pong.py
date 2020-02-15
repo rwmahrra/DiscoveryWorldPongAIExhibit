@@ -4,7 +4,7 @@ import math
 import keyboard
 from utils import normalize_states
 import matplotlib.pyplot as plt
-from random import choice, randint
+from random import choice, randint, random
 
 
 class Pong:
@@ -82,23 +82,39 @@ class Pong:
         SPEED = 1
         BOUNCE_ANGLES = [0, 60, 45, 30, -30, -45, -60]
 
-        def __init__(self):
-            self.x = math.floor(Pong.WIDTH / 2)
-            self.y = math.floor(Pong.HEIGHT / 2)
+        def spawn_hit_practice(self):
+            self.x = 5
+            self.y = randint(0, Pong.HEIGHT)
             self.speed = self.SPEED * Pong.SPEEDUP
-            self.velocity = (0, 0)
+            self.velocity = ((random() * 1.5 + 0.1), (random() * 3) - 1.5)
             self.w = self.DIAMETER
-            self.right = None
+            self.right = True
             self.h = self.DIAMETER
 
+        def __init__(self, hit_practice=False):
+            self.hit_practice = hit_practice
+            if self.hit_practice:
+                self.spawn_hit_practice()
+            else:
+                self.x = math.floor(Pong.WIDTH / 2)
+                self.y = math.floor(Pong.HEIGHT / 2)
+                self.speed = self.SPEED * Pong.SPEEDUP
+                self.velocity = (0, 0)
+                self.w = self.DIAMETER
+                self.right = None
+                self.h = self.DIAMETER
+
         def reset(self):
-            self.right = None
-            self.x = math.floor(Pong.WIDTH / 2)
-            self.y = math.floor(Pong.HEIGHT / 2)
-            self.speed = self.SPEED * Pong.SPEEDUP
-            self.velocity = (0, 0)
-            self.w = self.DIAMETER
-            self.h = self.DIAMETER
+            if self.hit_practice:
+                self.spawn_hit_practice()
+            else:
+                self.right = None
+                self.x = math.floor(Pong.WIDTH / 2)
+                self.y = math.floor(Pong.HEIGHT / 2)
+                self.speed = self.SPEED * Pong.SPEEDUP
+                self.velocity = (0, 0)
+                self.w = self.DIAMETER
+                self.h = self.DIAMETER
 
         def get_vector(self, deg, scale):
             rad = math.pi * deg / 180
@@ -143,20 +159,20 @@ class Pong:
                 self.y = 0
                 self.bounce(y=True)
 
-    def __init__(self):
+    def __init__(self, hit_practice=False):
         # Holds last raw screen pixels for rendering
         self.last_screen = None
-
+        self.hit_practice = hit_practice
         self.score_left = 0
         self.score_right = 0
-        self.left = Pong.Paddle("left")
+        self.left = Pong.Paddle("left") if not self.hit_practice else None
         self.right = Pong.Paddle("right")
-        self.ball = Pong.Ball()
+        self.ball = Pong.Ball(hit_practice=True)
 
     def reset(self):
         self.score_left = 0
         self.score_right = 0
-        self.left.reset()
+        if not self.hit_practice: self.left.reset()
         self.right.reset()
         self.ball.reset()
         screen = self.render()
@@ -190,7 +206,42 @@ class Pong:
                 return True, (ball.y - paddle.y) / (paddle.h / 2)
         return False, 0
 
+    def step_hit_practice(self, right_action, frames=3):
+        reward_l = 0
+        reward_r = 0
+        done = False
+        for i in range(frames):
+            if not done:
+                self.right.handle_action(right_action)
+
+                collide_right, pos = self.check_collision(self.ball, self.right)
+                if collide_right and self.ball.right:
+                    self.ball.bounce_angle(pos)
+                    self.ball.right = False
+
+                if self.ball.x < 0:
+                    self.score_right += 1
+                    reward_l -= 1.0
+                    reward_r += 1.0
+                    self.ball.reset()
+                    self.right.reset()
+                elif self.ball.x > Pong.WIDTH:
+                    self.score_left += 1
+                    reward_l += 1.0
+                    reward_r -= 1.0
+                    self.ball.reset()
+                    self.right.reset()
+                self.ball.update()
+                done = False
+                if self.score_right >= Pong.MAX_SCORE or self.score_left >= Pong.MAX_SCORE:
+                    done = True
+        screen = self.render()
+        self.last_screen = screen
+        return screen, (reward_l, reward_r), done
+
     def step(self, left_action, right_action, frames=3):
+        if self.hit_practice:
+            return self.step_hit_practice(right_action, frames=frames)
         reward_l = 0
         reward_r = 0
         done = False
@@ -228,6 +279,7 @@ class Pong:
                     done = True
 
         screen = self.render()
+        self.last_screen = screen
         return screen, (reward_l, reward_r), done
 
     def show(self, scale=1,  duration=1):
@@ -249,9 +301,9 @@ class Pong:
         # Draw middle grid lines
         #self.draw_rect(screen, 0, int(Pong.HEIGHT/2), int(Pong.WIDTH), 1, 255)
         #self.draw_rect(screen, int(Pong.WIDTH/2), 0, 1, int(Pong.HEIGHT), 255)
-
-        self.draw_rect(screen, int(self.left.x - int(self.left.w / 2)), int(self.left.y - int(self.left.h / 2)),
-                       self.left.w, self.left.h, 255)
+        if not self.hit_practice:
+            self.draw_rect(screen, int(self.left.x - int(self.left.w / 2)), int(self.left.y - int(self.left.h / 2)),
+                           self.left.w, self.left.h, 255)
         self.draw_rect(screen, int(self.right.x - int(self.right.w / 2)), int(self.right.y - int(self.right.h / 2)),
                        self.right.w, self.right.h, 255)
         self.draw_rect(screen, int(self.ball.x - int(self.ball.w / 2)), int(self.ball.y - int(self.ball.h / 2)),
