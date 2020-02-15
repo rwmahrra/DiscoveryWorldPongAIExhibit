@@ -15,7 +15,7 @@ FOR /F "tokens=*" %%g IN ('git config --get remote.origin.url') do (SET REMOTE=%
 SET GITHUB_IP=140.82.113.3
 
 :: Fill in run.sh template fields
-powershell -Command "(gc run.sh) -replace '{{BRANCH}}', '%TARGET%' | Out-File -encoding ASCII run.sh"
+powershell -Command "(gc scripts\run_template.sh) -replace '{{BRANCH}}', '%TARGET%' | Out-File -encoding ASCII run.sh"
 
 :: Check in code to target branch
 git branch -d %TARGET%
