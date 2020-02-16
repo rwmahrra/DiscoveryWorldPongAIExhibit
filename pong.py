@@ -86,7 +86,7 @@ class Pong:
             self.x = 5
             self.y = randint(0, Pong.HEIGHT)
             self.speed = self.SPEED * Pong.SPEEDUP
-            self.velocity = ((random() * 1.5 + 0.1), (random() * 3) - 1.5)
+            self.velocity = ((random() * 0.5 + 0.1), (random() * 2) - 1)
             self.w = self.DIAMETER
             self.right = True
             self.h = self.DIAMETER
@@ -167,7 +167,7 @@ class Pong:
         self.score_right = 0
         self.left = Pong.Paddle("left") if not self.hit_practice else None
         self.right = Pong.Paddle("right")
-        self.ball = Pong.Ball(hit_practice=True)
+        self.ball = Pong.Ball(hit_practice=hit_practice)
 
     def reset(self):
         self.score_left = 0
