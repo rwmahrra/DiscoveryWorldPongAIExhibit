@@ -58,12 +58,12 @@ class BotPlayer:
 
 
 class PGAgent:
-    def __init__(self, state_size, action_size, name="PGAgent"):
+    def __init__(self, state_size, action_size, name="PGAgent", learning_rate=0.001):
         self.name = name
         self.state_size = state_size
         self.action_size = action_size
         self.gamma = 0.99
-        self.learning_rate = 0.001
+        self.learning_rate = learning_rate
         self.states = []
         self.gradients = []
         self.rewards = []

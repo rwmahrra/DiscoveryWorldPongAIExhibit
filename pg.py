@@ -6,6 +6,7 @@ from visualizer import get_weight_image
 
 GAME_BATCH = 10
 MODE = simulator.CUSTOM
+LEARNING_RATE = 0.001
 
 if __name__ == "__main__":
     # Ensure directory safety
@@ -33,7 +34,7 @@ if __name__ == "__main__":
         state_shape = simulator.ATARI_STATE_SHAPE
 
     # Init agent
-    agent_r = PGAgent(state_size, action_size, "agent_r")
+    agent_r = PGAgent(state_size, action_size, name="agent_r", learning_rate=LEARNING_RATE)
 
     # Type checks for convenience later
     r_is_model = type(agent_r) == PGAgent
@@ -62,10 +63,10 @@ if __name__ == "__main__":
         neuron_states.append(get_weight_image(agent_r.model, size=state_shape))
         if episode == 1 or episode % 50 == 0:
             save_video(render_states, f'./analytics/{episode}.mp4')
-            if r_is_model: save_video(neuron_states, f'./analytics/{episode}_weights0.mp4', fps=60)
             plot_loss(f'./analytics/plots/loss_{episode}.png', include_left=False)
             plot_score(f'./analytics/plots/score_{episode}.png')
             if l_is_model: agent_l.save(f'./models/l/{episode}.h5')
             if r_is_model: agent_r.save(f'./models/r/{episode}.h5')
         if episode == 10000:
+            if r_is_model: save_video(neuron_states, f'./analytics/{episode}_weights0.mp4', fps=60)
             exit(0)
