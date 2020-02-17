@@ -75,6 +75,7 @@ def render_weights(canvas, l1_positions, l2_positions, w, significant=None, need
     should_render = np.ones(w.shape, dtype=bool)
     if needs_update is not None: should_render = np.logical_and(should_render, needs_update)
     if significant is not None: should_render = np.logical_and(should_render, significant)
+    if activations is not None: should_render = np.logical_and(should_render, activations)
     should_render = np.argwhere(should_render)
 
     for l1, l2 in should_render:
