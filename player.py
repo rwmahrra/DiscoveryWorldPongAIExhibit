@@ -24,9 +24,10 @@ class RandomPlayer:
 
 
 class BotPlayer:
-    def __init__(self, env=None, left=False, right=False):
+    def __init__(self, env=None, left=False, right=False, always_follow=False):
         self.left = left
         self.right = right
+        self.always_follow = always_follow
         if env is not None:
             self.paddle, self.ball = env.get_bot_data(left=left, right=right)
 
@@ -38,6 +39,13 @@ class BotPlayer:
 
     # Takes state to preserve interface
     def move(self):
+        if self.always_follow:
+            if self.ball.y > self.paddle.y:
+                return 1
+            elif self.ball.y < self.paddle.y:
+                return 0
+            else:
+                return 0 if randint(0, 1) == 1 else 1
         if self.left and not self.ball.right or self.right and self.ball.right:
             if self.ball.y > self.paddle.y:
                 return 1

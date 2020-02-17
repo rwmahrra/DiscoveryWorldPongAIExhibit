@@ -5,7 +5,7 @@ from player import PGAgent, BotPlayer
 from visualizer import get_weight_image
 
 GAME_BATCH = 10
-MODE = simulator.HIT_PRACTICE
+MODE = simulator.CUSTOM
 
 if __name__ == "__main__":
     # Ensure directory safety
@@ -26,7 +26,7 @@ if __name__ == "__main__":
         action_size = simulator.CUSTOM_ACTION_SIZE
         state_size = simulator.CUSTOM_STATE_SIZE
         state_shape = simulator.CUSTOM_STATE_SHAPE
-        agent_l = BotPlayer(left=True) if MODE == simulator.CUSTOM else None # Default to bot, override with model if needed
+        agent_l = BotPlayer(left=True, always_follow=True) if MODE == simulator.CUSTOM else None # Default to bot, override with model if needed
     if MODE == simulator.ATARI:
         action_size = simulator.ATARI_ACTION_SIZE
         state_size = simulator.ATARI_STATE_SIZE
