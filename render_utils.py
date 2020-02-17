@@ -1,30 +1,36 @@
 import numpy as np
-import math
+import utils
 
 TITLE_FONT = ("Helvetica", "16")
 WEIGHT_COLOR = "#666666"
 WEIGHT_COLOR_ACTIVE = "#BB6666"
+NEURON_COLOR = "#000000"
+NEURON_COLOR_ACTIVE = "#DD2222"
 ACTIVE_WEIGHT_THRESHOLD = 1
 
 
-def create_circle(x, y, r, ctx): #center coordinates, radius
+def create_circle(x, y, r, ctx, color=NEURON_COLOR): #center coordinates, radius
     x0 = x - r
     y0 = y - r
     x1 = x + r
     y1 = y + r
-    return ctx.create_oval(x0, y0, x1, y1)
+    return ctx.create_oval(x0, y0, x1, y1, fill=color)
 
 
-def render_layer(canvas, neurons, top_y, bottom_y, x, neuron_size, labels=None):
+def render_layer(canvas, neurons, top_y, bottom_y, x, neuron_size, activations=None, labels=None):
     # Scale and normalize biases around 1 to represent useful node scale factors (ranging from ~0.3 - ~1.7)
     neurons *= 10
     neurons += 1
     coordinates = []
     padding = ((bottom_y - top_y) - (len(neurons) * neuron_size)) / (len(neurons) + 1)
     for i in range(len(neurons)):
+        fill = NEURON_COLOR
+        if activations is not None:
+            if (activations[i]):
+                fill = NEURON_COLOR_ACTIVE
         b = neurons[i]
         y = top_y + (i * neuron_size) + ((i+1) * padding) + (neuron_size / 2)
-        create_circle(x, y, (neuron_size / 2) * b, canvas)
+        create_circle(x, y, (neuron_size / 2) * b, canvas, color=fill)
         if labels:
             canvas.create_text(x+50, y, text=labels[i], font=TITLE_FONT)
         coordinates.append((x, y))
@@ -36,15 +42,42 @@ def render_rescale(data, magnitude=2):
     return magnitude * data / scale
 
 
-def render_weights(canvas, l1_positions, l2_positions, w, threshold=0.2, values=None):
+# Simple util for returning bool array of active neurons
+def is_firing(values, threshold=0.2):
+    return values >= threshold
+
+
+# Given weights and preceding layer firing booleans, returns array of booleans indicating weight activity
+def is_weight_active(w, l1):
+    w_active = np.zeros_like(w)
+    for l1_index in range(len(l1)):
+        if l1[l1_index]: w_active[l1_index] = 1
+    return w_active.astype(np.bool)
+
+
+# Return bool array of "significant" weights given weight strength
+def is_significant(w, threshold=0.2):
     # Find indices of top threshold% weight values
     render_cap = int(len(w) * threshold)
-    # Unravels the weights, create a new array of the sorted indices, and transforms the indices into 2d weight indices
+
+    # Unravels the weights, create a new array of the top n indices, and transforms the indices into 2d weight indices
     # Then stacks up the array, squeezes out the extra dim, and cuts off everything after the max render cap
-    to_render = np.dstack(np.unravel_index(np.argsort(-w.ravel()), w.shape)).squeeze()[:render_cap]
-    for point in to_render:
-        l2 = point[1]  # layer 1 neuron index
-        l1 = point[0]  # layer 2 neuron index
+    significant = np.dstack(np.unravel_index(np.argpartition(w.ravel(), -render_cap)[-render_cap:], w.shape)).squeeze()[:render_cap]
+
+    significant_w = np.zeros_like(w)
+    for l1, l2 in significant:
+        significant_w[l1, l2] = 1
+    return significant_w.astype(np.bool)
+
+
+def render_weights(canvas, l1_positions, l2_positions, w, significant=None, needs_update=None, activations=None):
+    # Set up filtering
+    should_render = np.ones(w.shape, dtype=bool)
+    if needs_update is not None: should_render = np.logical_and(should_render, needs_update)
+    if significant is not None: should_render = np.logical_and(should_render, significant)
+    should_render = np.argwhere(should_render)
+
+    for l1, l2 in should_render:
         l2_pos = l2_positions[l2]
         l1_pos = l1_positions[l1]
         weight = w[l1][l2]
@@ -52,8 +85,7 @@ def render_weights(canvas, l1_positions, l2_positions, w, threshold=0.2, values=
         weight = abs(weight)
         np.set_printoptions(threshold=np.inf)
         # Render activation if l1 activation values are supplied
-        if values is not None:
-            value = values[l1]
-            if value >= ACTIVE_WEIGHT_THRESHOLD:
-                fill = WEIGHT_COLOR_ACTIVE
+        if activations is not None:
+            active = activations[l1, l2]
+            if active: fill = WEIGHT_COLOR_ACTIVE
         canvas.create_line(*l1_pos, *l2_pos, width=weight, fill=fill)

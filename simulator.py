@@ -82,13 +82,13 @@ def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1, visualizer=No
     state = env.reset()
     if visualizer is not None:
         visualizer.base_render(preprocess(state, env_type))
+    i = 0
     while True:
         render_states.append(state.astype(np.uint8))
         current_state = preprocess(state, env_type)
         diff_state = current_state - last_state
         model_states.append(diff_state.astype(np.uint8))
         last_state = current_state
-
         action_l, prob_l, action_r, prob_r = None, None, None, None
         x = diff_state.ravel()
         if left is not None: action_l, prob_l = left.act(x)
@@ -96,8 +96,10 @@ def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1, visualizer=No
 
         states.append(x)
 
-        if visualizer is not None:
+        if visualizer is not None and i % 2 == 0:
+            utils.Timer.start("vis")
             visualizer.render_frame(diff_state, current_state, prob_r)
+            utils.Timer.stop("vis")
         state, reward, done = step(env, env_type, action_l=action_l, action_r=action_r)
 
         reward_l = float(reward[0])
@@ -124,3 +126,4 @@ def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1, visualizer=No
             else:
                 score_l, score_r = 0, 0
                 state = env.reset()
+        i += 1
