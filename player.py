@@ -58,7 +58,7 @@ class BotPlayer:
 
 
 class PGAgent:
-    def __init__(self, state_size, action_size, name="PGAgent", learning_rate=0.001):
+    def __init__(self, state_size, action_size, name="PGAgent", learning_rate=0.001, structure=(200,)):
         self.name = name
         self.state_size = state_size
         self.action_size = action_size
@@ -68,13 +68,16 @@ class PGAgent:
         self.gradients = []
         self.rewards = []
         self.probs = []
+        self.structure = structure
         self.model = self._build_model()
         self.model.summary()
 
     def _build_model(self):
         model = Sequential()
-        model.add(Dense(200, activation='relu', init='he_uniform', input_shape=(self.state_size,)))
-        model.add(Dense(100, activation='relu', init='he_uniform'))
+        model.add(Dense(self.structure[0], activation='relu', init='he_uniform', input_shape=(self.state_size,)))
+        if len(self.structure) > 1:
+            for layer in self.structure[1:]:
+                model.add(Dense(layer, activation='relu', init='he_uniform'))
         model.add(Dense(self.action_size, activation='softmax'))
         opt = Adam(lr=self.learning_rate)
         model.compile(loss='categorical_crossentropy', optimizer=opt)

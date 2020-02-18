@@ -7,6 +7,8 @@ from visualizer import get_weight_image
 GAME_BATCH = 10
 MODE = simulator.CUSTOM
 LEARNING_RATE = 0.001
+DENSE_STRUCTURE = (200,)
+ALWAYS_FOLLOW = True
 
 if __name__ == "__main__":
     # Ensure directory safety
@@ -27,14 +29,14 @@ if __name__ == "__main__":
         action_size = simulator.CUSTOM_ACTION_SIZE
         state_size = simulator.CUSTOM_STATE_SIZE
         state_shape = simulator.CUSTOM_STATE_SHAPE
-        agent_l = BotPlayer(left=True, always_follow=True) if MODE == simulator.CUSTOM else None # Default to bot, override with model if needed
+        agent_l = BotPlayer(left=True, always_follow=ALWAYS_FOLLOW) if MODE == simulator.CUSTOM else None # Default to bot, override with model if needed
     if MODE == simulator.ATARI:
         action_size = simulator.ATARI_ACTION_SIZE
         state_size = simulator.ATARI_STATE_SIZE
         state_shape = simulator.ATARI_STATE_SHAPE
 
     # Init agent
-    agent_r = PGAgent(state_size, action_size, name="agent_r", learning_rate=LEARNING_RATE)
+    agent_r = PGAgent(state_size, action_size, name="agent_r", learning_rate=LEARNING_RATE, structure=DENSE_STRUCTURE)
 
     # Type checks for convenience later
     r_is_model = type(agent_r) == PGAgent
