@@ -8,7 +8,9 @@ GAME_BATCH = 10
 MODE = simulator.CUSTOM
 LEARNING_RATE = 0.001
 DENSE_STRUCTURE = (200,)
-ALWAYS_FOLLOW = True
+ALWAYS_FOLLOW = False
+BALL_MARKER_H = True
+BALL_MARKER_V = True
 
 if __name__ == "__main__":
     # Ensure directory safety
@@ -55,7 +57,8 @@ if __name__ == "__main__":
     # Train loop
     while True:
         episode += 1
-        states, left, right, meta = simulator.simulate_game(MODE, left=agent_l, right=agent_r, batch=GAME_BATCH)
+        states, left, right, meta = simulator.simulate_game(MODE, left=agent_l, right=agent_r, batch=GAME_BATCH,
+                                                            marker_h=BALL_MARKER_H, marker_v=BALL_MARKER_V)
         render_states, model_states, (score_l, score_r) = meta
         actions, probs, rewards = right
 

@@ -37,14 +37,14 @@ def step(env, env_type, action_l=None, action_r=None, frames=10):
         raise NotImplementedError
 
 
-def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1, visualizer=None):
+def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1, visualizer=None, marker_h=False, marker_v=False):
     env = None
     state_size = None
     games_remaining = batch
 
     if env_type == CUSTOM:
         from pong import Pong
-        env = Pong()
+        env = Pong(marker_h=marker_h, marker_v=marker_v)
         state_size = CUSTOM_STATE_SIZE
         state_shape = CUSTOM_STATE_SHAPE
         if type(left) == BotPlayer: left.attach_env(env)

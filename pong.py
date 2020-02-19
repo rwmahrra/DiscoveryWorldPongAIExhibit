@@ -15,6 +15,7 @@ class Pong:
     SPEEDUP = 1
     ACTIONS = ["UP", "DOWN", "NONE"]
     GRACE_PADDLE = 10
+    BALL_MARKER_SIZE = 4
 
     @staticmethod
     def read_key(up, down):
@@ -159,11 +160,13 @@ class Pong:
                 self.y = 0
                 self.bounce(y=True)
 
-    def __init__(self, hit_practice=False):
+    def __init__(self, hit_practice=False, marker_h=False, marker_v=False):
         # Holds last raw screen pixels for rendering
         self.last_screen = None
         self.hit_practice = hit_practice
         self.score_left = 0
+        self.marker_v = marker_v
+        self.marker_h = marker_h
         self.score_right = 0
         self.left = Pong.Paddle("left") if not self.hit_practice else None
         self.right = Pong.Paddle("right")
@@ -308,6 +311,15 @@ class Pong:
                        self.right.w, self.right.h, 255)
         self.draw_rect(screen, int(self.ball.x - int(self.ball.w / 2)), int(self.ball.y - int(self.ball.h / 2)),
                        self.ball.w, self.ball.h, 255)
+        # Draw pixel markers on top and left aligned with ball
+        if self.marker_h:
+            marker_x = max(min(int(self.ball.x), Pong.WIDTH-1), 0)
+            self.draw_rect(screen, int(marker_x - int(Pong.BALL_MARKER_SIZE / 2)), 0,
+                           Pong.BALL_MARKER_SIZE, Pong.BALL_MARKER_SIZE, 255)
+        if self.marker_v:
+            marker_y = min(max(int(self.ball.y), 0), Pong.HEIGHT - 1)
+            self.draw_rect(screen, 0, int(marker_y - int(Pong.BALL_MARKER_SIZE / 2)),
+                           Pong.BALL_MARKER_SIZE, Pong.BALL_MARKER_SIZE, 255)
         return screen
 
 
