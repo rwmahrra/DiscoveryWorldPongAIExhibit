@@ -14,7 +14,10 @@ class HumanPlayer:
         self.up = up
         self.down = down
 
-    def move(self, state):
+    def act(self, state):
+        return self.move(), 1
+
+    def move(self):
         return Pong.read_key(self.up, self.down)
 
 
