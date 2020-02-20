@@ -20,11 +20,11 @@ class Pong:
     @staticmethod
     def read_key(up, down):
         if keyboard.is_pressed(up):
-            return "UP"
+            return 0
         elif keyboard.is_pressed(down):
-            return "DOWN"
+            return 1
         else:
-            return "NONE"
+            return 2
 
     @staticmethod
     def random_action():
@@ -250,6 +250,7 @@ class Pong:
         done = False
         for i in range(frames):
             if not done:
+                self.show(4)
                 self.left.handle_action(left_action)
                 self.right.handle_action(right_action)
 
@@ -288,7 +289,7 @@ class Pong:
     def show(self, scale=1,  duration=1):
         l, r = self.get_score()
         to_render = cv2.resize(self.last_screen, (int(Pong.WIDTH * scale), int(Pong.HEIGHT * scale)))
-        cv2.imshow(f"Pong", to_render)
+        cv2.imshow(f"Pong", cv2.cvtColor(to_render, cv2.COLOR_RGB2BGR))
         cv2.waitKey(duration)
 
     def get_screen(self):

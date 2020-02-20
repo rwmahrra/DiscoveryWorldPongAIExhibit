@@ -1,7 +1,7 @@
 import os
 import simulator
 from utils import save_video, plot_loss, plot_score, write
-from player import PGAgent, BotPlayer
+from player import PGAgent, BotPlayer, HumanPlayer
 from visualizer import get_weight_image
 
 GAME_BATCH = 10
@@ -20,7 +20,7 @@ if __name__ == "__main__":
     os.makedirs("analytics/plots", exist_ok=True)
 
     # Initialize for checks & scope
-    start_index = None
+    start_index = 2000
     agent_l = None
     state_size = None
     state_shape = None
@@ -31,7 +31,8 @@ if __name__ == "__main__":
         action_size = simulator.CUSTOM_ACTION_SIZE
         state_size = simulator.CUSTOM_STATE_SIZE
         state_shape = simulator.CUSTOM_STATE_SHAPE
-        agent_l = BotPlayer(left=True, always_follow=ALWAYS_FOLLOW) if MODE == simulator.CUSTOM else None # Default to bot, override with model if needed
+        #agent_l = BotPlayer(left=True, always_follow=ALWAYS_FOLLOW) if MODE == simulator.CUSTOM else None # Default to bot, override with model if needed
+        agent_l = HumanPlayer(up='w', down='s')
     if MODE == simulator.ATARI:
         action_size = simulator.ATARI_ACTION_SIZE
         state_size = simulator.ATARI_STATE_SIZE

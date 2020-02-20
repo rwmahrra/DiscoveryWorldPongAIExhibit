@@ -6,7 +6,7 @@ from player import BotPlayer
 CUSTOM = 0
 ATARI = 1
 HIT_PRACTICE = 2
-CUSTOM_ACTIONS = ["UP", "DOWN"]
+CUSTOM_ACTIONS = ["UP", "DOWN", "NONE"]
 ATARI_ACTIONS = [2, 3]  # Control indices for "UP", "DOWN"
 ATARI_ACTION_SIZE = 2
 CUSTOM_ACTION_SIZE = 2
@@ -93,7 +93,6 @@ def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1, visualizer=No
         x = diff_state.ravel()
         if left is not None: action_l, prob_l = left.act(x)
         if right is not None: action_r, prob_r = right.act(x)
-
         states.append(x)
 
         if visualizer is not None and i % 2 == 0:
