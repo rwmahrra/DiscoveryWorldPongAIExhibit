@@ -122,6 +122,7 @@ class PGAgent:
         write(str(result), f'analytics/{self.name}.csv')
 
     def load(self, name):
+        print(f"Loading {name}")
         self.model.load_weights(name)
 
     def save(self, name):

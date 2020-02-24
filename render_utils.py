@@ -17,7 +17,14 @@ def create_circle(x, y, r, ctx, color=NEURON_COLOR): #center coordinates, radius
     return ctx.create_oval(x0, y0, x1, y1, fill=color)
 
 
-def render_layer(canvas, neurons, top_y, bottom_y, x, neuron_size, activations=None, labels=None):
+def get_intensity(val):
+    val = hex(max(int(val * 255), 0x22))
+    color = f"#{val[2:]}2222"
+    print(color)
+    return color
+
+
+def render_layer(canvas, neurons, top_y, bottom_y, x, neuron_size, activations=None, labels=None, activation_intensities=None):
     # Scale and normalize biases around 1 to represent useful node scale factors (ranging from ~0.3 - ~1.7)
     neurons *= 10
     neurons += 1
@@ -25,8 +32,10 @@ def render_layer(canvas, neurons, top_y, bottom_y, x, neuron_size, activations=N
     padding = ((bottom_y - top_y) - (len(neurons) * neuron_size)) / (len(neurons) + 1)
     for i in range(len(neurons)):
         fill = NEURON_COLOR
+        if activation_intensities is not None:
+            fill = get_intensity(activation_intensities[i])
         if activations is not None:
-            if (activations[i]):
+            if activations[i]:
                 fill = NEURON_COLOR_ACTIVE
         b = neurons[i]
         y = top_y + (i * neuron_size) + ((i+1) * padding) + (neuron_size / 2)

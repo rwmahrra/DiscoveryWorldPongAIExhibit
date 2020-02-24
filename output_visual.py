@@ -38,7 +38,7 @@ class RealtimeVisualizer:
         # Render game frame
         frame *= 256
         pixel_dims = frame.shape
-        render_frame = cv2.resize(frame, (frame.shape[0] * self.IMAGE_UPSCALE, frame.shape[1] * self.IMAGE_UPSCALE))
+        render_frame = cv2.resize(frame, (frame.shape[1] * self.IMAGE_UPSCALE, frame.shape[0] * self.IMAGE_UPSCALE))
         img = ImageTk.PhotoImage(image=Image.fromarray(render_frame))
         # Save rendering id of image to later inspect attributes
         self.img_id = self.base_ctx.create_image(self.IMAGE_X, self.canvas_height / 2, anchor="c", image=img)
@@ -47,7 +47,7 @@ class RealtimeVisualizer:
         img_coords = base_ctx.coords(self.img_id)
         img_size = (img.width(), img.height())
         top_corner = (np.subtract(img_coords, np.divide(img_size, 2)))
-        pixel_step = img_size[0] / pixel_dims[0]
+        pixel_step = img_size[0] / pixel_dims[1]
 
         # Calculate positions of individual pixels, for use as a "layer" to connect edges
         self.pixel_pos = []
@@ -101,27 +101,19 @@ class RealtimeVisualizer:
 
 
     def render_frame(self, state_frame, render_frame, prob):
-        utils.Timer.start("frame_total")
-        utils.Timer.start("intro")
         # Update rendered probabilities
-        prob *= 100
-        self.up_prob.set(f'{"{0:.2f}".format(prob[0])}%')
-        self.down_prob.set(f'{"{0:.2f}".format(prob[1])}%')
-        # Fake output activations
-        prob = np.asarray([1, 0]) if prob[0] > prob[1] else np.asarray([0, 1])
-        utils.Timer.start("intro")
+        percent_prob = prob * 100
+        self.up_prob.set(f'{"{0:.2f}".format(percent_prob[0])}%')
+        self.down_prob.set(f'{"{0:.2f}".format(percent_prob[1])}%')
 
-        utils.Timer.start("frame")
         # Render game frame
         render_frame *= 256
-        render_frame = cv2.resize(render_frame, (render_frame.shape[0] * self.IMAGE_UPSCALE, render_frame.shape[1] * self.IMAGE_UPSCALE))
+        render_frame = cv2.resize(render_frame, (render_frame.shape[1] * self.IMAGE_UPSCALE, render_frame.shape[0] * self.IMAGE_UPSCALE))
         img = ImageTk.PhotoImage(image=Image.fromarray(render_frame))
         #self.base_ctx.itemconfig(self.img_id, image=img)
         self.base_ctx.create_image(self.IMAGE_X, self.canvas_height / 2, anchor="c", image=img)
         X = state_frame.reshape([1, state_frame.shape[0] * state_frame.shape[1]])
-        utils.Timer.stop("frame")
 
-        utils.Timer.start("img_weights")
         # Render image weights
         image_activations = is_firing(state_frame.ravel())
         hw_activations = is_weight_active(self.hidden_weights, image_activations)
@@ -131,9 +123,7 @@ class RealtimeVisualizer:
         self.last_hw_activation = hw_activations
         render_weights(self.base_ctx, self.pixel_pos, self.hidden_pos, render_rescale(self.hidden_weights),
                        significant=self.significant_hw, activations=hw_activations)
-        utils.Timer.stop("img_weights")
 
-        utils.Timer.start("out_weights")
         # Re-compute hidden activations for rendering
         hl_activations = is_firing(self.hl_model.predict(X, batch_size=1).squeeze())
         ow_activations = is_weight_active(self.output_weights, hl_activations)
@@ -142,15 +132,12 @@ class RealtimeVisualizer:
         if self.last_ow_activation is not None: ow_needs_update = ow_activations != self.last_ow_activation
         render_weights(self.base_ctx, self.hidden_pos, self.out_pos, render_rescale(self.output_weights),
                        significant=self.significant_ow, activations=ow_activations)
-        utils.Timer.stop("out_weights")
 
         render_layer(self.base_ctx, render_rescale(self.hidden_biases, magnitude=1), 0,
                                        self.canvas_height, self.HIDDEN_LAYER_X, self.neuron_size, activations=hl_activations)
         render_layer(self.base_ctx, render_rescale(self.output_biases, magnitude=1), 0,
-                               self.canvas_height, self.OUTPUT_LAYER_X, self.neuron_size, labels=self.OUTPUT_LABELS, activations=prob)
-        utils.Timer.start("update")
+                     self.canvas_height, self.OUTPUT_LAYER_X, self.neuron_size,
+                     labels=self.OUTPUT_LABELS, activation_intensities=prob)
         # Open window
         self.base_ctx.update()
         self.base_ctx.delete(tk.ALL)
-        utils.Timer.stop("update")
-        utils.Timer.stop("frame_total")

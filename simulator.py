@@ -2,6 +2,7 @@ import utils
 import numpy as np
 from pong import Pong
 from player import BotPlayer
+import cv2
 
 CUSTOM = 0
 ATARI = 1
@@ -95,10 +96,8 @@ def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1, visualizer=No
         if right is not None: action_r, prob_r = right.act(x)
         states.append(x)
 
-        if visualizer is not None and i % 2 == 0:
-            utils.Timer.start("vis")
+        if visualizer is not None and i % 1 == 0:
             visualizer.render_frame(diff_state, current_state, prob_r)
-            utils.Timer.stop("vis")
         state, reward, done = step(env, env_type, action_l=action_l, action_r=action_r)
 
         reward_l = float(reward[0])
