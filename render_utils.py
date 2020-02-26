@@ -1,7 +1,8 @@
 import numpy as np
+import tkinter as tk
 import utils
 
-TITLE_FONT = ("Helvetica", "16")
+TITLE_FONT = ("Helvetica", "32")
 WEIGHT_COLOR = "#666666"
 WEIGHT_COLOR_ACTIVE = "#BB6666"
 NEURON_COLOR = "#000000"
@@ -41,7 +42,7 @@ def render_layer(canvas, neurons, top_y, bottom_y, x, neuron_size, activations=N
         y = top_y + (i * neuron_size) + ((i+1) * padding) + (neuron_size / 2)
         create_circle(x, y, (neuron_size / 2) * b, canvas, color=fill)
         if labels:
-            canvas.create_text(x+50, y, text=labels[i], font=TITLE_FONT)
+            canvas.create_text(x+25, y, text=labels[i], font=TITLE_FONT, anchor=tk.W)
         coordinates.append((x, y))
     return coordinates
 
