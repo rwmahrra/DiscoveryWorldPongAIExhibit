@@ -70,7 +70,7 @@ def plot_scores(path='./tmp/', show=False, average_of=100):
     from os import listdir
     from os.path import isfile, join
     files = [f for f in listdir(path) if isfile(join(path, f))]
-    for file in files[:-1]:
+    for file in files:
         with open(path + file, 'r') as csvfile:
             plots = list(csv.reader(csvfile, delimiter=','))
             i = 0
@@ -78,20 +78,21 @@ def plot_scores(path='./tmp/', show=False, average_of=100):
             yr = []
             print(path + file)
             for row in plots:
-                x.append(i)
-                last_n = sum([float(plots[j][1]) for j in range(i-average_of+1, i+1)])
-                yr.append(last_n / average_of)
+                if i > average_of:
+                    x.append(i)
+                    last_n = sum([float(plots[j][1]) for j in range(i-average_of+1, i+1)])
+                    yr.append(last_n / average_of)
                 i += 1
             print("finished rows")
             file_contents[str(file)] = (x, yr)
         print("last plot")
-        plt.plot(x, yr, label=str(file))
+        plt.plot(x, yr, label=str(file).replace('.csv', '').replace('_', '-'))
         print("plotted")
     print("plot")
     plt.xlabel('Episode')
-    plt.ylabel('Score')
-    plt.title('Agent Score By Episode')
-    plt.legend()
+    plt.ylabel('Average Score')
+    plt.title('Agent Score By Hidden Layer Structure')
+    plt.legend(loc='lower right')
     if path:
         plt.savefig(f'{path}/out.png')
     plt.cla()
