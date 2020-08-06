@@ -2,7 +2,12 @@ import utils
 import numpy as np
 from pong import Pong
 from player import BotPlayer
-import cv2
+
+"""
+Wraps both the OpenAI Gym Atari Pong environment and the custom
+Pong environment in a common interface, useful to test the same training setup
+against both environments
+"""
 
 CUSTOM = 0
 ATARI = 1

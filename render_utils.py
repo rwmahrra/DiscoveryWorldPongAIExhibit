@@ -1,6 +1,9 @@
 import numpy as np
 import tkinter as tk
-import utils
+
+"""
+This class is a relatively straightforward set of utilities used in the inference visualization proof-of-concept.
+"""
 
 TITLE_FONT = ("Helvetica", "32")
 WEIGHT_COLOR = "#666666"
@@ -11,6 +14,15 @@ ACTIVE_WEIGHT_THRESHOLD = 1
 
 
 def create_circle(x, y, r, ctx, color=NEURON_COLOR): #center coordinates, radius
+    """
+    Draw a circle on the canvas
+    :param x: x position
+    :param y: y position
+    :param r: radius
+    :param ctx: Tkinter canvas context
+    :param color: RGB color
+    :return:
+    """
     x0 = x - r
     y0 = y - r
     x1 = x + r
@@ -19,9 +31,13 @@ def create_circle(x, y, r, ctx, color=NEURON_COLOR): #center coordinates, radius
 
 
 def get_intensity(val):
+    """
+    Maps a float between 0 and 1 to a red-based color ranging from gray to bright red
+    :param val: float between 0 and 1
+    :return: Red color that is redder as val approaches 1
+    """
     val = hex(max(int(val * 255), 0x22))
     color = f"#{val[2:]}2222"
-    print(color)
     return color
 
 

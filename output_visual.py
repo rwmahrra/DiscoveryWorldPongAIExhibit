@@ -1,13 +1,19 @@
 import tkinter as tk
-import visualizer
-import utils
 from render_utils import render_weights, render_layer, render_rescale, TITLE_FONT, is_significant, is_firing, is_weight_active
 import numpy as np
 import cv2
 from PIL import Image, ImageTk
 from keras.models import Model
 
+
 class RealtimeVisualizer:
+    """
+    This class handles rendering the pong game and agent network state
+    over the course of a game. It gets injected into the simulator, which will call it as appropriate.
+
+    This proof of concept implementation uses Tkinter for rendering. I recommend that any actual implementation
+    use the HTML5 canvas, which seems faster and much easier to work with.
+    """
     # Rendering constants
     MIN_PADDING = 3
     HIDDEN_LAYER_X = 1000
@@ -101,6 +107,8 @@ class RealtimeVisualizer:
 
 
     def render_frame(self, state_frame, render_frame, prob):
+        render_frame = np.copy(render_frame)
+
         # Update rendered probabilities
         percent_prob = prob * 100
         self.up_prob.set(f'{"{0:.2f}".format(percent_prob[0])}%')
