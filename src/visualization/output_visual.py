@@ -1,5 +1,5 @@
 import tkinter as tk
-from render_utils import render_weights, render_layer, render_rescale, TITLE_FONT, is_significant, is_firing, is_weight_active
+from src.visualization.render_utils import render_weights, render_layer, render_rescale, TITLE_FONT, is_significant, is_firing, is_weight_active
 import numpy as np
 import cv2
 from PIL import Image, ImageTk

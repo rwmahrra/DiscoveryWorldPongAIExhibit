@@ -1,7 +1,7 @@
-from pong import Pong
+from src.game.pong import Pong
 import numpy as np
-import player
-from utils import encode_action
+from src.game import player
+from src.shared.utils import encode_action
 from initial_experiments.ai import DQN
 import matplotlib.pyplot as plt
 import csv

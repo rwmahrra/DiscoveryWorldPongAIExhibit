@@ -1,7 +1,7 @@
-from pong import Pong
+from src.game.pong import Pong
 import cv2
 import numpy as np
-from utils import discount_rewards
+from src.shared.utils import discount_rewards
 from initial_experiments.ai import DQN
 from initial_experiments.main import run_simulations
 from keras.models import Model

@@ -1,7 +1,7 @@
 import os
-import simulator
-from utils import save_video, plot_loss, plot_score
-from player import PGAgent, BotPlayer
+from src.game import simulator
+from src.shared.utils import save_video, plot_loss, plot_score
+from src.game.player import PGAgent, BotPlayer
 from visualizer import get_weight_image
 
 """

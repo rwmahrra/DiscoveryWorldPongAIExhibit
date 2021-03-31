@@ -1,14 +1,11 @@
 import numpy as np
 from keras.layers import Dense, Convolution2D, Reshape, Flatten
 from keras.models import Sequential
-from pong import Pong
+from src.game.pong import Pong
 import cv2
 import os
-from utils import normalize_states, discount_rewards
+from src.shared.utils import normalize_states, discount_rewards
 
-from matplotlib import pyplot as plt
-import utils
-from keras import activations
 from keras.optimizers import Adam
 
 

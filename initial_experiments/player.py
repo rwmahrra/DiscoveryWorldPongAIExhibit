@@ -1,7 +1,7 @@
 from initial_experiments.ai import DQN
 from random import random, choice
 import numpy as np
-from pong import Pong
+from src.game.pong import Pong
 
 class DeepQPlayer:
     """
