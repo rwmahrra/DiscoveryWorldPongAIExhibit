@@ -2,7 +2,10 @@ from src.ai.model import PGAgent
 from src.shared.config import Config
 import numpy as np
 
+from src.shared.state_subscriber import StateSubscriber
+
 agent = PGAgent(Config.CUSTOM_STATE_SIZE, Config.CUSTOM_ACTION_SIZE)
+state = StateSubscriber()
 agent.load('../../validation/6px_7k.h5')
 
 
