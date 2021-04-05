@@ -51,7 +51,7 @@ class PGAgent:
         """
         Infer action from state
         :param state: ndarray representing game state
-        :return: (action id, confidence)
+        :return: (action id, confidence vector)
         """
         state = state.reshape([1, state.shape[0]])
         prob = self.model.predict(state, batch_size=1).flatten()

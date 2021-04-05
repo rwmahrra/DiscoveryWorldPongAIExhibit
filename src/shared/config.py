@@ -6,6 +6,9 @@ class Config:
     HEIGHT = 192  # Game window height (px)
     SPEEDUP = 1  # Flat multiplier to game movement speeds
     ACTIONS = ["UP", "DOWN", "NONE"]
+    AI_INFER_INTERVAL_MS = 170
+    STATE_PACKET_INTERVAL_MS = 20
+    GAME_FPS = 6
     BALL_MARKER_SIZE = 4  # Pixel height and width of experimental position markers
     CUSTOM = 0
     ATARI = 1
@@ -17,3 +20,9 @@ class Config:
     ATARI_STATE_SHAPE = 80, 80
     CUSTOM_STATE_SIZE = HEIGHT // 2 * WIDTH // 2
     ATARI_STATE_SIZE = 80 * 80
+    BALL_DIAMETER = 6
+    PADDLE_HEIGHT = 20
+    PADDLE_WIDTH = 2
+    LEFT_PADDLE_X = PADDING
+    RIGHT_PADDLE_X = WIDTH - PADDING
+    ENV_TYPE = CUSTOM

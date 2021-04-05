@@ -1,8 +1,13 @@
 from src.shared import utils
 import numpy as np
 import asyncio
+import paho.mqtt.client as mqtt
 from src.game.pong import Pong
 from src.game.player import BotPlayer
+import time
+import json
+
+from src.shared.config import Config
 
 """
 Wraps both the OpenAI Gym Atari Pong environment and the custom
@@ -23,18 +28,9 @@ CUSTOM_STATE_SIZE = Pong.HEIGHT // 2 * Pong.WIDTH // 2
 ATARI_STATE_SIZE = 80 * 80
 
 
-def preprocess(state, env_type):
-    if env_type == CUSTOM or env_type == HIT_PRACTICE:
-        return utils.preprocess_custom(state)
-    elif env_type == ATARI:
-        return utils.preprocess_gym(state)
-    else:
-        raise NotImplementedError
-
-
 def step(env, env_type, action_l=None, action_r=None, frames=10):
     if env_type == CUSTOM:
-        return env.step(CUSTOM_ACTIONS[action_l], CUSTOM_ACTIONS[action_r], frames=frames)
+        return env.step(action_l, action_r, frames=frames)
     if env_type == HIT_PRACTICE:
         return env.step(None, CUSTOM_ACTIONS[action_r], frames=frames)
     elif env_type == ATARI:
@@ -44,7 +40,7 @@ def step(env, env_type, action_l=None, action_r=None, frames=10):
         raise NotImplementedError
 
 
-async def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1, visualizer=None, marker_h=False, marker_v=False):
+def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1, visualizer=None, marker_h=False, marker_v=False, subscriber=None):
     env = None
     state_size = None
     games_remaining = batch
@@ -88,36 +84,32 @@ async def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1, visuali
     last_state = np.zeros(state_shape)
     state = env.reset()
     if visualizer is not None:
-        visualizer.base_render(preprocess(state, env_type))
+        visualizer.base_render(utils.preprocess(state))
+
+    # Emit state over MQTT and keep a running timer to track the interval
+    subscriber.emit_state(env.get_packet_info())
+    last_state_emit = time.time()
+    last_frame_time = time.time()
     i = 0
     while True:
+        next_frame_time = last_frame_time + (1 / Config.GAME_FPS)
         render_states.append(state.astype(np.uint8))
-        current_state = preprocess(state, env_type)
+        current_state = utils.preprocess(state)
         diff_state = current_state - last_state
         model_states.append(diff_state.astype(np.uint8))
         last_state = current_state
         action_l, prob_l, action_r, prob_r = None, None, None, None
         x = diff_state.ravel()
-
-        pending_actions = []
+        states.append(x)
 
         # Checking for defined left and right agents here is clunky but necessary to support single-agent environments
         # (e.g. "hit practice", where a single paddle is confronted with a barrage of balls at random trajectories.)
 
-        if left is not None: pending_actions.append(left.act(x))
-        if right is not None: pending_actions.append(right.act(x))
-
-        actions = await asyncio.gather(*pending_actions)
-        print(actions)
-        print(type(actions))
-
-        # This code isn't pretty: it's a "compact" way to unpack the response into the available l/r actions and probs
         if left is not None:
-            if right is not None: (action_l, prob_l), (action_r, prob_r) = actions
-            else: (action_l, prob_l) = actions
-        else: (action_r, prob_r) = actions
+            action_l, prob_l = left.act()
+        if right is not None:
+            action_r, prob_r = right.act()
 
-        states.append(x)
 
         if visualizer is not None and i % 1 == 0:
             visualizer.render_frame(diff_state, current_state, prob_r)
@@ -134,6 +126,8 @@ async def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1, visuali
         rewards_l.append(reward_l)
         rewards_r.append(reward_r)
 
+        env.show(1, 1)
+
         if reward_r < 0: score_l -= reward_r
         if reward_r > 0: score_r += reward_r
 
@@ -147,4 +141,17 @@ async def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1, visuali
             else:
                 score_l, score_r = 0, 0
                 state = env.reset()
+        now = time.time()
+        if (now - last_state_emit) * 1000 > Config.STATE_PACKET_INTERVAL_MS:
+            subscriber.emit_state(env.get_packet_info())
+            last_state_emit = now
+        print(f"Took {time.time() - last_frame_time}")
+        to_sleep = next_frame_time - time.time()
+        if to_sleep < 0:
+            print(f"Warning: render tick is lagging behind by {-int(to_sleep * 1000)} ms.")
+        else:
+            time.sleep(to_sleep)
+            print(f"Sleeping {to_sleep}ms")
+        last_frame_time = time.time()
+
         i += 1

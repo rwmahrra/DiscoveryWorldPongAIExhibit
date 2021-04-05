@@ -1,4 +1,9 @@
 import paho.mqtt.client as mqtt
+import numpy as np
+import json
+
+from src.shared import utils
+from src.shared.config import Config
 
 
 class StateSubscriber:
@@ -17,17 +22,64 @@ class StateSubscriber:
         client.subscribe("game/level")
 
     def on_message(self, client, userdata, msg):
-        print(msg.topic + " " + str(msg.payload))
         topic = msg.topic
+        payload = json.loads(msg.payload)
         if topic == "puck/position":
-            self.puck_x = msg.payload["x"]
-            self.puck_y = msg.payload["y"]
+            self.puck_x = payload["x"]
+            self.puck_y = payload["y"]
         if topic == "paddle1/position":
-            self.paddle1_y = msg.payload["position"]
+            self.paddle1_y = payload["position"]
         if topic == "paddle2/position":
-            self.paddle2_y = msg.payload["position"]
+            self.paddle2_y = payload["position"]
         if topic == "game/level":
-            self.game_level = msg.payload["level"]
+            self.game_level = payload["level"]
+
+    def draw_rect(self, screen, x, y, w, h, color):
+        """
+        Utility to draw a rectangle on the screen state ndarray
+        :param screen: ndarray representing the screen
+        :param x: leftmost x coordinate
+        :param y: Topmost y coordinate
+        :param w: width (px)
+        :param h: height (px)
+        :param color: RGB int tuple
+        :return:
+        """
+        screen[max(y, 0):y + h + 1, max(x, 0):x + w + 1] = color
+
+    def publish(self, topic, message):
+        """
+        Use the state subscriber to send a message since we have the connection open anyway
+        :param topic: MQTT topic
+        :param message: payload object, will be JSON stringified
+        :return:
+        """
+        self.client.publish(topic, payload=json.dumps(message))
+
+    def render_latest(self):
+        """
+        Render the current game pixel state by hand in an ndarray
+        :return: ndarray of RGB screen pixels
+        """
+        screen = np.zeros((Config.HEIGHT, Config.WIDTH, 3), dtype=np.float32)
+        screen[:, :] = (0, 60, 140)
+
+        self.draw_rect(screen, int(Config.LEFT_PADDLE_X - int(Config.PADDLE_WIDTH / 2)), int(self.paddle1_y - int(Config.PADDLE_HEIGHT / 2)),
+                  Config.PADDLE_WIDTH, Config.PADDLE_HEIGHT, 255)
+        self.draw_rect(screen, int(Config.RIGHT_PADDLE_X - int(Config.PADDLE_WIDTH / 2)), int(self.paddle2_y - int(Config.PADDLE_HEIGHT / 2)),
+                 Config.PADDLE_WIDTH, Config.PADDLE_HEIGHT, 255)
+        self.draw_rect(screen, int(self.puck_x - int(Config.BALL_DIAMETER / 2)), int(self.puck_y - int(Config.BALL_DIAMETER / 2)),
+                  Config.BALL_DIAMETER, Config.BALL_DIAMETER, 255)
+        return screen
+
+    def render_latest_preprocessed(self):
+        """
+        Render the current game pixel state by hand in an ndarray
+        Scaled down for AI consumption
+        :return: ndarray of RGB screen pixels
+        """
+        latest = self.render_latest()
+        return utils.preprocess(latest)
 
     def ready(self):
         """
@@ -41,12 +93,14 @@ class StateSubscriber:
                and self.game_level is not None
 
     def __init__(self):
-        client = mqtt.Client()
-        client.on_connect = self.on_connect
-        client.on_message = self.on_message
+        self.client = mqtt.Client()
+        self.client.on_connect = lambda client, userdata, flags, rc : self.on_connect(client, userdata, flags, rc)
+        self.client.on_message = lambda client, userdata, msg : self.on_message(client, userdata, msg)
+        print("Initializing subscriber")
+        self.client.connect_async("localhost", port=1883, keepalive=60)
         self.puck_x = None
         self.puck_y = None
         self.paddle1_y = None
         self.paddle2_y = None
         self.game_level = None
-
+        self.client.loop_start()

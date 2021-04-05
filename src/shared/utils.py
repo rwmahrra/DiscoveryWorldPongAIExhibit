@@ -6,6 +6,8 @@ import imageio
 import csv
 import matplotlib.pyplot as plt
 
+from src.shared.config import Config
+
 """
 Various utility helper methods to consolidate reusable code
 """
@@ -38,6 +40,15 @@ def discount_rewards(r, gamma=0.99):
         running_add = running_add * gamma + r[t]
         discounted_r[t] = running_add
     return discounted_r
+
+
+def preprocess(state):
+    if Config.ENV_TYPE == Config.CUSTOM or Config.ENV_TYPE == Config.HIT_PRACTICE:
+        return preprocess_custom(state)
+    elif Config.ENV_TYPE == Config.ATARI:
+        return preprocess_gym(state)
+    else:
+        raise NotImplementedError
 
 
 def preprocess_gym(I):

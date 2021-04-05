@@ -1,6 +1,6 @@
 from random import randint
 from src.game.pong import Pong
-import paho.mqtt.client as mqtt
+from src.shared.config import Config
 
 """
 NOTE: the classes defined in this file are intended to implement a common interface:
@@ -33,7 +33,7 @@ class HumanPlayer:
         self.down = down
 
 
-    async def act(self, state):
+    def act(self):
         """
         Listen to key
         :param state: Unused, preserves interface
@@ -50,7 +50,7 @@ class RandomPlayer:
     Mostly for testing. Makes purely random actions.
     """
 
-    async def move(self, state):
+    def move(self):
         return Pong.random_action()
 
 
@@ -83,13 +83,13 @@ class BotPlayer:
         """
         self.paddle, self.ball = env.get_bot_data(left=self.left, right=self.right)
 
-    async def act(self, state):
+    def act(self):
         """
         Make decision based on state
         :param state: Unused, preserves interface
         :return: (action id, confidence)
         """
-        return self.move(), 1
+        return Config.ACTIONS[self.move()], 1
 
     def move(self):
         if self.always_follow:
@@ -112,29 +112,22 @@ class BotPlayer:
 
 class AIPlayer:
     """
-    Networked AI Agent
+    Abstraction for MQTT networked AI Agent
     """
+    def __init__(self, subscriber, left=False, right=False):
+        self.left = left
+        self.right = right
+        if not self.right and not self.left:
+            raise ValueError("AI paddle must be specified as left or right with the cooresponding keyword argument")
+        self.subscriber = subscriber
 
-    def on_message(self, client, userdata, msg):
-
-    def on_connect(self, client, userdata, flags, rc):
-        print("AI player connected")
-        client.subscribe("$SYS/#")
-
-    def __init__(self):
-        self.client = mqtt.Client()
-        self.client.on_connect = self.on_connect
-        self.client.connect("localhost", 1883, 60)
-        self.client.on_message = self.on_message
-
-    async def act(self, state):
+    def act(self):
         """
         Send game details over network. Return response from agent.
         :param state: dictionary representing game state
         :return: (action id, confidence)
         """
-        self.client.publish("test", payload="awaiting action")
-        self.client.loop_start()
-        self.client.loop_stop()
-        return (1, 1)
-        #return action, prob
+        if self.left:
+            return self.subscriber.paddle1_action, self.subscriber.paddle1_prob
+        if self.right:
+            return self.subscriber.paddle2_action, self.subscriber.paddle2_prob

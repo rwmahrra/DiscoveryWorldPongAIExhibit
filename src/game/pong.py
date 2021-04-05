@@ -4,6 +4,8 @@ import math
 import keyboard
 from random import choice, randint, random
 
+from src.shared.config import Config
+
 
 class Pong:
     """
@@ -40,8 +42,8 @@ class Pong:
 
     class Paddle:
         EDGE_BUFFER = 0  # Pixel distance from screen edges that paddle is allowed to reach
-        HEIGHT = 20  # px
-        WIDTH = 2  # px
+        HEIGHT = Config.PADDLE_HEIGHT  # px
+        WIDTH = Config.PADDLE_WIDTH  # px
         SPEED = 1  # base speed (in px/tick), scales up as game goes on
 
         def __init__(self, side):
@@ -67,9 +69,9 @@ class Pong:
             self.h = self.HEIGHT
             self.speed = self.SPEED * Pong.SPEEDUP
             if self.side == "left":
-                self.x = Pong.PADDING
+                self.x = Config.LEFT_PADDLE_X
             elif self.side == "right":
-                self.x = Pong.WIDTH - Pong.PADDING
+                self.x = Config.RIGHT_PADDLE_X
 
         def up(self):
             """
@@ -102,7 +104,7 @@ class Pong:
                 pass
 
     class Ball:
-        DIAMETER = 6
+        DIAMETER = Config.BALL_DIAMETER
         SPEED = 1
         BOUNCE_ANGLES = [0, 60, 45, 30, -30, -45, -60]  # True to original Atari Pong
 
@@ -406,6 +408,13 @@ class Pong:
         to_render = cv2.resize(self.last_screen, (int(Pong.WIDTH * scale), int(Pong.HEIGHT * scale)))
         cv2.imshow(f"Pong", cv2.cvtColor(to_render, cv2.COLOR_RGB2BGR))
         cv2.waitKey(duration)
+
+    def get_packet_info(self):
+        """
+        Return all info necessary for regular update messages
+        :return: Tuple representing ((puck_x, puck_y), paddle1_y, paddle2_y, paddle1_score, paddle2_score, game_level))
+        """
+        return ((self.ball.x, self.ball.y), self.left.y, self.right.y, self.score_left, self.score_right, 0)
 
     def get_screen(self):
         """
