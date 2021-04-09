@@ -20,6 +20,7 @@ class StateSubscriber:
         client.subscribe("paddle1/position")
         client.subscribe("paddle2/position")
         client.subscribe("game/level")
+        client.subscribe("game/frame")
 
     def on_message(self, client, userdata, msg):
         topic = msg.topic
@@ -33,6 +34,8 @@ class StateSubscriber:
             self.paddle2_y = payload["position"]
         if topic == "game/level":
             self.game_level = payload["level"]
+        if topic == "game/frame":
+            self.frame = payload["frame"]
 
     def draw_rect(self, screen, x, y, w, h, color):
         """
@@ -103,4 +106,5 @@ class StateSubscriber:
         self.paddle1_y = None
         self.paddle2_y = None
         self.game_level = None
+        self.frame = None
         self.client.loop_start()

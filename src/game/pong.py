@@ -13,13 +13,13 @@ class Pong:
     It was used instead of OpenAI Gym or various other publicly available alternatives
     in order to allow for complete flexibility.
     """
-    PADDING = 10  # Distance between screen edge and player paddles (px)
-    MAX_SCORE = 21  # Points one side must win to finish game
-    WIDTH = 160  # Game window width (px)
-    HEIGHT = 192  # Game window height (px)
-    SPEEDUP = 1  # Flat multiplier to game movement speeds
-    ACTIONS = ["UP", "DOWN", "NONE"]
-    BALL_MARKER_SIZE = 4  # Pixel height and width of experimental position markers
+    PADDING = Config.PADDING  # Distance between screen edge and player paddles (px)
+    MAX_SCORE = Config.MAX_SCORE  # Points one side must win to finish game
+    WIDTH = Config.WIDTH  # Game window width (px)
+    HEIGHT = Config.HEIGHT  # Game window height (px)
+    SPEEDUP = Config.SPEEDUP  # Flat multiplier to game movement speeds
+    ACTIONS = Config.ACTIONS
+    BALL_MARKER_SIZE = Config.BALL_MARKER_SIZE  # Pixel height and width of experimental position markers
 
     @staticmethod
     def read_key(up, down):
@@ -245,6 +245,7 @@ class Pong:
         self.left = Pong.Paddle("left") if not self.hit_practice else None
         self.right = Pong.Paddle("right")
         self.ball = Pong.Ball(hit_practice=hit_practice)
+        self.frames = 0
 
     def reset(self):
         """
@@ -338,7 +339,7 @@ class Pong:
                     self.right.reset()
                 self.ball.update()
                 done = False
-                if self.score_right >= Pong.MAX_SCORE or self.score_left >= Pong.MAX_SCORE:
+                if self.score_right + self.score_left >= Pong.MAX_SCORE: #self.score_right >= Pong.MAX_SCORE or self.score_left >= Pong.MAX_SCORE:
                     done = True
         screen = self.render()
         self.last_screen = screen
@@ -390,11 +391,12 @@ class Pong:
                     self.right.reset()
                 self.ball.update()
                 done = False
-                if self.score_right >= Pong.MAX_SCORE or self.score_left >= Pong.MAX_SCORE:
+                if self.score_right + self.score_left >= Pong.MAX_SCORE: #self.score_right >= Pong.MAX_SCORE or self.score_left >= Pong.MAX_SCORE:
                     done = True
 
         screen = self.render()
         self.last_screen = screen
+        self.frames += 1
         return screen, (reward_l, reward_r), done
 
     def show(self, scale=1,  duration=1):
@@ -414,7 +416,7 @@ class Pong:
         Return all info necessary for regular update messages
         :return: Tuple representing ((puck_x, puck_y), paddle1_y, paddle2_y, paddle1_score, paddle2_score, game_level))
         """
-        return ((self.ball.x, self.ball.y), self.left.y, self.right.y, self.score_left, self.score_right, 0)
+        return ((self.ball.x, self.ball.y), self.left.y, self.right.y, self.score_left, self.score_right, 0, self.frames)
 
     def get_screen(self):
         """

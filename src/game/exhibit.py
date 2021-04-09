@@ -1,8 +1,7 @@
-from src.visualization.output_visual import RealtimeVisualizer
 from src.game.player import HumanPlayer, AIPlayer, BotPlayer
 from src.game.game_subscriber import GameSubscriber
 from src.game import simulator
-import asyncio
+import time
 
 """
 This file is the driver for the exhibit proof of concept.
@@ -15,4 +14,7 @@ subscriber = GameSubscriber()
 opponent = BotPlayer(left=True)
 #opponent = HumanPlayer('w', 's')
 agent = AIPlayer(subscriber, right=True)
+time.sleep(3)
+start = time.time()
 simulator.simulate_game(simulator.CUSTOM, left=opponent, right=agent, subscriber=subscriber)
+print(f"Completed simulation in {time.time() - start}s")

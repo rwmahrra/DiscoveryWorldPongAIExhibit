@@ -1,14 +1,14 @@
 
 class Config:
     PADDING = 10  # Distance between screen edge and player paddles (px)
-    MAX_SCORE = 21  # Points one side must win to finish game
+    MAX_SCORE = 100  # Points one side must win to finish game
     WIDTH = 160  # Game window width (px)
     HEIGHT = 192  # Game window height (px)
     SPEEDUP = 1  # Flat multiplier to game movement speeds
     ACTIONS = ["UP", "DOWN", "NONE"]
-    AI_INFER_INTERVAL_MS = 170
-    STATE_PACKET_INTERVAL_MS = 20
-    GAME_FPS = 6
+    STATE_PACKET_INTERVAL_MS = 5
+    GAME_FPS = 15
+    AI_INFERENCES_PER_SECOND = 15  # Inferences per second
     BALL_MARKER_SIZE = 4  # Pixel height and width of experimental position markers
     CUSTOM = 0
     ATARI = 1

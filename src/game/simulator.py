@@ -145,13 +145,12 @@ def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1, visualizer=No
         if (now - last_state_emit) * 1000 > Config.STATE_PACKET_INTERVAL_MS:
             subscriber.emit_state(env.get_packet_info())
             last_state_emit = now
-        print(f"Took {time.time() - last_frame_time}")
         to_sleep = next_frame_time - time.time()
         if to_sleep < 0:
             print(f"Warning: render tick is lagging behind by {-int(to_sleep * 1000)} ms.")
         else:
             time.sleep(to_sleep)
-            print(f"Sleeping {to_sleep}ms")
         last_frame_time = time.time()
 
         i += 1
+
