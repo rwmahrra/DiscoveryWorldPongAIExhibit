@@ -7,8 +7,8 @@ class Config:
     SPEEDUP = 1  # Flat multiplier to game movement speeds
     ACTIONS = ["UP", "DOWN", "NONE"]
     STATE_PACKET_INTERVAL_MS = 5
-    GAME_FPS = 15
-    AI_INFERENCES_PER_SECOND = 15  # Inferences per second
+    GAME_FPS = 75
+    AI_INFERENCES_PER_SECOND = 75  # Inferences per second
     BALL_MARKER_SIZE = 4  # Pixel height and width of experimental position markers
     CUSTOM = 0
     ATARI = 1

@@ -90,6 +90,9 @@ def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1, visualizer=No
     subscriber.emit_state(env.get_packet_info())
     last_state_emit = time.time()
     last_frame_time = time.time()
+
+    behind_frames = []
+
     i = 0
     while True:
         next_frame_time = last_frame_time + (1 / Config.GAME_FPS)
@@ -104,12 +107,16 @@ def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1, visualizer=No
 
         # Checking for defined left and right agents here is clunky but necessary to support single-agent environments
         # (e.g. "hit practice", where a single paddle is confronted with a barrage of balls at random trajectories.)
-
         if left is not None:
             action_l, prob_l = left.act()
         if right is not None:
             action_r, prob_r = right.act()
 
+        acted_frame = subscriber.paddle2_frame
+        rendered_frame = env.frames
+        if acted_frame is not None:
+            behind_frame = rendered_frame - acted_frame
+            behind_frames.append(behind_frame)
 
         if visualizer is not None and i % 1 == 0:
             visualizer.render_frame(diff_state, current_state, prob_r)
@@ -137,6 +144,7 @@ def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1, visualizer=No
             utils.write(f'{score_l},{score_r}', f'../../analytics/scores.csv')
             if games_remaining == 0:
                 metadata = (render_states, model_states, (score_l, score_r))
+                print(f"Behind frames: {np.mean(behind_frames)} mean, {np.std(behind_frames)} stdev, {np.max(behind_frames)} max, {np.unique(behind_frames, return_counts=True)}")
                 return states, (actions_l, probs_l, rewards_l), (actions_r, probs_r, rewards_r), metadata
             else:
                 score_l, score_r = 0, 0
@@ -153,4 +161,5 @@ def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1, visualizer=No
         last_frame_time = time.time()
 
         i += 1
+
 

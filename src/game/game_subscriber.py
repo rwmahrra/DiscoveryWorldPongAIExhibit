@@ -18,6 +18,7 @@ class GameSubscriber:
         print("Connected with result code " + str(rc))
         client.subscribe("paddle1/action")
         client.subscribe("paddle2/action")
+        client.subscribe("paddle2/frame")
 
     def on_message(self, client, userdata, msg):
         topic = msg.topic
@@ -26,6 +27,8 @@ class GameSubscriber:
             self.paddle1_action = payload["action"]
         if topic == "paddle2/action":
             self.paddle2_action = payload["action"]
+        if topic == "paddle2/frame":
+            self.paddle2_frame = payload["frame"]
 
     def __init__(self):
         self.client = mqtt.Client()
@@ -37,3 +40,4 @@ class GameSubscriber:
         self.paddle1_prob = np.array([0, 1])
         self.paddle2_action = "NONE"
         self.paddle2_prob = np.array([0, 1])
+        self.paddle2_frame = None
