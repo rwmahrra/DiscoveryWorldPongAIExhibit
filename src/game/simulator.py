@@ -95,71 +95,77 @@ def simulate_game(env_type=CUSTOM, left=None, right=None, batch=1, visualizer=No
 
     i = 0
     while True:
-        next_frame_time = last_frame_time + (1 / Config.GAME_FPS)
-        render_states.append(state.astype(np.uint8))
-        current_state = utils.preprocess(state)
-        diff_state = current_state - last_state
-        model_states.append(diff_state.astype(np.uint8))
-        last_state = current_state
-        action_l, prob_l, action_r, prob_r = None, None, None, None
-        x = diff_state.ravel()
-        states.append(x)
-
-        # Checking for defined left and right agents here is clunky but necessary to support single-agent environments
-        # (e.g. "hit practice", where a single paddle is confronted with a barrage of balls at random trajectories.)
-        if left is not None:
-            action_l, prob_l = left.act()
-        if right is not None:
-            action_r, prob_r = right.act()
-
         acted_frame = subscriber.paddle2_frame
         rendered_frame = env.frames
+        next_frame_time = last_frame_time + (1 / Config.GAME_FPS)
+
+        behind = False
+        behind_frame = None
         if acted_frame is not None:
             behind_frame = rendered_frame - acted_frame
-            behind_frames.append(behind_frame)
+            if behind_frame > 0: behind = True
 
-        if visualizer is not None and i % 1 == 0:
-            visualizer.render_frame(diff_state, current_state, prob_r)
-        state, reward, done = step(env, env_type, action_l=action_l, action_r=action_r)
+        if not behind:
+            if behind_frame is not None: behind_frames.append(behind_frame)
+            render_states.append(state.astype(np.uint8))
+            current_state = utils.preprocess(state)
+            diff_state = current_state - last_state
+            model_states.append(diff_state.astype(np.uint8))
+            last_state = current_state
+            action_l, prob_l, action_r, prob_r = None, None, None, None
+            x = diff_state.ravel()
+            states.append(x)
 
-        reward_l = float(reward[0])
-        reward_r = float(reward[1])
+            # Checking for defined left and right agents here is clunky but necessary to support single-agent environments
+            # (e.g. "hit practice", where a single paddle is confronted with a barrage of balls at random trajectories.)
+            if left is not None:
+                action_l, prob_l = left.act()
+            if right is not None:
+                action_r, prob_r = right.act()
 
-        # Save observations
-        probs_l.append(prob_l)
-        probs_r.append(prob_r)
-        actions_l.append(action_l)
-        actions_r.append(action_r)
-        rewards_l.append(reward_l)
-        rewards_r.append(reward_r)
 
-        env.show(1, 1)
+            if visualizer is not None and i % 1 == 0:
+                visualizer.render_frame(diff_state, current_state, prob_r)
+            state, reward, done = step(env, env_type, action_l=action_l, action_r=action_r)
 
-        if reward_r < 0: score_l -= reward_r
-        if reward_r > 0: score_r += reward_r
+            reward_l = float(reward[0])
+            reward_r = float(reward[1])
 
-        if done:
-            games_remaining -= 1
-            print('Score: %f - %f.' % (score_l, score_r))
-            utils.write(f'{score_l},{score_r}', f'../../analytics/scores.csv')
-            if games_remaining == 0:
-                metadata = (render_states, model_states, (score_l, score_r))
-                print(f"Behind frames: {np.mean(behind_frames)} mean, {np.std(behind_frames)} stdev, {np.max(behind_frames)} max, {np.unique(behind_frames, return_counts=True)}")
-                return states, (actions_l, probs_l, rewards_l), (actions_r, probs_r, rewards_r), metadata
+            # Save observations
+            probs_l.append(prob_l)
+            probs_r.append(prob_r)
+            actions_l.append(action_l)
+            actions_r.append(action_r)
+            rewards_l.append(reward_l)
+            rewards_r.append(reward_r)
+
+            env.show(1, 1)
+
+            if reward_r < 0: score_l -= reward_r
+            if reward_r > 0: score_r += reward_r
+
+            if done:
+                games_remaining -= 1
+                print('Score: %f - %f.' % (score_l, score_r))
+                utils.write(f'{score_l},{score_r}', f'../../analytics/scores.csv')
+                if games_remaining == 0:
+                    metadata = (render_states, model_states, (score_l, score_r))
+                    print(f"Behind frames: {np.mean(behind_frames)} mean, {np.std(behind_frames)} stdev, {np.max(behind_frames)} max, {np.unique(behind_frames, return_counts=True)}")
+                    return states, (actions_l, probs_l, rewards_l), (actions_r, probs_r, rewards_r), metadata
+                else:
+                    score_l, score_r = 0, 0
+                    state = env.reset()
+            now = time.time()
+            if (now - last_state_emit) * 1000 > Config.STATE_PACKET_INTERVAL_MS:
+                subscriber.emit_state(env.get_packet_info())
+                last_state_emit = now
+            to_sleep = next_frame_time - time.time()
+            if to_sleep < 0:
+                print(f"Warning: render tick is lagging behind by {-int(to_sleep * 1000)} ms.")
             else:
-                score_l, score_r = 0, 0
-                state = env.reset()
-        now = time.time()
-        if (now - last_state_emit) * 1000 > Config.STATE_PACKET_INTERVAL_MS:
-            subscriber.emit_state(env.get_packet_info())
-            last_state_emit = now
-        to_sleep = next_frame_time - time.time()
-        if to_sleep < 0:
-            print(f"Warning: render tick is lagging behind by {-int(to_sleep * 1000)} ms.")
-        else:
-            time.sleep(to_sleep)
-        last_frame_time = time.time()
+                time.sleep(to_sleep)
+            last_frame_time = time.time()
 
-        i += 1
+            i += 1
 
 

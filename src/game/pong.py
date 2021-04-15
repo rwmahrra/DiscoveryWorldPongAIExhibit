@@ -107,6 +107,7 @@ class Pong:
         DIAMETER = Config.BALL_DIAMETER
         SPEED = 1
         BOUNCE_ANGLES = [0, 60, 45, 30, -30, -45, -60]  # True to original Atari Pong
+        START_ANGLES = [0]
 
         def spawn_hit_practice(self):
             """
@@ -211,7 +212,7 @@ class Pong:
             Run game tick housekeeping logic
             """
             if self.velocity == (0, 0):
-                angle = choice(Pong.Ball.BOUNCE_ANGLES)
+                angle = choice(Pong.Ball.START_ANGLES)
                 self.right = True
                 if randint(0, 1) == 1:
                     angle += 180

@@ -6,7 +6,7 @@ from src.shared import utils
 from src.shared.config import Config
 
 
-class StateSubscriber:
+class AISubscriber:
     """
     MQTT compliant game state subscriber.
     Always stores the latest up-to-date combination of game state factors.
@@ -36,6 +36,8 @@ class StateSubscriber:
             self.game_level = payload["level"]
         if topic == "game/frame":
             self.frame = payload["frame"]
+            self.trailing_frame = self.latest_frame
+            self.latest_frame = self.render_latest_preprocessed()
 
     def draw_rect(self, screen, x, y, w, h, color):
         """
@@ -84,6 +86,16 @@ class StateSubscriber:
         latest = self.render_latest()
         return utils.preprocess(latest)
 
+    def render_latest_diff(self):
+        """
+        Render the current game pixel state, subtracted from the previous
+        Guarantees that adjacent frames are used for the diff
+        :return: ndarray of RGB screen pixels
+        """
+        if self.trailing_frame is None:
+            return self.latest_frame
+        return self.latest_frame - self.trailing_frame
+
     def ready(self):
         """
         Determine if all state attributes have been received since initialization
@@ -107,4 +119,6 @@ class StateSubscriber:
         self.paddle2_y = None
         self.game_level = None
         self.frame = None
+        self.latest_frame = None
+        self.trailing_frame = None
         self.client.loop_start()
