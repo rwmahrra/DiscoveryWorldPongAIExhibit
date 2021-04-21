@@ -1,6 +1,6 @@
 from random import randint
-from src.game.pong import Pong
-from src.shared.config import Config
+from exhibit.game.pong import Pong
+from exhibit.shared.config import Config
 
 """
 NOTE: the classes defined in this file are intended to implement a common interface:

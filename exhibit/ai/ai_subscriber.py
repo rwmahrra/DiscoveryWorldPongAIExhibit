@@ -2,8 +2,8 @@ import paho.mqtt.client as mqtt
 import numpy as np
 import json
 
-from src.shared import utils
-from src.shared.config import Config
+from exhibit.shared import utils
+from exhibit.shared.config import Config
 
 
 class AISubscriber:
@@ -38,6 +38,7 @@ class AISubscriber:
             self.frame = payload["frame"]
             self.trailing_frame = self.latest_frame
             self.latest_frame = self.render_latest_preprocessed()
+            if self.trigger_event is not None: self.trigger_event()
 
     def draw_rect(self, screen, x, y, w, h, color):
         """
@@ -107,7 +108,11 @@ class AISubscriber:
                and self.paddle2_y is not None \
                and self.game_level is not None
 
-    def __init__(self):
+    def __init__(self, trigger_event=None):
+        """
+        :param trigger_event: Function to call each time a new state is received
+        """
+        self.trigger_event = trigger_event
         self.client = mqtt.Client()
         self.client.on_connect = lambda client, userdata, flags, rc : self.on_connect(client, userdata, flags, rc)
         self.client.on_message = lambda client, userdata, msg : self.on_message(client, userdata, msg)
@@ -121,4 +126,7 @@ class AISubscriber:
         self.frame = None
         self.latest_frame = None
         self.trailing_frame = None
-        self.client.loop_start()
+        #self.client.loop_start()
+
+    def start(self):
+        self.client.loop_forever()

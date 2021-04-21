@@ -1,7 +1,7 @@
-from src.game.pong import Pong
+from exhibit.game.pong import Pong
 import numpy as np
-from src.game import player
-from src.shared.utils import Timer, get_resume_index, encode_gradient, encode_action
+from exhibit.game import player
+from exhibit.shared.utils import Timer, get_resume_index, encode_gradient, encode_action
 import multiprocessing
 from initial_experiments.ai import DQN
 from keras import backend as K

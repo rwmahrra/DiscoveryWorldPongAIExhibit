@@ -4,7 +4,7 @@ import math
 import keyboard
 from random import choice, randint, random
 
-from src.shared.config import Config
+from exhibit.shared.config import Config
 
 
 class Pong:

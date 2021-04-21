@@ -1,7 +1,7 @@
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
-from src.shared.utils import write
+from exhibit.shared.utils import write
 import numpy as np
 
 

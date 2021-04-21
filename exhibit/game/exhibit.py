@@ -1,6 +1,6 @@
-from src.game.player import HumanPlayer, AIPlayer, BotPlayer
-from src.game.game_subscriber import GameSubscriber
-from src.game import simulator
+from exhibit.game.player import HumanPlayer, AIPlayer, BotPlayer
+from exhibit.game.game_subscriber import GameSubscriber
+from exhibit.game import simulator
 import time
 
 """
@@ -14,7 +14,7 @@ subscriber = GameSubscriber()
 opponent = BotPlayer(left=True)
 #opponent = HumanPlayer('w', 's')
 agent = AIPlayer(subscriber, right=True)
-time.sleep(3)
+time.sleep(5)
 start = time.time()
 simulator.simulate_game(simulator.CUSTOM, left=opponent, right=agent, subscriber=subscriber)
 print(f"Completed simulation in {time.time() - start}s")
