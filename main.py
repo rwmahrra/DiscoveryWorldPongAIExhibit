@@ -1,5 +1,5 @@
 import os
-from exhibit.game import simulator
+from exhibit.game import game_driver
 from exhibit.shared.utils import save_video, plot_loss, plot_score
 from exhibit.game.player import PGAgent, BotPlayer
 from visualizer import get_weight_image
@@ -9,7 +9,7 @@ This file is the driver for training a new DRL pong model.
 It brings together the following elements:
  
 * The environment simulator (either the custom one found in pong.py or the Atari emulator provided by OpenAI Gym)
-  Both environments are wrapped by the interface in simulator.py
+  Both environments are wrapped by the interface in game_driver.py
 
 * The two agents (some combination of human-controlled, DRL, and hard-coded agents found in player.py)
 
@@ -20,7 +20,7 @@ convenient monitoring and graphing of the training process.
 
 
 GAME_BATCH = 10
-MODE = simulator.CUSTOM
+MODE = game_driver.CUSTOM
 LEARNING_RATE = 0.001
 DENSE_STRUCTURE = (200,)
 ALWAYS_FOLLOW = False
@@ -46,18 +46,18 @@ if __name__ == "__main__":
     action_size = None
 
     # Set constants based on env setting
-    if MODE == simulator.CUSTOM or MODE == simulator.HIT_PRACTICE:
-        action_size = simulator.CUSTOM_ACTION_SIZE
-        state_size = simulator.CUSTOM_STATE_SIZE
-        state_shape = simulator.CUSTOM_STATE_SHAPE
-        agent_l = BotPlayer(left=True, always_follow=ALWAYS_FOLLOW) if MODE == simulator.CUSTOM else None # Default to bot, override with model if needed
+    if MODE == game_driver.CUSTOM or MODE == game_driver.HIT_PRACTICE:
+        action_size = game_driver.CUSTOM_ACTION_SIZE
+        state_size = game_driver.CUSTOM_STATE_SIZE
+        state_shape = game_driver.CUSTOM_STATE_SHAPE
+        agent_l = BotPlayer(left=True, always_follow=ALWAYS_FOLLOW) if MODE == game_driver.CUSTOM else None # Default to bot, override with model if needed
         # Switch out for interactive session (against human)
         #from player import HumanPlayer
         #agent_l = HumanPlayer(up='w', down='s')
-    if MODE == simulator.ATARI:
-        action_size = simulator.ATARI_ACTION_SIZE
-        state_size = simulator.ATARI_STATE_SIZE
-        state_shape = simulator.ATARI_STATE_SHAPE
+    if MODE == game_driver.ATARI:
+        action_size = game_driver.ATARI_ACTION_SIZE
+        state_size = game_driver.ATARI_STATE_SIZE
+        state_shape = game_driver.ATARI_STATE_SHAPE
 
     # Init agent
     agent_r = PGAgent(state_size, action_size, name="agent_r", learning_rate=LEARNING_RATE, structure=DENSE_STRUCTURE)
@@ -80,8 +80,8 @@ if __name__ == "__main__":
     # Train loop
     while True:
         episode += 1
-        states, left, right, meta = simulator.simulate_game(MODE, left=agent_l, right=agent_r, batch=GAME_BATCH,
-                                                            marker_h=BALL_MARKER_H, marker_v=BALL_MARKER_V)
+        states, left, right, meta = game_driver.simulate_game(MODE, left=agent_l, right=agent_r, batch=GAME_BATCH,
+                                                              marker_h=BALL_MARKER_H, marker_v=BALL_MARKER_V)
         render_states, model_states, (score_l, score_r) = meta
         actions, probs, rewards = right
 

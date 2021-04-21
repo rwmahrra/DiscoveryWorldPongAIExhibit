@@ -25,3 +25,4 @@ class Config:
     LEFT_PADDLE_X = PADDING
     RIGHT_PADDLE_X = WIDTH - PADDING
     ENV_TYPE = CUSTOM
+    DEBUG = True

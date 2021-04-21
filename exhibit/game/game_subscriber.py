@@ -23,12 +23,14 @@ class GameSubscriber:
     def on_message(self, client, userdata, msg):
         topic = msg.topic
         payload = json.loads(msg.payload)
+        print(payload)
         if topic == "paddle1/action":
             self.paddle1_action = payload["action"]
         if topic == "paddle2/action":
             self.paddle2_action = payload["action"]
         if topic == "paddle2/frame":
             self.paddle2_frame = payload["frame"]
+            print(self.paddle2_frame)
 
     def __init__(self):
         self.client = mqtt.Client()

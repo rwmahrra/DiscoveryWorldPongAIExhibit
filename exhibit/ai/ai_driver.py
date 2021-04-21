@@ -17,6 +17,7 @@ class AIDriver:
         # Publish prediction
         self.state.publish("paddle2/action", {"action": Config.ACTIONS[action]})
         self.state.publish("paddle2/frame", {"frame": current_frame_id})
+        print(current_frame_id)
 
         if len(self.frame_diffs) > 1000:
             print(
