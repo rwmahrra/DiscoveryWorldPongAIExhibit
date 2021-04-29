@@ -34,7 +34,7 @@
 # Activate the anaconda environment. Must use this form in scripts.
 #. /usr/local/anaconda3/bin/activate
 # Your job
-pip3 install --user -r requirements.txt
-python3 main.py
+python3 -m pip3 install --user -r requirements.txt
+python3 reinforcement.py
 # Deactivate the anaconda environment
 # conda deactivate
