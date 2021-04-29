@@ -19,7 +19,7 @@ convenient monitoring and graphing of the training process.
 """
 
 GAME_BATCH = 10
-MODE = Config.CUSTOM
+MODE = Config.HIT_PRACTICE
 LEARNING_RATE = 0.001
 DENSE_STRUCTURE = (200,)
 ALWAYS_FOLLOW = False
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     # Train loop
     while True:
         episode += 1
-        states, left, right, meta = simulator.simulate_game(MODE, left=agent_l, right=agent_r, batch=GAME_BATCH)
+        states, left, right, meta = simulator.simulate_game(env_type=MODE, left=agent_l, right=agent_r, batch=GAME_BATCH)
         render_states, model_states, (score_l, score_r) = meta
         actions, probs, rewards = right
 

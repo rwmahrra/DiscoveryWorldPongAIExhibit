@@ -60,7 +60,11 @@ def simulate_game(env_type=Config.CUSTOM, left=None, right=None, batch=1, visual
         if right is not None: action_r, prob_r = right.act(x)
         states.append(x)
 
-        state, reward, done = env.step(Config.ACTIONS[action_l], Config.ACTIONS[action_r], frames=10)
+        state, reward, done = None, None, None
+        if env_type == Config.HIT_PRACTICE:
+            state, reward, done = env.step(None, Config.ACTIONS[action_r], frames=10)
+        else:
+            state, reward, done = env.step(Config.ACTIONS[action_l], Config.ACTIONS[action_r], frames=10)
 
         reward_l = float(reward[0])
         reward_r = float(reward[1])

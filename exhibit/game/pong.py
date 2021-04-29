@@ -382,6 +382,7 @@ class Pong:
                     done = True
         screen = self.render()
         self.last_screen = screen
+        #self.show(self.render())
         return screen, (reward_l, reward_r), done
 
     def step(self, left_action, right_action, frames=3):
