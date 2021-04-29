@@ -26,5 +26,5 @@ class Config:
     RIGHT_PADDLE_X = WIDTH - PADDING
     ENV_TYPE = CUSTOM
     DEBUG = True
-    ENABLE_AUDIO = True
+    ENABLE_AUDIO = False
     AUDIO_DIR = "C:\\dev\\DiscoveryWorld\\exhibit\\game\\resources\\"
