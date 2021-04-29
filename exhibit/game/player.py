@@ -39,7 +39,7 @@ class HumanPlayer:
         :param state: Unused, preserves interface
         :return: (action id, confidence)
         """
-        return self.move(), 1
+        return Config.ACTIONS[self.move()], 1
 
     def move(self):
         return Pong.read_key(self.up, self.down)

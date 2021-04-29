@@ -3,6 +3,11 @@ import cv2
 import math
 import keyboard
 from random import choice, randint, random
+import time
+from exhibit.shared.config import Config
+
+if Config.ENABLE_AUDIO:
+    import pygame.mixer
 
 from exhibit.shared.config import Config
 
@@ -20,6 +25,9 @@ class Pong:
     SPEEDUP = Config.SPEEDUP  # Flat multiplier to game movement speeds
     ACTIONS = Config.ACTIONS
     BALL_MARKER_SIZE = Config.BALL_MARKER_SIZE  # Pixel height and width of experimental position markers
+
+    # Cache game sounds. Loaded on first instance's init
+    sounds = None
 
     @staticmethod
     def read_key(up, down):
@@ -39,6 +47,24 @@ class Pong:
     @staticmethod
     def random_action():
         return choice(Pong.ACTIONS)
+
+    @staticmethod
+    def load_sounds():
+        if Config.ENABLE_AUDIO:
+            pygame.mixer.init()
+            Pong.sounds = {}
+            Pong.sounds["return"] = pygame.mixer.Sound(Config.AUDIO_DIR + "return.ogg")
+            Pong.sounds["score"] = pygame.mixer.Sound(Config.AUDIO_DIR + "score.ogg")
+            Pong.sounds["bounce"] = pygame.mixer.Sound(Config.AUDIO_DIR + "bounce.ogg")
+
+    @staticmethod
+    def play_sound(sound):
+        if Config.ENABLE_AUDIO and Pong.sounds is not None and sound in Pong.sounds:
+            try:
+                playback = Pong.sounds[sound].play()
+            except Exception as e:
+                print(e)
+
 
     class Paddle:
         EDGE_BUFFER = 0  # Pixel distance from screen edges that paddle is allowed to reach
@@ -187,6 +213,7 @@ class Pong:
                 xv = -xv
             if y:
                 yv = -yv
+            Pong.play_sound("bounce")
             self.velocity = xv, yv
 
         def bounce_angle(self, pos):
@@ -235,6 +262,8 @@ class Pong:
         :param marker_h: Display markers on the top and bottom of the screen that follow the horizontal ball position
         :param marker_v: Display markers on the left and right of the screen that follow the vertical ball position
         """
+        if Pong.sounds == None:
+            Pong.load_sounds()
 
         # Holds last raw screen pixels for rendering
         self.last_screen = None
@@ -323,16 +352,19 @@ class Pong:
 
                 collide_right, pos = self.check_collision(self.ball, self.right)
                 if collide_right and self.ball.right:
+                    Pong.play_sound("return")
                     self.ball.bounce_angle(pos)
                     self.ball.right = False
 
                 if self.ball.x < 0:
+                    Pong.play_sound("score")
                     self.score_right += 1
                     reward_l -= 1.0
                     reward_r += 1.0
                     self.ball.reset()
                     self.right.reset()
                 elif self.ball.x > Pong.WIDTH:
+                    Pong.play_sound("score")
                     self.score_left += 1
                     reward_l += 1.0
                     reward_r -= 1.0
@@ -369,14 +401,17 @@ class Pong:
 
                 collide_left, pos = self.check_collision(self.ball, self.left)
                 if collide_left and not self.ball.right:
+                    Pong.play_sound("return")
                     self.ball.bounce_angle(pos)
                     self.ball.right = True
                 collide_right, pos = self.check_collision(self.ball, self.right)
                 if collide_right and self.ball.right:
+                    Pong.play_sound("return")
                     self.ball.bounce_angle(pos)
                     self.ball.right = False
 
                 if self.ball.x < 0:
+                    Pong.play_sound("score")
                     self.score_right += 1
                     reward_l -= 1.0
                     reward_r += 1.0
@@ -384,6 +419,7 @@ class Pong:
                     self.left.reset()
                     self.right.reset()
                 elif self.ball.x > Pong.WIDTH:
+                    Pong.play_sound("score")
                     self.score_left += 1
                     reward_l += 1.0
                     reward_r -= 1.0
@@ -394,13 +430,16 @@ class Pong:
                 done = False
                 if self.score_right + self.score_left >= Pong.MAX_SCORE: #self.score_right >= Pong.MAX_SCORE or self.score_left >= Pong.MAX_SCORE:
                     done = True
+            self.show(self.render())
 
-        screen = self.render()
-        self.last_screen = screen
+            screen = self.render()
+            self.last_screen = screen
+            self.last_frame_time = time.time()
+
         self.frames += 1
         return screen, (reward_l, reward_r), done
 
-    def show(self, scale=1,  duration=1):
+    def show(self, screen, scale=1,  duration=1):
         """
         Render last game frame through OpenCV
         :param scale: Multiplier to scale up/scale down rendered frame
@@ -408,7 +447,7 @@ class Pong:
         :return:
         """
         l, r = self.get_score()
-        to_render = cv2.resize(self.last_screen, (int(Pong.WIDTH * scale), int(Pong.HEIGHT * scale)))
+        to_render = cv2.resize(screen, (int(Pong.WIDTH * scale), int(Pong.HEIGHT * scale)))
         cv2.imshow(f"Pong", cv2.cvtColor(to_render, cv2.COLOR_RGB2BGR))
         cv2.waitKey(duration)
 

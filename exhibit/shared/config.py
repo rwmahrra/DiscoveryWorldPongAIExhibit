@@ -6,8 +6,8 @@ class Config:
     HEIGHT = 192  # Game window height (px)
     SPEEDUP = 1  # Flat multiplier to game movement speeds
     ACTIONS = ["UP", "DOWN", "NONE"]
-    STATE_PACKET_INTERVAL_MS = 5
-    GAME_FPS = 50
+    GAME_FPS = 60
+    GAME_TPS = 15
     BALL_MARKER_SIZE = 4  # Pixel height and width of experimental position markers
     CUSTOM = 0
     ATARI = 1
@@ -26,3 +26,5 @@ class Config:
     RIGHT_PADDLE_X = WIDTH - PADDING
     ENV_TYPE = CUSTOM
     DEBUG = True
+    ENABLE_AUDIO = True
+    AUDIO_DIR = "C:\\dev\\DiscoveryWorld\\exhibit\\game\\resources\\"

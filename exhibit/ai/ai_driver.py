@@ -10,6 +10,9 @@ class AIDriver:
         # Get latest state diff
         diff_state = self.state.render_latest_diff()
         current_frame_id = self.state.frame
+        import cv2
+        cv2.imshow("test", diff_state)
+        cv2.waitKey(1)
         # Infer on flattened state vector
         x = diff_state.ravel()
         action, probs = self.agent.act(x)
