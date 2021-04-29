@@ -378,7 +378,7 @@ class Pong:
                     self.right.reset()
                 self.ball.update()
                 done = False
-                if self.score_right + self.score_left >= Pong.MAX_SCORE: #self.score_right >= Pong.MAX_SCORE or self.score_left >= Pong.MAX_SCORE:
+                if self.score_right >= Pong.MAX_SCORE or self.score_left >= Pong.MAX_SCORE:
                     done = True
         screen = self.render()
         self.last_screen = screen
