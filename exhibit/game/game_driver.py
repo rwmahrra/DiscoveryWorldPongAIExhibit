@@ -26,7 +26,7 @@ class GameDriver:
         score_r = 0
 
         # Emit state over MQTT and keep a running timer to track the interval
-        self.subscriber.emit_state(env.get_packet_info())
+        self.subscriber.emit_state(env.get_packet_info(), request_action=True)
         last_frame_time = time.time()
 
         # Track skipped frame statistics
@@ -43,18 +43,19 @@ class GameDriver:
                 frames_behind = rendered_frame - acted_frame
                 frame_skips.append(frames_behind)
             action_l, prob_l = self.left_agent.act()
-            action_r, prob_r = self.right_agent.act()
+
             for i in range(10):
-                #if type(self.left_agent) == HumanPlayer:
-                #    action_l, prob_l = self.left_agent.act()
+                action_r, prob_r = self.right_agent.act()
+                if type(self.left_agent) == HumanPlayer:
+                    action_l, prob_l = self.left_agent.act()
 
                 next_frame_time = last_frame_time + (1 / Config.GAME_FPS)
-                state, reward, done = env.step(action_l, action_r, frames=1)
+                state, reward, done = env.step(Config.ACTIONS[action_l], Config.ACTIONS[action_r], frames=1)
                 reward_l, reward_r = reward
                 if reward_r < 0: score_l -= reward_r
                 if reward_r > 0: score_r += reward_r
                 if i == 9:
-                    self.subscriber.emit_state(env.get_packet_info())
+                    self.subscriber.emit_state(env.get_packet_info(), request_action=True)
                 to_sleep = next_frame_time - time.time()
                 if to_sleep < 0:
                     print(f"Warning: render tick is lagging behind by {-int(to_sleep * 1000)} ms.")

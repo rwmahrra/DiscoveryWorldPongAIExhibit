@@ -3,7 +3,7 @@ import paho.mqtt.client as mqtt
 import numpy as np
 
 class GameSubscriber:
-    def emit_state(self, state):
+    def emit_state(self, state, request_action=False):
         (puck_x, puck_y), left_y, right_y, score_left, score_right, level, frame = state
 
         self.client.publish("puck/position", payload=json.dumps({"x": puck_x, "y": puck_y}))
@@ -12,7 +12,8 @@ class GameSubscriber:
         self.client.publish("player1/score", payload=json.dumps({"score": score_left}))
         self.client.publish("player2/score", payload=json.dumps({"score": score_right}))
         self.client.publish("game/level", payload=json.dumps({"level": level}))
-        self.client.publish("game/frame", payload=json.dumps({"frame": frame}))
+        if request_action:
+            self.client.publish("game/frame", payload=json.dumps({"frame": frame}))
 
     def on_connect(self, client, userdata, flags, rc):
         print("Connected with result code " + str(rc))

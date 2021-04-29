@@ -39,7 +39,7 @@ class HumanPlayer:
         :param state: Unused, preserves interface
         :return: (action id, confidence)
         """
-        return Config.ACTIONS[self.move()], 1
+        return self.move(), 1
 
     def move(self):
         return Pong.read_key(self.up, self.down)
@@ -83,13 +83,13 @@ class BotPlayer:
         """
         self.paddle, self.ball = env.get_bot_data(left=self.left, right=self.right)
 
-    def act(self):
+    def act(self, state=None):
         """
         Make decision based on state
-        :param state: Unused, preserves interface
+        :param state: Unused, preserves interface for train script
         :return: (action id, confidence)
         """
-        return Config.ACTIONS[self.move()], 1
+        return self.move(), 1
 
     def move(self):
         if self.always_follow:

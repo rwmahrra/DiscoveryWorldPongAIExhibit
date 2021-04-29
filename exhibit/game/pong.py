@@ -225,7 +225,13 @@ class Pong:
             :param pos: paddle-relative position
             :return:
             """
+            # Translate segment to fraction of the paddle that is impacted
             segment = int(round(pos * 3))
+
+            # In edge cases where the ball is barely grazing the edge of the paddle, don't wrap around to the other side
+            segment = min(segment, 3)
+            segment = max(segment, -3)
+
             angle = Pong.Ball.BOUNCE_ANGLES[segment]
             velocity = self.get_vector(angle, self.speed)
             if self.right:
