@@ -381,8 +381,6 @@ class Pong:
                 if self.score_right >= Pong.MAX_SCORE or self.score_left >= Pong.MAX_SCORE:
                     done = True
         screen = self.render()
-        self.last_screen = screen
-        #self.show(self.render())
         return screen, (reward_l, reward_r), done
 
     def step(self, left_action, right_action, frames=3):
@@ -435,12 +433,15 @@ class Pong:
                     self.right.reset()
                 self.ball.update()
                 done = False
-                if self.score_right + self.score_left >= Pong.MAX_SCORE: #self.score_right >= Pong.MAX_SCORE or self.score_left >= Pong.MAX_SCORE:
+                if self.score_right >= Pong.MAX_SCORE or self.score_left >= Pong.MAX_SCORE:
                     done = True
 
             screen = self.render()
             self.last_screen = screen
             self.last_frame_time = time.time()
+
+        self.last_screen = screen
+        #self.show(self.render())
 
         self.frames += 1
         return screen, (reward_l, reward_r), done

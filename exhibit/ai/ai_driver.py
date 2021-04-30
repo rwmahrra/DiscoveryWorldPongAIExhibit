@@ -18,7 +18,7 @@ class AIDriver:
         action, probs = self.agent.act(x)
 
         # Publish prediction
-        self.state.publish("paddle2/action", {"action": action})
+        self.state.publish("paddle2/action", {"action": str(action)})
         self.state.publish("paddle2/frame", {"frame": current_frame_id})
         print(current_frame_id)
 
@@ -29,7 +29,7 @@ class AIDriver:
 
     def __init__(self):
         self.agent = PGAgent(Config.CUSTOM_STATE_SIZE, Config.CUSTOM_ACTION_SIZE)
-        self.agent.load('../../validation/6px_7k.h5')
+        self.agent.load('../../validation/6px_hitpractice_1750.h5')#self.agent.load('../../validation/6px_7k.h5')
         self.state = AISubscriber(trigger_event=lambda: self.publish_inference())
         self.last_frame_id = self.state.frame
         self.last_tick = time.time()
