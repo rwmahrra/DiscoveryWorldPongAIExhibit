@@ -441,7 +441,7 @@ class Pong:
             self.last_frame_time = time.time()
 
         self.last_screen = screen
-        #self.show(self.render())
+        self.show(self.render(), 3)
 
         self.frames += 1
         return screen, (reward_l, reward_r), done
@@ -495,7 +495,7 @@ class Pong:
 
         # Draw middle grid lines
         #self.draw_rect(screen, 0, int(Pong.HEIGHT/2), int(Pong.WIDTH), 1, 255)
-        #self.draw_rect(screen, int(Pong.WIDTH/2), 0, 1, int(Pong.HEIGHT), 255)
+        self.draw_rect(screen, int(Pong.WIDTH/2), 0, 1, int(Pong.HEIGHT), 255)
 
         if not self.hit_practice:
             self.draw_rect(screen, int(self.left.x - int(self.left.w / 2)), int(self.left.y - int(self.left.h / 2)),

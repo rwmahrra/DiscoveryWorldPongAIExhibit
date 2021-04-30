@@ -29,7 +29,7 @@ class AIDriver:
 
     def __init__(self):
         self.agent = PGAgent(Config.CUSTOM_STATE_SIZE, Config.CUSTOM_ACTION_SIZE)
-        self.agent.load('../../validation/6px_hitpractice_1750.h5')#self.agent.load('../../validation/6px_7k.h5')
+        self.agent.load('../../validation/6px_7k.h5')
         self.state = AISubscriber(trigger_event=lambda: self.publish_inference())
         self.last_frame_id = self.state.frame
         self.last_tick = time.time()
