@@ -18,6 +18,7 @@ class Pong:
     It was used instead of OpenAI Gym or various other publicly available alternatives
     in order to allow for complete flexibility.
     """
+    VOLLEY_SPEEDUP = Config.VOLLEY_SPEEDUP
     PADDING = Config.PADDING  # Distance between screen edge and player paddles (px)
     MAX_SCORE = Config.MAX_SCORE  # Points one side must win to finish game
     WIDTH = Config.WIDTH  # Game window width (px)
@@ -70,7 +71,7 @@ class Pong:
         EDGE_BUFFER = 0  # Pixel distance from screen edges that paddle is allowed to reach
         HEIGHT = Config.PADDLE_HEIGHT  # px
         WIDTH = Config.PADDLE_WIDTH  # px
-        SPEED = 1  # base speed (in px/tick), scales up as game goes on
+        SPEED = 3  # base speed (in px/tick)
 
         def __init__(self, side):
             self.side = side
@@ -78,6 +79,7 @@ class Pong:
             self.y = int(Pong.HEIGHT / 2)
             self.w = self.WIDTH
             self.h = self.HEIGHT
+            self.velocity = [0, 0]
             self.speed = self.SPEED * Pong.SPEEDUP
             if side == "left":
                 self.x = Pong.PADDING
@@ -103,18 +105,29 @@ class Pong:
             """
             Handle up action
             """
-            self.y -= self.speed
-            if self.y < Pong.Paddle.EDGE_BUFFER:
-                self.y = Pong.Paddle.EDGE_BUFFER
+            self.velocity[1] -= self.speed
 
         def down(self):
             """
             Handle down action
             """
-            self.y += self.speed
+            self.velocity[1] += self.speed
+
+        def update(self):
+            """
+            Run game tick housekeeping logic
+            """
+            # First blindly increment position by velocity
+            self.x += self.velocity[0]  # X should never actually change, but it feels right to include it
+            self.y += self.velocity[1]
+            self.velocity = [0, 0]  # We don't actually want velocity to persist from tick to tick, so deplete it all
+
+            # Then back up position if we cross the screen border
             max = Pong.HEIGHT - Pong.Paddle.EDGE_BUFFER
             if self.y > max:
                 self.y = max
+            if self.y < Pong.Paddle.EDGE_BUFFER:
+                self.y = Pong.Paddle.EDGE_BUFFER
 
         def handle_action(self, action):
             """
@@ -131,7 +144,7 @@ class Pong:
 
     class Ball:
         DIAMETER = Config.BALL_DIAMETER
-        SPEED = 1
+        SPEED = 2
         BOUNCE_ANGLES = [0, 60, 45, 30, -30, -45, -60]  # True to original Atari Pong
         START_ANGLES = [0]
 
@@ -238,7 +251,7 @@ class Pong:
                 velocity = self.get_vector(-angle, self.speed)
                 velocity = self.reverse_vector(velocity)
             self.velocity = velocity
-            self.speed += 0.1 * Pong.SPEEDUP
+            self.speed += Pong.VOLLEY_SPEEDUP * Pong.SPEEDUP
 
         def update(self):
             """
@@ -322,6 +335,29 @@ class Pong:
         :param paddle: Paddle object to check
         :return: Tuple of boolean indicating collision and float indicating collision position relative to paddle
         """
+
+        # In retrospect, I regret making positions central vs in a corner - it adds a lot of ugly half translations
+        ball_r = ball.DIAMETER / 2
+        paddle_half_w = paddle.w / 2
+        paddle_half_h = paddle.h / 2
+
+        next_ball_x = ball.x + ball.velocity[0]
+        crosses_x_left = (next_ball_x - ball_r <= paddle.x + paddle_half_w) and (next_ball_x - ball_r >= paddle.x - paddle_half_w)
+        crosses_x_right = (next_ball_x + ball_r <= paddle.x + paddle_half_w) and (next_ball_x + ball_r >= paddle.x - paddle_half_w)
+
+        intersects_x_left = (ball.x + ball_r <= paddle.x - paddle_half_w) and (next_ball_x + ball_r >= paddle.x - paddle_half_w)
+        intersects_x_right = (ball.x - ball_r >= paddle.x + paddle_half_w) and (next_ball_x - ball_r <= paddle.x + paddle_half_w)
+
+        if crosses_x_left or crosses_x_right or intersects_x_left or intersects_x_right:
+            next_ball_y = ball.y + ball.velocity[1]
+            paddle_bottom = min(paddle.y - paddle_half_h, paddle.y - paddle_half_h + paddle.velocity[1])
+            paddle_top = max(paddle.y + paddle_half_h, paddle.y + paddle_half_h + paddle.velocity[1])
+            collide_y_top = (next_ball_y + ball_r <= paddle_top) and (next_ball_y + ball_r >= paddle_bottom)
+            collide_y_bottom = (next_ball_y - ball_r <= paddle_top) and (next_ball_y - ball_r >= paddle_bottom)
+            if collide_y_top or collide_y_bottom:
+                return True, (ball.y - paddle.y) / (paddle.h / 2)
+
+        """
         ball_left = ball.x - (ball.w / 2)
         ball_right = ball.x + (ball.w / 2)
         ball_top = ball.y + (ball.h / 2)
@@ -337,7 +373,9 @@ class Pong:
         if left_collide or right_collide:
             if top_collide or bottom_collide:
                 return True, (ball.y - paddle.y) / (paddle.h / 2)
+        """
         return False, 0
+
 
     def step_hit_practice(self, right_action, frames=3):
         """
@@ -431,6 +469,8 @@ class Pong:
                     self.ball.reset()
                     self.left.reset()
                     self.right.reset()
+                self.left.update()
+                self.right.update()
                 self.ball.update()
                 done = False
                 if self.score_right >= Pong.MAX_SCORE or self.score_left >= Pong.MAX_SCORE:

@@ -27,4 +27,5 @@ class Config:
     ENV_TYPE = CUSTOM
     DEBUG = True
     ENABLE_AUDIO = False
+    VOLLEY_SPEEDUP = 0.2
     AUDIO_DIR = "C:\\dev\\DiscoveryWorld\\exhibit\\game\\resources\\"
