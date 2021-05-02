@@ -157,7 +157,7 @@ class Pong:
             self.x = 5
             self.y = randint(0, Pong.HEIGHT)
             self.speed = self.SPEED * Pong.SPEEDUP
-            self.velocity = ((random() * 0.5 + 0.1), (random() * 2) - 1)
+            self.velocity = self.get_vector(choice(Pong.Ball.BOUNCE_ANGLES), Pong.Ball.SPEED + (Pong.VOLLEY_SPEEDUP * choice(list(range(12)))))
             self.w = self.DIAMETER
             self.right = True
             self.h = self.DIAMETER
@@ -415,10 +415,12 @@ class Pong:
                     self.ball.reset()
                     self.right.reset()
                 self.ball.update()
+                self.right.update()
                 done = False
                 if self.score_right >= Pong.MAX_SCORE or self.score_left >= Pong.MAX_SCORE:
                     done = True
         screen = self.render()
+        #self.show(self.render(), 3)
         return screen, (reward_l, reward_r), done
 
     def step(self, left_action, right_action, frames=3):
@@ -481,12 +483,12 @@ class Pong:
             self.last_frame_time = time.time()
 
         self.last_screen = screen
-        self.show(self.render(), 3)
+        #self.show(self.render(), 3)
 
         self.frames += 1
         return screen, (reward_l, reward_r), done
 
-    def show(self, screen, scale=1,  duration=1):
+    def show(self, screen, scale=1,  duration=0):
         """
         Render last game frame through OpenCV
         :param scale: Multiplier to scale up/scale down rendered frame
