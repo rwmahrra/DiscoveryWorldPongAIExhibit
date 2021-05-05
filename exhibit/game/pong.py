@@ -86,13 +86,31 @@ class Pong:
             elif side == "right":
                 self.x = Pong.WIDTH - Pong.PADDING
 
-        def reset(self):
+        def reset(self, hit_practice=False):
             """
             Clean game state to initial configuration.
             Should be called before a new game.
+            hit_practice: Spawns paddle at random valid position each round, for training generalization
             """
             self.x = 0
             self.y = int(Pong.HEIGHT / 2)
+            if hit_practice:
+                # Generate all positions the paddle could end up in, then pick one.
+                # This allows us to better generalize to all paddle positions in training.
+                # (yes, it's redundant to do this on every reset, but I don't want to add another class field
+                # just for this test setup)
+                base_start = int(Pong.HEIGHT / 2)
+                valid_starts = [base_start]
+                start = base_start + self.speed
+                while start < Pong.HEIGHT - Pong.Paddle.EDGE_BUFFER:
+                    valid_starts.append(start)
+                    start += self.speed
+                start = base_start - self.speed
+                while start > Pong.Paddle.EDGE_BUFFER:
+                    valid_starts.append(start)
+                    start -= self.speed
+                self.y = choice(valid_starts)
+
             self.w = self.WIDTH
             self.h = self.HEIGHT
             self.speed = self.SPEED * Pong.SPEEDUP
@@ -406,14 +424,14 @@ class Pong:
                     reward_l -= 1.0
                     reward_r += 1.0
                     self.ball.reset()
-                    self.right.reset()
+                    self.right.reset(hit_practice=True)
                 elif self.ball.x > Pong.WIDTH:
                     Pong.play_sound("score")
                     self.score_left += 1
                     reward_l += 1.0
                     reward_r -= 1.0
                     self.ball.reset()
-                    self.right.reset()
+                    self.right.reset(hit_practice=True)
                 self.ball.update()
                 self.right.update()
                 done = False
@@ -488,7 +506,7 @@ class Pong:
         self.frames += 1
         return screen, (reward_l, reward_r), done
 
-    def show(self, screen, scale=1,  duration=1):
+    def show(self, screen, scale=1,  duration=0):
         """
         Render last game frame through OpenCV
         :param scale: Multiplier to scale up/scale down rendered frame
