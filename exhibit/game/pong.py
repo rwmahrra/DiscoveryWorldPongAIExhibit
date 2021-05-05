@@ -483,7 +483,7 @@ class Pong:
             self.last_frame_time = time.time()
 
         self.last_screen = screen
-        #self.show(self.render(), 3)
+        self.show(self.render(), 3)
 
         self.frames += 1
         return screen, (reward_l, reward_r), done

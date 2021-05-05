@@ -70,8 +70,8 @@ class AISubscriber:
         screen = np.zeros((Config.HEIGHT, Config.WIDTH, 3), dtype=np.float32)
         screen[:, :] = (0, 60, 140)
 
-        self.draw_rect(screen, int(Config.LEFT_PADDLE_X - int(Config.PADDLE_WIDTH / 2)), int(self.paddle1_y - int(Config.PADDLE_HEIGHT / 2)),
-                  Config.PADDLE_WIDTH, Config.PADDLE_HEIGHT, 255)
+        #self.draw_rect(screen, int(Config.LEFT_PADDLE_X - int(Config.PADDLE_WIDTH / 2)), int(self.paddle1_y - int(Config.PADDLE_HEIGHT / 2)),
+        #          Config.PADDLE_WIDTH, Config.PADDLE_HEIGHT, 255)
         self.draw_rect(screen, int(Config.RIGHT_PADDLE_X - int(Config.PADDLE_WIDTH / 2)), int(self.paddle2_y - int(Config.PADDLE_HEIGHT / 2)),
                  Config.PADDLE_WIDTH, Config.PADDLE_HEIGHT, 255)
         self.draw_rect(screen, int(self.puck_x - int(Config.BALL_DIAMETER / 2)), int(self.puck_y - int(Config.BALL_DIAMETER / 2)),
