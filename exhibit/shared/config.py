@@ -7,7 +7,7 @@ class Config:
     SPEEDUP = 1  # Flat multiplier to game movement speeds
     ACTIONS = ["UP", "DOWN", "NONE"]
     GAME_FPS = 60
-    GAME_TPS = 15
+    AI_FRAME_INTERVAL = 10
     BALL_MARKER_SIZE = 4  # Pixel height and width of experimental position markers
     CUSTOM = 0
     ATARI = 1

@@ -44,7 +44,7 @@ class GameDriver:
                 frame_skips.append(frames_behind)
             action_l, prob_l = self.left_agent.act()
 
-            for i in range(10):
+            for i in range(Config.AI_FRAME_INTERVAL):
                 action_r, prob_r = self.right_agent.act()
                 if type(self.left_agent) == HumanPlayer:
                     action_l, prob_l = self.left_agent.act()
@@ -54,7 +54,7 @@ class GameDriver:
                 reward_l, reward_r = reward
                 if reward_r < 0: score_l -= reward_r
                 if reward_r > 0: score_r += reward_r
-                if i == 9:
+                if i == Config.AI_FRAME_INTERVAL - 1:
                     self.subscriber.emit_state(env.get_packet_info(), request_action=True)
                 to_sleep = next_frame_time - time.time()
                 if to_sleep < 0:
@@ -87,8 +87,8 @@ class GameDriver:
 if __name__ == "__main__":
     subscriber = GameSubscriber()
 
-    opponent = BotPlayer(left=True)
-    #opponent = HumanPlayer('w', 's')
+    #opponent = BotPlayer(left=True)
+    opponent = HumanPlayer('w', 's')
     agent = AIPlayer(subscriber, right=True)
 
     # Wait for AI agent to spin up
