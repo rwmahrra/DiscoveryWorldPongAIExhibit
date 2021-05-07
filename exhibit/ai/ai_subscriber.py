@@ -60,7 +60,8 @@ class AISubscriber:
         :param message: payload object, will be JSON stringified
         :return:
         """
-        self.client.publish(topic, payload=json.dumps(message))
+        p = json.dumps(message)
+        self.client.publish(topic, payload=p)
 
     def render_latest(self):
         """
@@ -113,7 +114,7 @@ class AISubscriber:
         :param trigger_event: Function to call each time a new state is received
         """
         self.trigger_event = trigger_event
-        self.client = mqtt.Client()
+        self.client = mqtt.Client(client_id="ai_module")
         self.client.on_connect = lambda client, userdata, flags, rc : self.on_connect(client, userdata, flags, rc)
         self.client.on_message = lambda client, userdata, msg : self.on_message(client, userdata, msg)
         print("Initializing subscriber")

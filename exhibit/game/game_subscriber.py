@@ -32,7 +32,7 @@ class GameSubscriber:
             self.paddle2_frame = payload["frame"]
 
     def __init__(self):
-        self.client = mqtt.Client()
+        self.client = mqtt.Client(client_id="game_module")
         self.client.connect_async("localhost", port=1883, keepalive=60)
         self.client.on_connect = lambda client, userdata, flags, rc : self.on_connect(client, userdata, flags, rc)
         self.client.on_message = lambda client, userdata, msg : self.on_message(client, userdata, msg)

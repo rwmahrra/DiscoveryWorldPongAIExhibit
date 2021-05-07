@@ -506,7 +506,7 @@ class Pong:
         self.frames += 1
         return screen, (reward_l, reward_r), done
 
-    def show(self, screen, scale=1,  duration=0):
+    def show(self, screen, scale=1,  duration=1):
         """
         Render last game frame through OpenCV
         :param scale: Multiplier to scale up/scale down rendered frame

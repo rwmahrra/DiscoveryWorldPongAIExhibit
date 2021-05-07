@@ -1,3 +1,5 @@
+import tensorflow as tf
+from keras import Model
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
@@ -5,6 +7,7 @@ from keras.optimizers import Adam
 from exhibit.shared.config import Config
 from exhibit.shared.utils import write
 import numpy as np
+import time
 
 
 class PGAgent:
@@ -34,6 +37,13 @@ class PGAgent:
         self.structure = structure
         self.model = self._build_model()
         self.model.summary()
+        self.last_state = None
+        self.last_hidden_activation = None
+        self.last_output = None
+
+        # Truncated model to only calculate hidden layer activations
+        # (it's hard to get at them otherwise since the model is compiled)
+        self.hl_model = Model(inputs=self.model.inputs, outputs=self.model.layers[0].output)
 
     def _build_model(self):
         """
@@ -55,10 +65,44 @@ class PGAgent:
         :param state: ndarray representing game state
         :return: (action id, confidence vector)
         """
+        self.last_state = state
         state = state.reshape([1, state.shape[0]])
+        self.last_hidden_activation = self.hl_model.predict(state, batch_size=1)
         prob = self.model.predict(state, batch_size=1).flatten()
+        self.last_output = prob
         action = np.random.choice(self.action_size, 1, p=prob)[0]
+
         return action, prob
+
+    def get_structure_packet(self):
+        """
+        Returns the state of the model suitable for realtime visualization
+        :return: Model weights (list of 2d lists), biases (list of 1d lists),
+        """
+        layers = []
+        for w in self.model.weights:
+            l = w.numpy().tolist()
+            layers.append(l)
+        return layers
+
+    def get_activation_packet(self):
+        """
+        Returns the state of the model suitable for realtime visualization
+        :return: Model weights (list of 2d lists), biases (list of 1d lists),
+        """
+        import time
+        t1 = time.perf_counter()
+        # First, get input activations (the last preprocessed state)
+        input_activation = self.last_state.tolist()
+
+        # Then, get hidden layer activations (using the truncated model)
+        hidden_activations = self.last_hidden_activation.tolist()
+
+        # Finally, store output activations (model prediction)
+        output_activations = self.last_output.tolist()
+
+        return [input_activation, hidden_activations, output_activations]
+
 
     def discount_rewards(self, rewards):
         """
