@@ -1,8 +1,8 @@
 import tensorflow as tf
-from keras import Model
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.optimizers import Adam
+from tensorflow.keras import Model
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.optimizers import Adam
 
 from exhibit.shared.config import Config
 from exhibit.shared.utils import write
@@ -50,10 +50,10 @@ class PGAgent:
         Helper to construct model with Keras based on configuration
         """
         model = Sequential()
-        model.add(Dense(self.structure[0], activation='relu', init='he_uniform', input_shape=(self.state_size,)))
+        model.add(Dense(self.structure[0], activation='relu', input_shape=(self.state_size,)))
         if len(self.structure) > 1:
             for layer in self.structure[1:]:
-                model.add(Dense(layer, activation='relu', init='he_uniform'))
+                model.add(Dense(layer, activation='relu'))
         model.add(Dense(self.action_size, activation='softmax'))
         opt = Adam(lr=self.learning_rate)
         model.compile(loss='categorical_crossentropy', optimizer=opt)

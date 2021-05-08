@@ -6,7 +6,7 @@ import numpy as np
 
 
 class AIDriver:
-    MODEL = '../../validation/canstop_randomstart_6850.h5'#'../../validation/newhit_10k.h5'
+    MODEL = 'vwalidation/canstop_randomstart_6850.h5'#'../../validation/newhit_10k.h5'
     def publish_inference(self):
         # Get latest state diff
         diff_state = self.state.render_latest_diff()
