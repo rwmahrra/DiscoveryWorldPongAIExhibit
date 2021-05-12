@@ -31,6 +31,7 @@ def simulate_game(env_type=Config.CUSTOM, left=None, right=None, batch=1, visual
 
     # Training data
     states = []
+    states_flipped = []
     actions_l = []
     actions_r = []
     rewards_l = []
@@ -53,10 +54,12 @@ def simulate_game(env_type=Config.CUSTOM, left=None, right=None, batch=1, visual
         current_state = utils.preprocess_custom(state)
         diff_state = current_state - last_state
         model_states.append(diff_state.astype(np.uint8))
+        diff_state_rev = np.flip(diff_state, axis=1)
         last_state = current_state
         action_l, prob_l, action_r, prob_r = None, None, None, None
         x = diff_state.ravel()
-        if left is not None: action_l, prob_l = left.act(x)
+        x_flip = diff_state_rev.ravel()
+        if left is not None: action_l, prob_l = left.act(x_flip)
         if right is not None: action_r, prob_r = right.act(x)
         states.append(x)
 

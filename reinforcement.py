@@ -5,6 +5,7 @@ from exhibit.shared.config import Config
 from exhibit.game.player import BotPlayer
 from exhibit.ai.model import PGAgent
 from visualizer import get_weight_image
+import numpy as np
 
 """
 This file is the driver for training a new DRL pong model.
@@ -19,7 +20,7 @@ convenient monitoring and graphing of the training process.
 """
 
 GAME_BATCH = 10
-MODE = Config.HIT_PRACTICE
+MODE = Config.CUSTOM
 LEARNING_RATE = 0.001
 DENSE_STRUCTURE = (200,)
 ALWAYS_FOLLOW = False
@@ -38,14 +39,18 @@ if __name__ == "__main__":
     action_size = Config.CUSTOM_ACTION_SIZE
     state_size = Config.CUSTOM_STATE_SIZE
     state_shape = Config.CUSTOM_STATE_SHAPE
-    agent_l = BotPlayer(left=True,
-                        always_follow=ALWAYS_FOLLOW) if MODE == Config.CUSTOM else None  # Default to bot, override with model if needed
+    #agent_l = BotPlayer(left=True,
+    #                    always_follow=ALWAYS_FOLLOW) if MODE == Config.CUSTOM else None  # Default to bot, override with model if needed
     # Switch out for interactive session (against human)
     # from player import HumanPlayer
     # agent_l = HumanPlayer(up='w', down='s')
 
     # Init agent
+    agent_l = PGAgent(state_size, action_size, name="agent_l", learning_rate=LEARNING_RATE, structure=DENSE_STRUCTURE)
     agent_r = PGAgent(state_size, action_size, name="agent_r", learning_rate=LEARNING_RATE, structure=DENSE_STRUCTURE)
+
+    agent_l.load("./validation/hitstop_5frame.h5")
+    agent_r.load("./validation/hitstop_5frame.h5")
 
     # Type checks for convenience later
     r_is_model = type(agent_r) == PGAgent
@@ -70,7 +75,8 @@ if __name__ == "__main__":
         actions, probs, rewards = right
 
         if r_is_model: agent_r.train(states, *right)
-        if l_is_model: agent_l.train(states, *left)
+        states_rev = [np.flip(state, axis=0) for state in states]
+        if l_is_model: agent_l.train(states_rev, *left)
 
         neuron_states.append(get_weight_image(agent_r.model, size=state_shape))
         if episode == 1 or episode % 50 == 0:
