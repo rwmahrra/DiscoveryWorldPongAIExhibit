@@ -75,7 +75,7 @@ if __name__ == "__main__":
         actions, probs, rewards = right
 
         if r_is_model: agent_r.train(states, *right)
-        states_rev = [np.flip(state, axis=0) for state in states]
+        states_rev = [np.flip(state, axis=1) for state in states]
         if l_is_model: agent_l.train(states_rev, *left)
 
         neuron_states.append(get_weight_image(agent_r.model, size=state_shape))
