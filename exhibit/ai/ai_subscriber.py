@@ -61,6 +61,11 @@ class AISubscriber:
         :return:
         """
         p = json.dumps(message)
+        if topic == "ai/activation":
+            f = open("out.txt", "w")
+            f.write(p)
+            f.close()
+
         self.client.publish(topic, payload=p)
 
     def render_latest(self):
