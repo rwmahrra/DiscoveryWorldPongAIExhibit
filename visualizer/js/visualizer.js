@@ -26,7 +26,7 @@ function onConnectionLost(responseObject) {
 
 // called when a message arrives
 function onMessageArrived(message) {
-  console.log("onMessageArrived:"+message.payloadString);
+  last_activations = message.payloadString;
 }
 
 function render_game(ctx, frame, image_upscale = 5) {
@@ -115,11 +115,11 @@ function base_render(ctx, frame) {
     // Render neuron nodes, saving calculated positions for weight rendering
     // Hidden
     hidden_pos = render_layer(ctx, render_rescale(hidden_biases, magnitude=1), 0,
-        canvas_height, HIDDEN_LAYER_X, NEURON_SIZE)
+        canvas_height, HIDDEN_LAYER_X * canvas_width, NEURON_SIZE)
 
     // Output
     out_pos = render_layer(ctx, render_rescale(output_biases, magnitude=1), 0,
-        canvas_height, OUTPUT_LAYER_X, NEURON_SIZE, null, OUTPUT_LABELS)
+        canvas_height, OUTPUT_LAYER_X * canvas_width, NEURON_SIZE, null, OUTPUT_LABELS)
 
     // TODO: Create dynamic labels for inference confidence
     /*
@@ -159,7 +159,7 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
     // Render image weights
     t = timer("image_activations");
     const image_activations = is_firing(state_frame);
-    const hw_activations = is_weight_active(hidden_weights, image_activations, significant_hw);
+    const hw_activations = is_weight_active(hidden_weights, image_activations, copy(significant_hw));
     t.stop()
 
     t = timer("rescale hw")
@@ -171,7 +171,7 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
 
     // Re-compute hidden activations for rendering
     t = timer("hl_activations");
-    ow_activations = is_weight_active(output_weights, hl_activations, significant_ow)
+    ow_activations = is_weight_active(output_weights, hl_activations, copy(significant_ow))
     t.stop()
 
     // Render hidden weights
@@ -181,10 +181,20 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
 
     t = timer("render_layers");
     render_layer(ctx, render_rescale(hidden_biases, 1), 0,
-        canvas_height, HIDDEN_LAYER_X, NEURON_SIZE, hl_activations)
+        canvas_height, HIDDEN_LAYER_X * canvas_width, NEURON_SIZE, hl_activations)
     render_layer(ctx, render_rescale(output_biases, 1), 0,
-        canvas_height, OUTPUT_LAYER_X, NEURON_SIZE, null, OUTPUT_LABELS, ol_activations)
+        canvas_height, OUTPUT_LAYER_X * canvas_width, NEURON_SIZE, null, OUTPUT_LABELS, ol_activations)
     t.stop()
+}
+
+function render_loop() {
+    if(last_activations && last_activations != last_rendered_activations) {
+        const ctx = canvas.getContext("2d");
+        const [state_frame, hl_activations, ol_activations] = JSON.parse(last_activations);
+        render_tick(ctx, state_frame, state_frame, hl_activations, ol_activations);
+        last_rendered_activations = last_activations;
+    }
+    requestAnimationFrame(render_loop);
 }
 
 function init() {
@@ -207,19 +217,7 @@ function init() {
     t.stop();
     const activations = [example_activation]//[activation_1, activation_2, activation_3, activation_4, activation_5];
     let i = 4;
-    while(true) {
-        let activation = activations[i % activations.length];
-        const t3 = timer("render tick");
-        render_frame = activation[0]
-        state_frame = activation[0]
-        hl_activations = activation[1][0] //TODO: Squeeze on producer side - this is sent with an extra dimension
-        ol_activations = activation[2]
-        render_tick(ctx, state_frame, state_frame, hl_activations, ol_activations);
-        t3.stop();
-        i++;
-        break;
-    }
-
+    requestAnimationFrame(render_loop);
 }
 
 // Intentionally global. Canvas is for base drawing. Frame canvas holds game frame images.
@@ -244,9 +242,12 @@ var significant_ow = null;
 // Rendering config
 var NEURON_SIZE = null;
 var MIN_PADDING = 3;
-var HIDDEN_LAYER_X = 1000;
-var OUTPUT_LAYER_X = 1600;
+var HIDDEN_LAYER_X = 0.5;
+var OUTPUT_LAYER_X = 0.8;
 var OUTPUT_LABELS = ["UP", "DOWN", "NONE"]
+
+var last_activations = null;
+var last_rendered_activations = null;
 
 
 window.onload = init

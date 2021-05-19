@@ -3,7 +3,7 @@ import socketserver
 
 if __name__ == "__main__":
     PORT = 8000
-    DIRECTORY = "../../visualizer"
+    DIRECTORY = "visualizer"
 
 
     class Handler(http.server.SimpleHTTPRequestHandler):

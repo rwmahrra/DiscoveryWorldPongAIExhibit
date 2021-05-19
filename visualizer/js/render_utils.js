@@ -173,12 +173,22 @@ function interOperate(a, b, lambda) {
 
 function argwhere(a) {
     // Returns array indices where true
-    // Requires a 2d array
-    const indices = []
-    for(let i = 0; i < a.length; i++) {
-        for(let j = 0; j < a[0].length; j++) {
-            if(a[i][j]) {
-                indices.push([i, j])
+    // Requires a 1d or 2d array
+    const dims = get_dims(a);
+    const indices = [];
+    if(dims == 2) {
+        for(let i = 0; i < a.length; i++) {
+            for(let j = 0; j < a[0].length; j++) {
+                if(a[i][j]) {
+                    indices.push([i, j]);
+                }
+            }
+        }
+    }
+    if(dims == 1) {
+        for(let i = 0; i < a.length; i++) {
+            if(a[i]) {
+                indices.push(i);
             }
         }
     }
@@ -187,6 +197,25 @@ function argwhere(a) {
 
 function and(a, b) {
     return interOperate(a, b, (a, b) => a && b);
+}
+
+function copy(a) {
+    const dims = get_dims(a);
+    const new_a = [];
+    if(dims == 2) {
+        for(let i = 0; i < a.length; i++) {
+            new_a.push([]);
+            for(let j = 0; j < a[0].length; j++) {
+                new_a[i].push(a[i][j]);
+            }
+        }
+    }
+    else if(dims == 1) {
+        for(let i = 0; i < a.length; i++) {
+            new_a.push(a[i]);
+        }
+    }
+    return new_a;
 }
 
 // More general rendering utilities

@@ -65,12 +65,12 @@ class PGAgent:
         :param state: ndarray representing game state
         :return: (action id, confidence vector)
         """
-        self.last_state = state
         state = state.reshape([1, state.shape[0]])
-        self.last_hidden_activation = self.hl_model.predict(state, batch_size=1)
+        self.last_hidden_activation = self.hl_model.predict(state, batch_size=1).squeeze()
         prob = self.model.predict(state, batch_size=1).flatten()
         self.last_output = prob
         action = np.random.choice(self.action_size, 1, p=prob)[0]
+        self.last_state = state.flatten()
 
         return action, prob
 
