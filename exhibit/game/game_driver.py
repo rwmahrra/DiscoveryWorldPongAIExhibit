@@ -88,7 +88,7 @@ if __name__ == "__main__":
     subscriber = GameSubscriber()
 
     #opponent = BotPlayer(left=True)
-    opponent = HumanPlayer('w', 's')
+    opponent = HumanPlayer('a', 'd')
     agent = AIPlayer(subscriber, right=True)
 
     # Wait for AI agent to spin up

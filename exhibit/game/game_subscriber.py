@@ -4,11 +4,11 @@ import numpy as np
 
 class GameSubscriber:
     def emit_state(self, state, request_action=False):
-        (puck_x, puck_y), left_y, right_y, score_left, score_right, level, frame = state
+        (puck_x, puck_y), bottom_x, top_x, score_left, score_right, level, frame = state
 
         self.client.publish("puck/position", payload=json.dumps({"x": puck_x, "y": puck_y}))
-        self.client.publish("paddle1/position", payload=json.dumps({"position": left_y}))
-        self.client.publish("paddle2/position", payload=json.dumps({"position": right_y}))
+        self.client.publish("paddle1/position", payload=json.dumps({"position": bottom_x}))
+        self.client.publish("paddle2/position", payload=json.dumps({"position": top_x}))
         self.client.publish("player1/score", payload=json.dumps({"score": score_left}))
         self.client.publish("player2/score", payload=json.dumps({"score": score_right}))
         self.client.publish("game/level", payload=json.dumps({"level": level}))

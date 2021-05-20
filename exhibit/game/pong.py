@@ -2,14 +2,12 @@ import numpy as np
 import cv2
 import math
 import keyboard
-from random import choice, randint, random
 import time
+from random import choice, randint
 from exhibit.shared.config import Config
 
 if Config.ENABLE_AUDIO:
     import pygame.mixer
-
-from exhibit.shared.config import Config
 
 
 class Pong:
@@ -25,7 +23,6 @@ class Pong:
     HEIGHT = Config.HEIGHT  # Game window height (px)
     SPEEDUP = Config.SPEEDUP  # Flat multiplier to game movement speeds
     ACTIONS = Config.ACTIONS
-    BALL_MARKER_SIZE = Config.BALL_MARKER_SIZE  # Pixel height and width of experimental position markers
 
     # Cache game sounds. Loaded on first instance's init
     sounds = None
@@ -75,16 +72,16 @@ class Pong:
 
         def __init__(self, side):
             self.side = side
-            self.x = 0
-            self.y = int(Pong.HEIGHT / 2)
+            self.x = int(Pong.WIDTH / 2)
+            self.y = 0
             self.w = self.WIDTH
             self.h = self.HEIGHT
             self.velocity = [0, 0]
             self.speed = self.SPEED * Pong.SPEEDUP
-            if side == "left":
-                self.x = Pong.PADDING
-            elif side == "right":
-                self.x = Pong.WIDTH - Pong.PADDING
+            if self.side == "top":
+                self.y = Config.TOP_PADDLE_Y
+            elif self.side == "bottom":
+                self.y = Config.BOTTOM_PADDLE_Y
 
         def reset(self, hit_practice=False):
             """
@@ -92,14 +89,14 @@ class Pong:
             Should be called before a new game.
             hit_practice: Spawns paddle at random valid position each round, for training generalization
             """
-            self.x = 0
-            self.y = int(Pong.HEIGHT / 2)
+            self.x = int(Pong.WIDTH / 2)
+            self.y = 0
             if hit_practice:
                 # Generate all positions the paddle could end up in, then pick one.
                 # This allows us to better generalize to all paddle positions in training.
                 # (yes, it's redundant to do this on every reset, but I don't want to add another class field
                 # just for this test setup)
-                base_start = int(Pong.HEIGHT / 2)
+                base_start = int(Pong.WIDTH / 2)
                 valid_starts = [base_start]
                 start = base_start + self.speed
                 while start < Pong.HEIGHT - Pong.Paddle.EDGE_BUFFER:
@@ -114,38 +111,38 @@ class Pong:
             self.w = self.WIDTH
             self.h = self.HEIGHT
             self.speed = self.SPEED * Pong.SPEEDUP
-            if self.side == "left":
-                self.x = Config.LEFT_PADDLE_X
-            elif self.side == "right":
-                self.x = Config.RIGHT_PADDLE_X
+            if self.side == "top":
+                self.y = Config.TOP_PADDLE_Y
+            elif self.side == "bottom":
+                self.y = Config.BOTTOM_PADDLE_Y
 
-        def up(self):
+        def left(self):
             """
             Handle up action
             """
-            self.velocity[1] -= self.speed
+            self.velocity[0] -= self.speed
 
-        def down(self):
+        def right(self):
             """
             Handle down action
             """
-            self.velocity[1] += self.speed
+            self.velocity[0] += self.speed
 
         def update(self):
             """
             Run game tick housekeeping logic
             """
             # First blindly increment position by velocity
-            self.x += self.velocity[0]  # X should never actually change, but it feels right to include it
-            self.y += self.velocity[1]
+            self.x += self.velocity[0]
+            self.y += self.velocity[1]  # Y should never actually change, but it feels right to include it
             self.velocity = [0, 0]  # We don't actually want velocity to persist from tick to tick, so deplete it all
 
             # Then back up position if we cross the screen border
-            max = Pong.HEIGHT - Pong.Paddle.EDGE_BUFFER
-            if self.y > max:
-                self.y = max
-            if self.y < Pong.Paddle.EDGE_BUFFER:
-                self.y = Pong.Paddle.EDGE_BUFFER
+            max = Pong.WIDTH - Pong.Paddle.EDGE_BUFFER
+            if self.x > max:
+                self.x = max
+            if self.x < Pong.Paddle.EDGE_BUFFER:
+                self.x = Pong.Paddle.EDGE_BUFFER
 
         def handle_action(self, action):
             """
@@ -153,18 +150,18 @@ class Pong:
             :param action: String representation of action ("UP", "DOWN", "NONE")
             :return:
             """
-            if action == "UP":
-                self.up()
-            elif action == "DOWN":
-                self.down()
+            if action == "LEFT":
+                self.left()
+            elif action == "RIGHT":
+                self.right()
             elif action == "NONE":
                 pass
 
     class Ball:
         DIAMETER = Config.BALL_DIAMETER
         SPEED = 2
-        BOUNCE_ANGLES = [0, 60, 45, 30, -30, -45, -60]  # True to original Atari Pong
-        START_ANGLES = [0]
+        BOUNCE_ANGLES = [-90, -30, -45, -60, -120, -135, -150]  # True to original Atari Pong
+        START_ANGLES = [90]
 
         def spawn_hit_practice(self):
             """
@@ -172,12 +169,12 @@ class Pong:
             the right side. Useful for training a right model to hit from various
             trajectories without coupling to an opponent strategy.
             """
-            self.x = 5
-            self.y = randint(0, Pong.HEIGHT)
+            self.x = randint(0, Pong.WIDTH)
+            self.y = 5
             self.speed = self.SPEED * Pong.SPEEDUP
-            self.velocity = self.get_vector(choice(Pong.Ball.BOUNCE_ANGLES), Pong.Ball.SPEED + (Pong.VOLLEY_SPEEDUP * choice(list(range(12)))))
+            self.velocity = self.get_vector(Pong.Ball.SPEED + (Pong.VOLLEY_SPEEDUP * choice(list(range(12)))), choice(Pong.Ball.BOUNCE_ANGLES))
             self.w = self.DIAMETER
-            self.right = True
+            self.up = True
             self.h = self.DIAMETER
 
         def __init__(self, hit_practice=False):
@@ -195,7 +192,7 @@ class Pong:
                 self.speed = self.SPEED * Pong.SPEEDUP
                 self.velocity = (0, 0)
                 self.w = self.DIAMETER
-                self.right = None
+                self.up = None
                 self.h = self.DIAMETER
 
         def reset(self):
@@ -205,7 +202,7 @@ class Pong:
             if self.hit_practice:
                 self.spawn_hit_practice()
             else:
-                self.right = None
+                self.up = None
                 self.x = math.floor(Pong.WIDTH / 2)
                 self.y = math.floor(Pong.HEIGHT / 2)
                 self.speed = self.SPEED * Pong.SPEEDUP
@@ -265,9 +262,9 @@ class Pong:
 
             angle = Pong.Ball.BOUNCE_ANGLES[segment]
             velocity = self.get_vector(angle, self.speed)
-            if self.right:
+            if self.up:
                 velocity = self.get_vector(-angle, self.speed)
-                velocity = self.reverse_vector(velocity)
+                #velocity = self.reverse_vector(velocity)
             self.velocity = velocity
             self.speed += Pong.VOLLEY_SPEEDUP * Pong.SPEEDUP
 
@@ -277,27 +274,25 @@ class Pong:
             """
             if self.velocity == (0, 0):
                 angle = choice(Pong.Ball.START_ANGLES)
-                self.right = True
+                self.up = False
                 if randint(0, 1) == 1:
                     angle += 180
-                    self.right = False
+                    self.up = True
                 self.velocity = self.get_vector(angle, self.speed)
             self.x += self.velocity[0]
             self.y += self.velocity[1]
-            if self.y > Pong.HEIGHT:
-                self.y = Pong.HEIGHT
-                self.bounce(y=True)
-            if self.y < 0:
-                self.y = 0
-                self.bounce(y=True)
+            if self.x > Pong.WIDTH:
+                self.x = Pong.WIDTH
+                self.bounce(x=True)
+            if self.x < 0:
+                self.x = 0
+                self.bounce(x=True)
 
-    def __init__(self, hit_practice=False, marker_h=False, marker_v=False):
+    def __init__(self, hit_practice=False):
         """
         Initialize basic game state
         :param hit_practice: Trigger training mode with a single paddle and randomly spawned balls
                              See the Ball class's hit_practice method.
-        :param marker_h: Display markers on the top and bottom of the screen that follow the horizontal ball position
-        :param marker_v: Display markers on the left and right of the screen that follow the vertical ball position
         """
         if Pong.sounds == None:
             Pong.load_sounds()
@@ -305,12 +300,10 @@ class Pong:
         # Holds last raw screen pixels for rendering
         self.last_screen = None
         self.hit_practice = hit_practice
-        self.score_left = 0
-        self.marker_v = marker_v
-        self.marker_h = marker_h
-        self.score_right = 0
-        self.left = Pong.Paddle("left") if not self.hit_practice else None
-        self.right = Pong.Paddle("right")
+        self.score_bottom = 0
+        self.score_top = 0
+        self.bottom = Pong.Paddle("bottom") if not self.hit_practice else None
+        self.top = Pong.Paddle("top")
         self.ball = Pong.Ball(hit_practice=hit_practice)
         self.frames = 0
 
@@ -318,10 +311,10 @@ class Pong:
         """
         Reset game state
         """
-        self.score_left = 0
-        self.score_right = 0
-        if not self.hit_practice: self.left.reset()
-        self.right.reset()
+        self.score_bottom = 0
+        self.score_top = 0
+        if not self.hit_practice: self.bottom.reset()
+        self.top.reset()
         self.ball.reset()
         screen = self.render()
         self.last_screen = screen
@@ -332,19 +325,19 @@ class Pong:
         Fetch score tuple at the current frame
         :return: integer tuple: (left score, right score)
         """
-        return self.score_left, self.score_right
+        return self.score_bottom, self.score_top
 
-    def get_bot_data(self, left=False, right=False):
+    def get_bot_data(self, bottom=False, top=False):
         """
         Returns internal objects for the hard-coded opponent bot with perfect game state knowledge
-        :param left: hard-coded bot operates left paddle
-        :param right: hard-coded bot operates right paddle
+        :param bottom: hard-coded bot operates bottom paddle
+        :param top: hard-coded bot operates top paddle
         :return: Bot's paddle object and the ball object, used to directly calculate optimal move from object positions
         """
-        if left:
-            return self.left, self.ball
-        if right:
-            return self.right, self.ball
+        if bottom:
+            return self.bottom, self.ball
+        if top:
+            return self.top, self.ball
 
     def check_collision(self, ball, paddle):
         """
@@ -359,46 +352,28 @@ class Pong:
         paddle_half_w = paddle.w / 2
         paddle_half_h = paddle.h / 2
 
-        next_ball_x = ball.x + ball.velocity[0]
-        crosses_x_left = (next_ball_x - ball_r <= paddle.x + paddle_half_w) and (next_ball_x - ball_r >= paddle.x - paddle_half_w)
-        crosses_x_right = (next_ball_x + ball_r <= paddle.x + paddle_half_w) and (next_ball_x + ball_r >= paddle.x - paddle_half_w)
+        next_ball_y = ball.y + ball.velocity[1]
+        crosses_y_left = (next_ball_y - ball_r <= paddle.y + paddle_half_h) and (next_ball_y - ball_r >= paddle.y - paddle_half_h)
+        crosses_y_right = (next_ball_y + ball_r <= paddle.y + paddle_half_h) and (next_ball_y + ball_r >= paddle.y - paddle_half_h)
 
-        intersects_x_left = (ball.x + ball_r <= paddle.x - paddle_half_w) and (next_ball_x + ball_r >= paddle.x - paddle_half_w)
-        intersects_x_right = (ball.x - ball_r >= paddle.x + paddle_half_w) and (next_ball_x - ball_r <= paddle.x + paddle_half_w)
+        intersects_y_left = (ball.y + ball_r <= paddle.y - paddle_half_h) and (next_ball_y + ball_r >= paddle.y - paddle_half_h)
+        intersects_y_right = (ball.y - ball_r >= paddle.y + paddle_half_h) and (next_ball_y - ball_r <= paddle.y + paddle_half_h)
 
-        if crosses_x_left or crosses_x_right or intersects_x_left or intersects_x_right:
-            next_ball_y = ball.y + ball.velocity[1]
-            paddle_bottom = min(paddle.y - paddle_half_h, paddle.y - paddle_half_h + paddle.velocity[1])
-            paddle_top = max(paddle.y + paddle_half_h, paddle.y + paddle_half_h + paddle.velocity[1])
-            collide_y_top = (next_ball_y + ball_r <= paddle_top) and (next_ball_y + ball_r >= paddle_bottom)
-            collide_y_bottom = (next_ball_y - ball_r <= paddle_top) and (next_ball_y - ball_r >= paddle_bottom)
-            if collide_y_top or collide_y_bottom:
-                return True, (ball.y - paddle.y) / (paddle.h / 2)
+        if crosses_y_left or crosses_y_right or intersects_y_left or intersects_y_right:
+            next_ball_x = ball.x + ball.velocity[0]
+            paddle_left = min(paddle.x - paddle_half_w, paddle.x - paddle_half_w + paddle.velocity[0])
+            paddle_right = max(paddle.x + paddle_half_w, paddle.x + paddle_half_w + paddle.velocity[0])
+            collide_x_right = (next_ball_x + ball_r <= paddle_right) and (next_ball_x + ball_r >= paddle_left)
+            collide_x_bottom = (next_ball_x - ball_r <= paddle_right) and (next_ball_x - ball_r >= paddle_left)
+            if collide_x_right or collide_x_bottom:
+                return True, (ball.x - paddle.x) / (paddle.w / 2)
 
-        """
-        ball_left = ball.x - (ball.w / 2)
-        ball_right = ball.x + (ball.w / 2)
-        ball_top = ball.y + (ball.h / 2)
-        ball_bottom = ball.y - (ball.h / 2)
-        paddle_left = paddle.x - (paddle.w / 2)
-        paddle_right = paddle.x + (paddle.w / 2)
-        paddle_top = paddle.y + (paddle.h / 2)
-        paddle_bottom = paddle.y - (paddle.h / 2)
-        left_collide = ball_left > paddle_left and ball_left < paddle_right
-        right_collide = ball_right > paddle_left and ball_right < paddle_right
-        top_collide = ball_top > paddle_bottom and ball_top < paddle_top
-        bottom_collide = ball_bottom < paddle_top and ball_bottom > paddle_bottom
-        if left_collide or right_collide:
-            if top_collide or bottom_collide:
-                return True, (ball.y - paddle.y) / (paddle.h / 2)
-        """
         return False, 0
 
-
-    def step_hit_practice(self, right_action, frames=3):
+    def step_hit_practice(self, top_action, frames=3):
         """
         Game tick if running hit practice
-        :param right_action: Action from right agent
+        :param top_action: Action from top agent
         :param frames: Frames to run before the next action is accepted
         :return: Tuple containing:
                  (screen state,
@@ -410,42 +385,42 @@ class Pong:
         done = False
         for i in range(frames):
             if not done:
-                self.right.handle_action(right_action)
+                self.top.handle_action(top_action)
 
-                collide_right, pos = self.check_collision(self.ball, self.right)
-                if collide_right and self.ball.right:
+                collide_right, pos = self.check_collision(self.ball, self.top)
+                if collide_right and self.ball.up:
                     Pong.play_sound("return")
                     self.ball.bounce_angle(pos)
-                    self.ball.right = False
+                    self.ball.up = False
 
-                if self.ball.x < 0:
+                if self.ball.y > Pong.HEIGHT:
                     Pong.play_sound("score")
-                    self.score_right += 1
+                    self.score_top += 1
                     reward_l -= 1.0
                     reward_r += 1.0
                     self.ball.reset()
-                    self.right.reset(hit_practice=True)
-                elif self.ball.x > Pong.WIDTH:
+                    self.top.reset(hit_practice=True)
+                elif self.ball.y < 0:
                     Pong.play_sound("score")
-                    self.score_left += 1
+                    self.score_bottom += 1
                     reward_l += 1.0
                     reward_r -= 1.0
                     self.ball.reset()
-                    self.right.reset(hit_practice=True)
+                    self.top.reset(hit_practice=True)
                 self.ball.update()
-                self.right.update()
+                self.top.update()
                 done = False
-                if self.score_right >= Pong.MAX_SCORE or self.score_left >= Pong.MAX_SCORE:
+                if self.score_top >= Pong.MAX_SCORE or self.score_bottom >= Pong.MAX_SCORE:
                     done = True
         screen = self.render()
         #self.show(self.render(), 3)
         return screen, (reward_l, reward_r), done
 
-    def step(self, left_action, right_action, frames=3):
+    def step(self, bottom_action, top_action, frames=3):
         """
         Game tick housekeeping
-        :param left_action: Action from left agent
-        :param right_action: Action from right agent
+        :param bottom_action: Action from bottom agent
+        :param top_action: Action from top agent
         :param frames: Frames to run before the next action is accepted
         :return: Tuple containing:
                  (screen state,
@@ -453,47 +428,47 @@ class Pong:
                  boolean indicating if game is over)
         """
         if self.hit_practice:
-            return self.step_hit_practice(right_action, frames=frames)
+            return self.step_hit_practice(top_action, frames=frames)
         reward_l = 0
         reward_r = 0
         done = False
         for i in range(frames):
             if not done:
-                self.left.handle_action(left_action)
-                self.right.handle_action(right_action)
+                self.bottom.handle_action(bottom_action)
+                self.top.handle_action(top_action)
 
-                collide_left, pos = self.check_collision(self.ball, self.left)
-                if collide_left and not self.ball.right:
+                collide_bottom, pos = self.check_collision(self.ball, self.bottom)
+                if collide_bottom and not self.ball.up:
                     Pong.play_sound("return")
                     self.ball.bounce_angle(pos)
-                    self.ball.right = True
-                collide_right, pos = self.check_collision(self.ball, self.right)
-                if collide_right and self.ball.right:
+                    self.ball.up = True
+                collide_top, pos = self.check_collision(self.ball, self.top)
+                if collide_top and self.ball.up:
                     Pong.play_sound("return")
                     self.ball.bounce_angle(pos)
-                    self.ball.right = False
+                    self.ball.up = False
 
-                if self.ball.x < 0:
+                if self.ball.y > Pong.HEIGHT:
                     Pong.play_sound("score")
-                    self.score_right += 1
+                    self.score_top += 1
                     reward_l -= 1.0
                     reward_r += 1.0
                     self.ball.reset()
-                    self.left.reset()
-                    self.right.reset()
-                elif self.ball.x > Pong.WIDTH:
+                    self.bottom.reset()
+                    self.top.reset()
+                elif self.ball.y < 0:
                     Pong.play_sound("score")
-                    self.score_left += 1
+                    self.score_bottom += 1
                     reward_l += 1.0
                     reward_r -= 1.0
                     self.ball.reset()
-                    self.left.reset()
-                    self.right.reset()
-                self.left.update()
-                self.right.update()
+                    self.bottom.reset()
+                    self.top.reset()
+                self.bottom.update()
+                self.top.update()
                 self.ball.update()
                 done = False
-                if self.score_right >= Pong.MAX_SCORE or self.score_left >= Pong.MAX_SCORE:
+                if self.score_top >= Pong.MAX_SCORE or self.score_bottom >= Pong.MAX_SCORE:
                     done = True
 
             screen = self.render()
@@ -521,9 +496,9 @@ class Pong:
     def get_packet_info(self):
         """
         Return all info necessary for regular update messages
-        :return: Tuple representing ((puck_x, puck_y), paddle1_y, paddle2_y, paddle1_score, paddle2_score, game_level))
+        :return: Tuple representing ((puck_x, puck_y), paddle1_x, paddle2_x, paddle1_score, paddle2_score, game_level))
         """
-        return ((self.ball.x, self.ball.y), self.left.y, self.right.y, self.score_left, self.score_right, 0, self.frames)
+        return ((self.ball.x, self.ball.y), self.bottom.x, self.top.x, self.score_bottom, self.score_top, 0, self.frames)
 
     def get_screen(self):
         """
@@ -554,25 +529,16 @@ class Pong:
         screen[:, :] = (0, 60, 140)
 
         # Draw middle grid lines
-        #self.draw_rect(screen, 0, int(Pong.HEIGHT/2), int(Pong.WIDTH), 1, 255)
-        self.draw_rect(screen, int(Pong.WIDTH/2), 0, 1, int(Pong.HEIGHT), 255)
+        self.draw_rect(screen, 0, int(Pong.HEIGHT/2), int(Pong.WIDTH), 1, 255)
+        #self.draw_rect(screen, int(Pong.WIDTH/2), 0, 1, int(Pong.HEIGHT), 255)
 
         if not self.hit_practice:
-            self.draw_rect(screen, int(self.left.x - int(self.left.w / 2)), int(self.left.y - int(self.left.h / 2)),
-                           self.left.w, self.left.h, 255)
-        self.draw_rect(screen, int(self.right.x - int(self.right.w / 2)), int(self.right.y - int(self.right.h / 2)),
-                       self.right.w, self.right.h, 255)
+            self.draw_rect(screen, int(self.bottom.x - int(self.bottom.w / 2)), int(self.bottom.y - int(self.bottom.h / 2)),
+                           self.bottom.w, self.bottom.h, 255)
+        self.draw_rect(screen, int(self.top.x - int(self.top.w / 2)), int(self.top.y - int(self.top.h / 2)),
+                       self.top.w, self.top.h, 255)
         self.draw_rect(screen, int(self.ball.x - int(self.ball.w / 2)), int(self.ball.y - int(self.ball.h / 2)),
                        self.ball.w, self.ball.h, 255)
-        # Draw pixel markers on top and left aligned with ball
-        if self.marker_h:
-            marker_x = max(min(int(self.ball.x), Pong.WIDTH-1), 0)
-            self.draw_rect(screen, int(marker_x - int(Pong.BALL_MARKER_SIZE / 2)), 0,
-                           Pong.BALL_MARKER_SIZE, Pong.BALL_MARKER_SIZE, 255)
-        if self.marker_v:
-            marker_y = min(max(int(self.ball.y), 0), Pong.HEIGHT - 1)
-            self.draw_rect(screen, 0, int(marker_y - int(Pong.BALL_MARKER_SIZE / 2)),
-                           Pong.BALL_MARKER_SIZE, Pong.BALL_MARKER_SIZE, 255)
         return screen
 
 
