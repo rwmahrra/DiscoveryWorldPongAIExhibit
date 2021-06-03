@@ -87,15 +87,16 @@ class GameDriver:
 if __name__ == "__main__":
     subscriber = GameSubscriber()
 
-    #opponent = BotPlayer(left=True)
-    opponent = HumanPlayer('w', 's')
+    opponent = BotPlayer(left=True)
+    #opponent = HumanPlayer('w', 's')
     agent = AIPlayer(subscriber, right=True)
 
     # Wait for AI agent to spin up
-    time.sleep(5)
-
-    start = time.time()
-    instance = GameDriver(subscriber, opponent, agent)
-    instance.run()
+    for level in range(1,4):
+        subscriber.emit_level(3)
+        time.sleep(5)
+        start = time.time()
+        instance = GameDriver(subscriber, opponent, agent)
+        instance.run()
     print(f"Completed simulation in {time.time() - start}s")
 

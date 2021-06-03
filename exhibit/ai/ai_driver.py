@@ -3,6 +3,7 @@ from exhibit.shared.config import Config
 import time
 from exhibit.ai.ai_subscriber import AISubscriber
 import numpy as np
+import cv2
 
 
 class AIDriver:
@@ -31,9 +32,7 @@ class AIDriver:
     def __init__(self):
         self.agent = PGAgent(Config.CUSTOM_STATE_SIZE, Config.CUSTOM_ACTION_SIZE)
         self.agent.load(AIDriver.MODEL)
-        model_structure = self.agent.get_structure_packet()
         self.state = AISubscriber(trigger_event=lambda: self.publish_inference())
-        self.state.publish("ai/structure", model_structure)
         self.last_frame_id = self.state.frame
         self.last_tick = time.time()
         self.frame_diffs = []

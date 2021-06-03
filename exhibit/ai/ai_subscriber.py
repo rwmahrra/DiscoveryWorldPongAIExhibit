@@ -53,7 +53,7 @@ class AISubscriber:
         """
         screen[max(y, 0):y + h + 1, max(x, 0):x + w + 1] = color
 
-    def publish(self, topic, message):
+    def publish(self, topic, message, qos=0):
         """
         Use the state subscriber to send a message since we have the connection open anyway
         :param topic: MQTT topic
@@ -61,7 +61,7 @@ class AISubscriber:
         :return:
         """
         p = json.dumps(message)
-        self.client.publish(topic, payload=p)
+        self.client.publish(topic, payload=p, qos=qos)
 
     def render_latest(self):
         """
@@ -106,8 +106,7 @@ class AISubscriber:
         return self.puck_x is not None \
                and self.puck_y is not None \
                and self.paddle1_y is not None \
-               and self.paddle2_y is not None \
-               and self.game_level is not None
+               and self.paddle2_y is not None
 
     def __init__(self, trigger_event=None):
         """

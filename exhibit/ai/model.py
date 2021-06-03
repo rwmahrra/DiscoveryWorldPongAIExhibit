@@ -7,7 +7,6 @@ from tensorflow.keras.optimizers import Adam
 from exhibit.shared.config import Config
 from exhibit.shared.utils import write
 import numpy as np
-import time
 
 
 class PGAgent:
@@ -70,7 +69,8 @@ class PGAgent:
         prob = self.model.predict(state, batch_size=1).flatten()
         self.last_output = prob
         action = np.random.choice(self.action_size, 1, p=prob)[0]
-        self.last_state = state.flatten()
+        state_ravel = state.reshape(Config.CUSTOM_STATE_SHAPE)
+        self.last_state = np.rot90(state_ravel, axes=(0,1), k=1).flatten()
 
         return action, prob
 
@@ -80,9 +80,17 @@ class PGAgent:
         :return: Model weights (list of 2d lists), biases (list of 1d lists),
         """
         layers = []
+        i = 0
         for w in self.model.weights:
-            l = w.numpy().tolist()
+            l = None
+            if i == 0: # Rotate first weight matrix as temporary solution for rotated
+                l = np.rot90(w.numpy().reshape(*Config.CUSTOM_STATE_SHAPE, -1), axes=(0,1), k=1)
+                l = l.reshape(Config.CUSTOM_STATE_SIZE, 200).tolist()
+            else:
+                l = w.numpy().tolist()
+
             layers.append(l)
+            i += 1
         return layers
 
     def get_activation_packet(self):

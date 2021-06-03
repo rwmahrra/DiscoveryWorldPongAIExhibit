@@ -117,7 +117,7 @@ function max(array) {
     if(dims == 0) return array
     if(dims == 1) return arrayMax(array)
     if(dims == 2) {
-        let max = Math.min();
+        let max = -100000000;
         for(let i = 0; i < array.length; i++) {
             for(let j = 0; j < array[0].length; j++) {
                 if(array[i][j] > max) {
@@ -130,13 +130,44 @@ function max(array) {
     if(dims > 2) throw "Max of array > 2 dimensions not supported"
 }
 
+function argmax(array) {
+    const dims = get_dims(array);
+    // Fill in dims
+    if(dims == 0) return 0
+    if(dims == 1) {
+        let max = -100000000;
+        let max_idx = -1;
+        for(let i = 0; i < array.length; i++) {
+            if(array[i] > max) {
+                max = array[i];
+                max_idx = i;
+            }
+        }
+        return max_idx;
+    }
+    if(dims == 2) {
+        let max = -100000000;
+        let max_idx = -1;
+        for(let i = 0; i < array.length; i++) {
+            for(let j = 0; j < array[0].length; j++) {
+                if(array[i][j] > max) {
+                    max = array[i][j];
+                    max_idx = [i, j];
+                }
+            }
+        }
+        return max_idx;
+    }
+    if(dims > 2) throw "Max of array > 2 dimensions not supported"
+}
+
 function min(array) {
     const dims = get_dims(array);
     // Fill in dims
     if(dims == 0) return array
     if(dims == 1) return arrayMin(array)
     if(dims == 2) {
-        let min = Math.max();
+        let min = 100000000000;
         for(let i = 0; i < array.length; i++) {
             for(let j = 0; j < array[0].length; j++) {
                 if(array[i][j] < min) {
@@ -252,23 +283,37 @@ function get_intensity(val) {
     val = Math.floor(Math.max(val * 255, 34));
     redVal = val.toString(16);
     if(redVal.length == 1) {
-        redvVal = "0" + redVal;
+        redVal = "0" + redVal;
     }
     color = "#" + redVal + "2222"
     return color
 }
 
+function get_weight_map(weights, neuron) {
+    /*
+    Extract a flattened image of the weights of a single neuron relative to each pixel in the input image
+    weights: x by n weight matrix
+    neuron: index of the neuron to extract weights from for each x
+    */
+    weight_map = []
+    weight_map.length = weights.length
+    for(let i = 0; i < weights.length; i++) {
+        weight_map[i] = weights[i][neuron];
+    }
+    return weight_map;
+}
 
-function render_layer(canvas, neurons, top_y, bottom_y, x, neuron_size, activations=null, labels=null, activation_intensities=null) {
+
+function render_layer(canvas, neurons, left_x, right_x, y, neuron_size, activations=null, labels=null, activation_intensities=null) {
     // Scale and normalize biases around 1 to represent useful node scale factors (ranging from ~0.3 - ~1.7)
     neurons = abs(scale(neurons, 10));
     neurons = add(neurons, 1); // Ensure no neurons are zero-sized
     coordinates = [];
-    padding = ((bottom_y - top_y) - (neurons.length * neuron_size)) / (neurons.length + 1);
+    padding = ((right_x - left_x) - (neurons.length * neuron_size)) / (neurons.length + 1);
     for(let i = 0; i < neurons.length; i++) {
         let fill = NEURON_COLOR;
         if (activation_intensities) {
-            fill = get_intensity(activation_intensities[i])
+            fill = get_intensity(activation_intensities[i]);
         }
         if (activations) {
             if (activations[i]) {
@@ -276,11 +321,12 @@ function render_layer(canvas, neurons, top_y, bottom_y, x, neuron_size, activati
             }
         }
         b = neurons[i];
-        y = top_y + (i * neuron_size) + ((i+1) * padding) + (neuron_size / 2);
+        x = left_x + (i * neuron_size) + ((i+1) * padding) + (neuron_size / 2);
         create_circle(x, y, (neuron_size / 2) * b, canvas, color=fill);
         if (labels) {
             canvas.font = TITLE_FONT;
-            canvas.fillText(labels[i], x+25, y+10);
+            canvas.textAlign = "center";
+            canvas.fillText(labels[i], x, y-10);
         }
         coordinates.push([x, y])
     }

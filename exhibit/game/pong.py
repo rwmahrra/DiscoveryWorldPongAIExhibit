@@ -515,15 +515,15 @@ class Pong:
         """
         l, r = self.get_score()
         to_render = cv2.resize(screen, (int(Pong.WIDTH * scale), int(Pong.HEIGHT * scale)))
-        cv2.imshow(f"Pong", cv2.cvtColor(to_render, cv2.COLOR_RGB2BGR))
+        cv2.imshow(f"Pong", to_render/255)
         cv2.waitKey(duration)
 
     def get_packet_info(self):
         """
         Return all info necessary for regular update messages
-        :return: Tuple representing ((puck_x, puck_y), paddle1_y, paddle2_y, paddle1_score, paddle2_score, game_level))
+        :return: Tuple representing ((puck_x, puck_y), paddle1_y, paddle2_y, paddle1_score, paddle2_score, game_frame))
         """
-        return ((self.ball.x, self.ball.y), self.left.y, self.right.y, self.score_left, self.score_right, 0, self.frames)
+        return ((self.ball.x, self.ball.y), self.left.y, self.right.y, self.score_left, self.score_right,  self.frames)
 
     def get_screen(self):
         """
@@ -551,7 +551,7 @@ class Pong:
         :return: ndarray of RGB screen pixels
         """
         screen = np.zeros((Pong.HEIGHT, Pong.WIDTH, 3), dtype=np.float32)
-        screen[:, :] = (0, 60, 140)
+        screen[:, :] = (140, 60, 0) # BGR for a deep blue
 
         # Draw middle grid lines
         #self.draw_rect(screen, 0, int(Pong.HEIGHT/2), int(Pong.WIDTH), 1, 255)
