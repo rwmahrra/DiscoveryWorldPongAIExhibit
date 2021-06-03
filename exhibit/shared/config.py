@@ -7,18 +7,13 @@ class Config:
     SPEEDUP = 1  # Flat multiplier to game movement speeds
     ACTIONS = ["UP", "DOWN", "NONE"]
     GAME_FPS = 60
-    AI_FRAME_INTERVAL = 5
+    AI_FRAME_INTERVAL = 5  # AI will publish inference every n frames
     BALL_MARKER_SIZE = 4  # Pixel height and width of experimental position markers
     CUSTOM = 0
-    ATARI = 1
     HIT_PRACTICE = 2
-    ATARI_ACTIONS = [2, 3]  # Control indices for "UP", "DOWN"
-    ATARI_ACTION_SIZE = 2
     CUSTOM_ACTION_SIZE = 3
     CUSTOM_STATE_SHAPE = HEIGHT // 2, WIDTH // 2
-    ATARI_STATE_SHAPE = 80, 80
     CUSTOM_STATE_SIZE = HEIGHT // 2 * WIDTH // 2
-    ATARI_STATE_SIZE = 80 * 80
     BALL_DIAMETER = 6
     PADDLE_HEIGHT = 20
     PADDLE_WIDTH = 2
@@ -27,5 +22,5 @@ class Config:
     ENV_TYPE = CUSTOM
     DEBUG = True
     ENABLE_AUDIO = False
-    VOLLEY_SPEEDUP = 0.2
+    VOLLEY_SPEEDUP = 0.2  # Multiplier to ball speed after each paddle hit
     AUDIO_DIR = "C:\\dev\\DiscoveryWorld\\exhibit\\game\\resources\\"

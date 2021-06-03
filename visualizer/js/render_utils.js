@@ -20,7 +20,9 @@ var timer = function(name) {
     }
 };
 
-// Utils for working with ND arrays like numpy arrays
+// The following functions are essentially reimplementations of NumPy array operations on nested JavaScript arrays.
+// Most are specific to 1D and 2D arrays.
+
 function get_dims(array) {
     // Find number of dimensions
     base = array;
@@ -231,6 +233,9 @@ function and(a, b) {
 }
 
 function copy(a) {
+    /*
+     * Create a deep copy of the provided 1d or 2d array
+     */
     const dims = get_dims(a);
     const new_a = [];
     if(dims == 2) {

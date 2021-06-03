@@ -64,11 +64,6 @@ class GameDriver:
 
                 last_frame_time = time.time()
 
-            #to_sleep = next_frame_time - time.time()
-            #if to_sleep < 0:
-            #    print(f"Warning: render tick is lagging behind by {-int(to_sleep * 1000)} ms.")
-            #else:
-            #    time.sleep(to_sleep)
             last_frame_time = time.time()
 
             i += 1
@@ -88,6 +83,8 @@ if __name__ == "__main__":
     subscriber = GameSubscriber()
 
     opponent = BotPlayer(left=True)
+
+    # Uncomment the following line (and comment the above) to control the left paddle
     #opponent = HumanPlayer('w', 's')
     agent = AIPlayer(subscriber, right=True)
 
