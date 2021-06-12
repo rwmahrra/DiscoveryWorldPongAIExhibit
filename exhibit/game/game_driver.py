@@ -82,11 +82,11 @@ class GameDriver:
 if __name__ == "__main__":
     subscriber = GameSubscriber()
 
-    opponent = BotPlayer(left=True)
+    opponent = BotPlayer(right=True)
 
     # Uncomment the following line (and comment the above) to control the left paddle
     #opponent = HumanPlayer('w', 's')
-    agent = AIPlayer(subscriber, right=True)
+    agent = AIPlayer(subscriber, left=True)
 
     # Wait for AI agent to spin up
     for level in range(1,4):

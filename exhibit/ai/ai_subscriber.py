@@ -4,7 +4,7 @@ import json
 
 from exhibit.shared import utils
 from exhibit.shared.config import Config
-
+import cv2
 
 class AISubscriber:
     """
@@ -51,7 +51,7 @@ class AISubscriber:
         :param color: RGB int tuple
         :return:
         """
-        screen[max(y, 0):y + h + 1, max(x, 0):x + w + 1] = color
+        screen[max(y,0):y+h, max(x,0):x+w] = color
 
     def publish(self, topic, message, qos=0):
         """
@@ -71,12 +71,15 @@ class AISubscriber:
         screen = np.zeros((Config.HEIGHT, Config.WIDTH, 3), dtype=np.float32)
         screen[:, :] = (0, 60, 140)
 
-        #self.draw_rect(screen, int(Config.LEFT_PADDLE_X - int(Config.PADDLE_WIDTH / 2)), int(self.paddle1_y - int(Config.PADDLE_HEIGHT / 2)),
-        #          Config.PADDLE_WIDTH, Config.PADDLE_HEIGHT, 255)
-        self.draw_rect(screen, int(Config.RIGHT_PADDLE_X - int(Config.PADDLE_WIDTH / 2)), int(self.paddle2_y - int(Config.PADDLE_HEIGHT / 2)),
-                 Config.PADDLE_WIDTH, Config.PADDLE_HEIGHT, 255)
-        self.draw_rect(screen, int(self.puck_x - int(Config.BALL_DIAMETER / 2)), int(self.puck_y - int(Config.BALL_DIAMETER / 2)),
+        self.draw_rect(screen, round(Config.LEFT_PADDLE_X - round(Config.PADDLE_WIDTH / 2)), round(self.paddle1_y - round(Config.PADDLE_HEIGHT / 2)),
+                  Config.PADDLE_WIDTH, Config.PADDLE_HEIGHT, 255)
+        #self.draw_rect(screen, round(Config.RIGHT_PADDLE_X - round(Config.PADDLE_WIDTH / 2)), round(self.paddle2_y - round(Config.PADDLE_HEIGHT / 2)),
+        #         Config.PADDLE_WIDTH, Config.PADDLE_HEIGHT, 255)
+        self.draw_rect(screen, round(self.puck_x - round(Config.BALL_DIAMETER / 2)), round(self.puck_y - round(Config.BALL_DIAMETER / 2)),
                   Config.BALL_DIAMETER, Config.BALL_DIAMETER, 255)
+        screen = np.flip(screen, axis=1)
+        cv2.imshow("test", screen)
+        cv2.waitKey(1)
         return screen
 
     def render_latest_preprocessed(self):

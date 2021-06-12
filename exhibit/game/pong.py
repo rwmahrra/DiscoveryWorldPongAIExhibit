@@ -25,7 +25,6 @@ class Pong:
     HEIGHT = Config.HEIGHT  # Game window height (px)
     SPEEDUP = Config.SPEEDUP  # Flat multiplier to game movement speeds
     ACTIONS = Config.ACTIONS
-    BALL_MARKER_SIZE = Config.BALL_MARKER_SIZE  # Pixel height and width of experimental position markers
 
     # Cache game sounds. Loaded on first instance's init
     sounds = None
@@ -190,8 +189,8 @@ class Pong:
             if self.hit_practice:
                 self.spawn_hit_practice()
             else:
-                self.x = math.floor(Pong.WIDTH / 2)
-                self.y = math.floor(Pong.HEIGHT / 2)
+                self.x = round((Pong.WIDTH / 2) - 1)
+                self.y = round((Pong.HEIGHT / 2) - 1)
                 self.speed = self.SPEED * Pong.SPEEDUP
                 self.velocity = (0, 0)
                 self.w = self.DIAMETER
@@ -206,8 +205,8 @@ class Pong:
                 self.spawn_hit_practice()
             else:
                 self.right = None
-                self.x = math.floor(Pong.WIDTH / 2)
-                self.y = math.floor(Pong.HEIGHT / 2)
+                self.x = round(Pong.WIDTH / 2)
+                self.y = round(Pong.HEIGHT / 2)
                 self.speed = self.SPEED * Pong.SPEEDUP
                 self.velocity = (0, 0)
                 self.w = self.DIAMETER
@@ -291,13 +290,11 @@ class Pong:
                 self.y = 0
                 self.bounce(y=True)
 
-    def __init__(self, hit_practice=False, marker_h=False, marker_v=False):
+    def __init__(self, hit_practice=False):
         """
         Initialize basic game state
         :param hit_practice: Trigger training mode with a single paddle and randomly spawned balls
                              See the Ball class's hit_practice method.
-        :param marker_h: Display markers on the top and bottom of the screen that follow the horizontal ball position
-        :param marker_v: Display markers on the left and right of the screen that follow the vertical ball position
         """
         if Pong.sounds == None:
             Pong.load_sounds()
@@ -306,8 +303,6 @@ class Pong:
         self.last_screen = None
         self.hit_practice = hit_practice
         self.score_left = 0
-        self.marker_v = marker_v
-        self.marker_h = marker_h
         self.score_right = 0
         self.left = Pong.Paddle("left") if not self.hit_practice else None
         self.right = Pong.Paddle("right")
@@ -543,7 +538,7 @@ class Pong:
         :param color: RGB int tuple
         :return:
         """
-        screen[max(y,0):y+h+1, max(x,0):x+w+1] = color
+        screen[max(y,0):y+h, max(x,0):x+w] = color
 
     def render(self):
         """
@@ -553,26 +548,17 @@ class Pong:
         screen = np.zeros((Pong.HEIGHT, Pong.WIDTH, 3), dtype=np.float32)
         screen[:, :] = (140, 60, 0) # BGR for a deep blue
 
-        # Draw middle grid lines
-        #self.draw_rect(screen, 0, int(Pong.HEIGHT/2), int(Pong.WIDTH), 1, 255)
-        self.draw_rect(screen, int(Pong.WIDTH/2), 0, 1, int(Pong.HEIGHT), 255)
+        # Draw middle grid line
+        # Note: subtract 1 from game width because pixels index starting from 0, and we want this to be symmetrical
+        self.draw_rect(screen, round((Pong.WIDTH)/2 - 1), 0, 2, round(Pong.HEIGHT), 255)
 
         if not self.hit_practice:
-            self.draw_rect(screen, int(self.left.x - int(self.left.w / 2)), int(self.left.y - int(self.left.h / 2)),
+            self.draw_rect(screen, round(self.left.x - round(self.left.w / 2)), round(self.left.y - round(self.left.h / 2)),
                            self.left.w, self.left.h, 255)
-        self.draw_rect(screen, int(self.right.x - int(self.right.w / 2)), int(self.right.y - int(self.right.h / 2)),
+        self.draw_rect(screen, round(self.right.x - round(self.right.w / 2)), round(self.right.y - round(self.right.h / 2)),
                        self.right.w, self.right.h, 255)
-        self.draw_rect(screen, int(self.ball.x - int(self.ball.w / 2)), int(self.ball.y - int(self.ball.h / 2)),
+        self.draw_rect(screen, round(self.ball.x - round(self.ball.w / 2)), round(self.ball.y - round(self.ball.h / 2)),
                        self.ball.w, self.ball.h, 255)
-        # Draw pixel markers on top and left aligned with ball
-        if self.marker_h:
-            marker_x = max(min(int(self.ball.x), Pong.WIDTH-1), 0)
-            self.draw_rect(screen, int(marker_x - int(Pong.BALL_MARKER_SIZE / 2)), 0,
-                           Pong.BALL_MARKER_SIZE, Pong.BALL_MARKER_SIZE, 255)
-        if self.marker_v:
-            marker_y = min(max(int(self.ball.y), 0), Pong.HEIGHT - 1)
-            self.draw_rect(screen, 0, int(marker_y - int(Pong.BALL_MARKER_SIZE / 2)),
-                           Pong.BALL_MARKER_SIZE, Pong.BALL_MARKER_SIZE, 255)
         return screen
 
 
