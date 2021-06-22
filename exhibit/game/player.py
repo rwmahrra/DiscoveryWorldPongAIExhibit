@@ -73,7 +73,7 @@ class BotPlayer:
         self.right = right
         self.always_follow = always_follow
         if env is not None:
-            self.paddle, self.ball = env.get_bot_data(left=left, right=right)
+            self.paddle, self.ball = env.get_bot_data(bottom=left, top=right)
 
     def attach_env(self, env):
         """
@@ -81,7 +81,7 @@ class BotPlayer:
         :param env: Pong environment
         :return:
         """
-        self.paddle, self.ball = env.get_bot_data(left=self.left, right=self.right)
+        self.paddle, self.ball = env.get_bot_data(bottom=self.left, top=self.right)
 
     def act(self, state=None):
         """
@@ -99,7 +99,7 @@ class BotPlayer:
                 return 0
             else:
                 return 0 if randint(0, 1) == 1 else 1
-        if self.left and not self.ball.right or self.right and self.ball.right:
+        if self.left and not self.ball.up or self.right and self.ball.up:
             if self.ball.y > self.paddle.y:
                 return 1
             elif self.ball.y < self.paddle.y:

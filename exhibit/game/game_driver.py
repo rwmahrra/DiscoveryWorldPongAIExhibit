@@ -82,7 +82,8 @@ class GameDriver:
 if __name__ == "__main__":
     subscriber = GameSubscriber()
 
-    opponent = BotPlayer(right=True)
+    opponent = HumanPlayer('a', 'd')
+    agent = AIPlayer(subscriber, right=True)
 
     # Uncomment the following line (and comment the above) to control the left paddle
     #opponent = HumanPlayer('w', 's')

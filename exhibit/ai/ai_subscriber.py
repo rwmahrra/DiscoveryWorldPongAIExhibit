@@ -29,9 +29,9 @@ class AISubscriber:
             self.puck_x = payload["x"]
             self.puck_y = payload["y"]
         if topic == "paddle1/position":
-            self.paddle1_y = payload["position"]
+            self.bottom_paddle_x = payload["position"]
         if topic == "paddle2/position":
-            self.paddle2_y = payload["position"]
+            self.top_paddle_x = payload["position"]
         if topic == "game/level":
             self.game_level = payload["level"]
         if topic == "game/frame":
@@ -70,17 +70,13 @@ class AISubscriber:
         """
         screen = np.zeros((Config.HEIGHT, Config.WIDTH, 3), dtype=np.float32)
         screen[:, :] = (0, 60, 140)
-
-        self.draw_rect(screen, round(Config.LEFT_PADDLE_X - round(Config.PADDLE_WIDTH / 2)), round(self.paddle1_y - round(Config.PADDLE_HEIGHT / 2)),
-                  Config.PADDLE_WIDTH, Config.PADDLE_HEIGHT, 255)
-        #self.draw_rect(screen, round(Config.RIGHT_PADDLE_X - round(Config.PADDLE_WIDTH / 2)), round(self.paddle2_y - round(Config.PADDLE_HEIGHT / 2)),
-        #         Config.PADDLE_WIDTH, Config.PADDLE_HEIGHT, 255)
+        #self.draw_rect(screen, int(self.bottom_paddle_x - int(Config.PADDLE_WIDTH / 2)), int(Config.BOTTOM_PADDLE_Y - int(Config.PADDLE_HEIGHT / 2)),
+        #          Config.PADDLE_WIDTH, Config.PADDLE_HEIGHT, 255)
+        self.draw_rect(screen, round(self.top_paddle_x - round(Config.PADDLE_WIDTH / 2)), round(Config.TOP_PADDLE_Y - round(Config.PADDLE_HEIGHT / 2)),
+                 Config.PADDLE_WIDTH, Config.PADDLE_HEIGHT, 255)
         self.draw_rect(screen, round(self.puck_x - round(Config.BALL_DIAMETER / 2)), round(self.puck_y - round(Config.BALL_DIAMETER / 2)),
                   Config.BALL_DIAMETER, Config.BALL_DIAMETER, 255)
-        screen = np.flip(screen, axis=1)
-        cv2.imshow("test", screen)
-        cv2.waitKey(1)
-        return screen
+        return np.rot90(screen, k=3, axes=(0, 1))  # Temporary hack because the model was trained on a horizontal game
 
     def render_latest_preprocessed(self):
         """
@@ -108,8 +104,9 @@ class AISubscriber:
         """
         return self.puck_x is not None \
                and self.puck_y is not None \
-               and self.paddle1_y is not None \
-               and self.paddle2_y is not None
+               and self.bottom_paddle_x is not None \
+               and self.top_paddle_x is not None \
+               and self.game_level is not None
 
     def __init__(self, trigger_event=None):
         """
@@ -123,8 +120,8 @@ class AISubscriber:
         self.client.connect_async("localhost", port=1883, keepalive=60)
         self.puck_x = None
         self.puck_y = None
-        self.paddle1_y = None
-        self.paddle2_y = None
+        self.bottom_paddle_x = None
+        self.top_paddle_x = None
         self.game_level = None
         self.frame = None
         self.latest_frame = None
