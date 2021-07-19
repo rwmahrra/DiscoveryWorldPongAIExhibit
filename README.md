@@ -1,6 +1,14 @@
 # Atari Pong with Deep Reinforcement Learning
 This repository contains all of the materials used to create [this video (and linked paper)](https://youtu.be/23g--Iu_cPE).
 
+## To Play the Exhibit
+* 'mosquitto -v -c ./mosquitto_br.conf': mosquitto MQTT bridge on linux computer 
+* 'mosquitto -v -c ./mosquitto.conf': mosquitto MQTT server on windows computer
+* 'python3 -m exhibit.ai.ai_driver': loads and gets actions from ai models on linux computer
+* 'py -m exhibit.game.game_driver': the game module that runs the Pong environemnt on windows computer
+* 'py -m exhibit.visualization.visualization_driver': visualization module that starts http server for the browser visualization
+* 'Emulate 3D project fixed_pong': the emulate 3d project
+
 ## Getting Started
 1. (Optional) Enter a Python virtual environment if you intend to use one to run this application
 2. Run `pip install -r requirements_local.txt`
