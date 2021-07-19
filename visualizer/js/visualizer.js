@@ -44,14 +44,14 @@ function myMethod(message) {
         player_score = 0;
         morphAllZero()
         morphOp("Smug", 0.5)
+        clearInterval(rightInterval0);
+        clearInterval(rightInterval1);
+        clearInterval(leftInterval0);
+        clearInterval(leftInterval1);
         switch(level) {
             case 1:
                 morphOp("Happy",0.0)
                 setTimeout(smugZero, 0)
-                clearInterval(rightInterval0);
-                clearInterval(rightInterval1);
-                clearInterval(leftInterval0);
-                clearInterval(leftInterval1);
                 rightInterval1 = setInterval(right10, 2910)
                 rightInterval0 = setInterval(rightZero, 3650)
                 rightInterval1 = setInterval(left10, 2750)
@@ -62,10 +62,6 @@ function myMethod(message) {
                 morphOp("Happy",0.2)
                 setTimeout(smugZero, 5000)
                 //setTimeout(mad10, 5000)
-                clearInterval(rightInterval0);
-                clearInterval(rightInterval1);
-                clearInterval(leftInterval0);
-                clearInterval(leftInterval1);
                 rightInterval1 = setInterval(right10, 3709)
                 rightInterval0 = setInterval(rightZero, 4550)
                 rightInterval1 = setInterval(left10, 3610)
@@ -77,10 +73,6 @@ function myMethod(message) {
                 morphOp("Mad", 0.3)
                 //setTimeout(smugZero, 5000)
                 //setTimeout(mad10, 5000)
-                clearInterval(rightInterval0);
-                clearInterval(rightInterval1);
-                clearInterval(leftInterval0);
-                clearInterval(leftInterval1);
                 rightInterval1 = setInterval(right10, 5505)
                 //rightInterval0 = setInterval(rightZero, 5600)
                 rightInterval1 = setInterval(left10, 4910)
@@ -216,17 +208,22 @@ function render_game(ctx, frame, image_upscale = 4) {
     const frame_ctx = frameCanvas.getContext("2d");
     const imageData = frame_ctx.getImageData(0, 0, frame_width, frame_height);
     const frameData = imageData.data;
+    // frameData = imageData.data.map(function(element) {
+    //     return element;
+    // });
+    //console.log(Math.max(frame))
     for(let i = 0; i < frame.length; i++) {
         idx = i * 4;
-        frameData[idx] = frame[i]; // Red
-        frameData[idx+1] = frame[i]; // Green
-        frameData[idx+2] = frame[i]; // Blue
+        // console.log("frame[i]  is:")
+        // console.log(frame[i])
+        //if (frame[i] !== 0) {console.log("frame has nonzero value")} 
+        frameData[idx] = 230-frame[i]; // Red
+        frameData[idx+1] = 230-frame[i]; // Green
+        frameData[idx+2] = 230-frame[i]; // Blue
         frameData[idx+3] = 255; // Alpha
     }
 
     frame_ctx.putImageData(imageData, 0, 0);
-
-    //ctx.drawImage(frameCanvas, img_x, img_y, img_w, img_h);document.body.clientWidth/2
     ctx.drawImage(frameCanvas, img_x, img_y, img_w, img_h); // LW
 }
 
@@ -269,13 +266,17 @@ function render_weight_image(ctx, hl_activations, image_upscale = 4) {
 
 function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activations) {
     // Clean slate before redraw
-    ctx.clearRect(0, 0, canvas_width, canvas_height); // LW so we dont erase the face eyes
+    ctx.clearRect(0, 0, canvas_width, canvas_height); 
 
     // Update rendered probabilities
     percent_prob = scale(ol_activations, 100)
     up_prob = parseFloat(percent_prob[0]).toFixed(2)+"%"
     down_prob = parseFloat(percent_prob[1]).toFixed(2)+"%"
     none_prob = parseFloat(percent_prob[2]).toFixed(2)+"%"
+
+    if (percent_prob[0] > percent_prob[1] & percent_prob[0] > percent_prob[2]) {labelChosen = 0}
+    else if (percent_prob[1] > percent_prob[2]) {labelChosen = 1}
+    else {labelChosen = 2}
 
     let t = timer("render_game");
     // Render game frame
@@ -531,5 +532,7 @@ let leftInterval0;
 var levelg = 1;
 var ai_score = 0;
 var player_score = 0;
+
+var labelChosen = 0;
 
 window.onload = init
