@@ -309,15 +309,15 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
     t.stop()
 
     /********************************************* */
-    console.log('about to do the new activations')
+    //console.log('about to do the new activations')
     // Re-compute middle activations for rendering
     t = timer("il_activations");
-    iw_activations = is_weight_active(output_weights, hl_activations, copy(significant_hw))
+    iw_activations = is_weight_active(hidden_weights, hl_activations, copy(significant_hw))
     t.stop()
 
     // Render middle weights
     t = timer("render_middle_weights");
-    render_weights(ctx, hidden_pos, hidden_pos, rescaled_hw, hw_activations, 3)
+    render_weights(ctx, hidden_pos, hidden_pos, rescaled_hw, iw_activations, 3)
     t.stop()
     /************************************************** */
 
@@ -334,9 +334,9 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
     none_pos = out_pos[2]
     ctx.font = TITLE_FONT;
     ctx.textAlign = "center";
-    ctx.fillText(up_prob, up_pos[0], up_pos[1]-40);
-    ctx.fillText(down_prob, down_pos[0], down_pos[1]-40);
-    ctx.fillText(none_prob, none_pos[0], none_pos[1]-40);
+    // ctx.fillText(up_prob, up_pos[0], up_pos[1]-40);
+    // ctx.fillText(down_prob, down_pos[0], down_pos[1]-40);
+    // ctx.fillText(none_prob, none_pos[0], none_pos[1]-40);
 }
 
 function render_loop() {
@@ -407,8 +407,8 @@ function init_model(level) {
         // Determine appropriate base size for a neuron based on minimum allowable padding for a specific layer
         console.log('MIN_PADDING is:')
         console.log(MIN_PADDING);
-        console.log('hidden_biases.length is:')
-        console.log(hidden_biases.length);
+        // console.log('hidden_biases.length is:')
+        // console.log(hidden_biases.length);
         console.log('canvas_height is:')
         console.log(canvas_height);
         NEURON_SIZE = (canvas_height - (hidden_biases.length * MIN_PADDING)) / (hidden_biases.length)

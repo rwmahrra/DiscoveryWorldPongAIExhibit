@@ -3,8 +3,8 @@ This class is a relatively straightforward set of utilities used in the inferenc
 */
 const TITLE_FONT = "30px Arial";
 const WEIGHT_COLOR = "#666666"
-const WEIGHT_COLOR_ACTIVE = "#1100FF"//"#BB6666"
-const WEIGHT_COLOR_ACTIVE = "#BB6666"
+const WEIGHT_COLOR_ACTIVE = "00cdcd"//"#1100FF"//"#BB6666"
+const WEIGHT_COLOR_ACTIVE2 = "#93c727"
 const NEURON_COLOR = "#000000"
 const NEURON_COLOR_ACTIVE = "#22ffff"//"#DD2222"
 const ACTIVE_WEIGHT_THRESHOLD = 1
@@ -341,7 +341,7 @@ function render_layer(canvas, neurons, left_x, right_x, y, neuron_size, activati
             canvas.textAlign = "center";
             canvas.fillText(labels[i], x, y-10);
         } else {
-            create_circle(x, y + (Math.sin(x*4)*40), (neuron_size / 2) * b * 2.5, canvas, color = fill);
+            create_circle(x, y + (Math.sin(x/canvas_width*400)*40), (neuron_size / 2) * b * 2.5, canvas, color = fill);
         }
         coordinates.push([x, y])
     }
@@ -445,13 +445,13 @@ function render_weights(canvas, l1_positions, l2_positions, w, render_filter=nul
     t = timer("rendering");
 
     //console.log("should_render.length is:");
-    //console.log(should_render.length);
-    console.log("value1 layer is:")
-    console.log(value1)
+    // console.log(should_render.length);
+    // console.log("value1 layer is:")
+    // console.log(value1)
 
     switch (value1) {
         case 1: // l2 spread
-            console.log("case 1");
+            //console.log("case 1");
             for (let i = 0; i < should_render.length; i++) {
                 const [l1, l2] = should_render[i];
                 l2_pos = l2_positions[l2]
@@ -468,20 +468,14 @@ function render_weights(canvas, l1_positions, l2_positions, w, render_filter=nul
                 canvas.lineWidth = weight;
                 canvas.strokeStyle = fill;
                 canvas.beginPath();
-                if (typeof l1_pos !== 'undefined') {
-                    console.log("l1_pos[0] is")
-                    console.log(l1_pos[0])
                     canvas.moveTo(l1_pos[0], l1_pos[1]); // + (Math.sin(l1_pos[0] * 4) * 40));
-                    canvas.lineTo(l2_pos[0], l2_pos[1] + (Math.sin(l2_pos[0] * 4) * 40));
+                    canvas.lineTo(l2_pos[0], l2_pos[1] + (Math.sin(l2_pos[0]/canvas_width * 400) * 40));
                     canvas.stroke();
                     canvas.lineWidth = 1;
-                } else {
-                    console.log("null l1_pos")
-                }
             }
             break;
         case 2: // l1 spread
-            console.log("case 2");
+            //console.log("case 2");
             for (let i = 0; i < should_render.length; i++) {
                 const [l1, l2] = should_render[i];
                 l2_pos = l2_positions[l2]
@@ -498,22 +492,29 @@ function render_weights(canvas, l1_positions, l2_positions, w, render_filter=nul
                 canvas.lineWidth = weight;
                 canvas.strokeStyle = fill;
                 canvas.beginPath();
-                if (typeof l1_pos !== 'undefined') {
-                    console.log("l1_pos[0] is")
-                    console.log(l1_pos[0])
-                    canvas.moveTo(l1_pos[0], l1_pos[1] + (Math.sin(l1_pos[0] * 4) * 40));
+                    canvas.moveTo(l1_pos[0], l1_pos[1] + (Math.sin(l1_pos[0]/canvas_width * 400) * 40));
                     canvas.lineTo(l2_pos[0], l2_pos[1]); // + (Math.sin(l2_pos[0] * 4) * 40));
                     canvas.stroke();
                     canvas.lineWidth = 1;
-                } else {
-                    console.log("null l1_pos")
-                }
             }
             break;
         case 3: // l2 and l1 spread
-        console.log("case 3");
+            // console.log("case 3");
+        
+            // console.log("should_render.length is:");
+            // console.log(should_render.length);
+            // console.log(should_render)
+            
+            // console.log("l1_positions.length is:");
+            // console.log(l1_positions.length);
+
             for (let i = 0; i < should_render.length; i++) {
                 const [l1, l2] = should_render[i];
+                
+                // console.log("const l1 and l2 are:")
+                // console.log(l1)
+                // console.log(l2)
+
                 l2_pos = l2_positions[l2]
                 l1_pos = l1_positions[l1]
                 let weight = w[l1][l2]
@@ -523,20 +524,21 @@ function render_weights(canvas, l1_positions, l2_positions, w, render_filter=nul
                 // Render activation if l1 activation values are supplied
                 if (render_filter) {
                     active = render_filter[l1, l2]
-                    if (active) fill = WEIGHT_COLOR_ACTIVE
+                    if (active) fill = WEIGHT_COLOR_ACTIVE2
+                    // if (active) console.log("active")
                 }
-                canvas.lineWidth = weight;
+                canvas.lineWidth = weight * 4; // LW
                 canvas.strokeStyle = fill;
                 canvas.beginPath();
                 if (typeof l1_pos !== 'undefined') {
-                    console.log("l1_pos[0] is")
-                    console.log(l1_pos[0])
-                    canvas.moveTo(l1_pos[0], l1_pos[1] + (Math.sin(l1_pos[0] * 4) * 40));
-                    canvas.lineTo(l2_pos[0], l2_pos[1]+ (Math.sin(l2_pos[0] * 4) * 40));
+                    // console.log("l1_pos[0] is")
+                    // console.log(l1_pos[0])
+                    canvas.moveTo(l1_pos[0], l1_pos[1] + (Math.sin(l1_pos[0]/canvas_width * 400) * 40));
+                    canvas.lineTo(l2_pos[0], l2_pos[1]+ (Math.sin(l2_pos[0]/canvas_width * 400) * 40));
                     canvas.stroke();
                     canvas.lineWidth = 1;
                 } else {
-                    console.log("null l1_pos")
+                    //console.log("null l1_pos")
                 }
             }
             break;
