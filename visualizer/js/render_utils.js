@@ -481,7 +481,7 @@ function render_weights(canvas, l1_positions, l2_positions, w, render_filter=nul
             console.log("l1_pos[0] is")
             console.log(l1_pos[0])
             canvas.moveTo(l1_pos[0], l1_pos[1] + (Math.sin(l1_pos[0] * 4) * 40));
-            canvas.lineTo(l2_pos[0], l2_pos[1]);
+            canvas.lineTo(l2_pos[0], l2_pos[1] + (Math.sin(l2_pos[0] * 4) * 40));
             canvas.stroke();
             canvas.lineWidth = 1;
         } else {console.log("null l1_pos")}

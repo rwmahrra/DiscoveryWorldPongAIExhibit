@@ -190,7 +190,7 @@ class Pong:
             depth_cropped_3d_colormap = cv2.line(depth_cropped_3d_colormap, (int(m),h), (int(m),0), (255,255,255), 1)
             cv2.imshow('Filtered',  depth_cropped_3d_colormap)
 
-            img = cv2.EncodeImage(".jpg", img).tostring()
+            #img = cv2.EncodeImage(".jpg", img).tostring()
 
             #key = cv2.waitKey(1)
             # **************************************************
