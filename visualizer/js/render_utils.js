@@ -4,6 +4,7 @@ This class is a relatively straightforward set of utilities used in the inferenc
 const TITLE_FONT = "30px Arial";
 const WEIGHT_COLOR = "#666666"
 const WEIGHT_COLOR_ACTIVE = "#1100FF"//"#BB6666"
+const WEIGHT_COLOR_ACTIVE = "#BB6666"
 const NEURON_COLOR = "#000000"
 const NEURON_COLOR_ACTIVE = "#22ffff"//"#DD2222"
 const ACTIVE_WEIGHT_THRESHOLD = 1
@@ -426,7 +427,7 @@ function is_significant(w, threshold=0.2) {
 }
 
 
-function render_weights(canvas, l1_positions, l2_positions, w, render_filter=null) {
+function render_weights(canvas, l1_positions, l2_positions, w, render_filter=null, value1) {
     // Set up filtering
     let t2 = timer("and")
 
@@ -439,52 +440,107 @@ function render_weights(canvas, l1_positions, l2_positions, w, render_filter=nul
         should_render = argwhere(ones_like(w));
     }
 
-    
-
-
     t.stop();
 
     t = timer("rendering");
-    for(let i = 0; i < should_render.length; i++) {
-        const [l1, l2] = should_render[i];
-        l2_pos = l2_positions[l2]
-        l1_pos = l1_positions[l1]
-        let weight = w[l1][l2]
-        let fill = WEIGHT_COLOR
-        weight = abs(weight)
 
-    //     console.log("length of l1_positions is:");
-    // console.log(l1_positions.length)
-    // console.log("length of element l1 in l1_positions is:");
-    // //console.log(l1_positions[l1].length)
+    //console.log("should_render.length is:");
+    //console.log(should_render.length);
+    console.log("value1 layer is:")
+    console.log(value1)
 
-    // console.log("length of l2_positions is:");
-    // console.log(l2_positions.length)
-    // console.log("length of element l2 in l2_positions is:");
-    // //console.log(l2_positions[l2].length)
+    switch (value1) {
+        case 1: // l2 spread
+            console.log("case 1");
+            for (let i = 0; i < should_render.length; i++) {
+                const [l1, l2] = should_render[i];
+                l2_pos = l2_positions[l2]
+                l1_pos = l1_positions[l1]
+                let weight = w[l1][l2]
+                let fill = WEIGHT_COLOR
+                weight = abs(weight)
 
-    // console.log("length of w the rescale thing is:");
-    // console.log(w.length)
+                // Render activation if l1 activation values are supplied
+                if (render_filter) {
+                    active = render_filter[l1, l2]
+                    if (active) fill = WEIGHT_COLOR_ACTIVE
+                }
+                canvas.lineWidth = weight;
+                canvas.strokeStyle = fill;
+                canvas.beginPath();
+                if (typeof l1_pos !== 'undefined') {
+                    console.log("l1_pos[0] is")
+                    console.log(l1_pos[0])
+                    canvas.moveTo(l1_pos[0], l1_pos[1]); // + (Math.sin(l1_pos[0] * 4) * 40));
+                    canvas.lineTo(l2_pos[0], l2_pos[1] + (Math.sin(l2_pos[0] * 4) * 40));
+                    canvas.stroke();
+                    canvas.lineWidth = 1;
+                } else {
+                    console.log("null l1_pos")
+                }
+            }
+            break;
+        case 2: // l1 spread
+            console.log("case 2");
+            for (let i = 0; i < should_render.length; i++) {
+                const [l1, l2] = should_render[i];
+                l2_pos = l2_positions[l2]
+                l1_pos = l1_positions[l1]
+                let weight = w[l1][l2]
+                let fill = WEIGHT_COLOR
+                weight = abs(weight)
 
-    // console.log("length of render_filter is:");
-    // console.log(render_filter.length)
+                // Render activation if l1 activation values are supplied
+                if (render_filter) {
+                    active = render_filter[l1, l2]
+                    if (active) fill = WEIGHT_COLOR_ACTIVE
+                }
+                canvas.lineWidth = weight;
+                canvas.strokeStyle = fill;
+                canvas.beginPath();
+                if (typeof l1_pos !== 'undefined') {
+                    console.log("l1_pos[0] is")
+                    console.log(l1_pos[0])
+                    canvas.moveTo(l1_pos[0], l1_pos[1] + (Math.sin(l1_pos[0] * 4) * 40));
+                    canvas.lineTo(l2_pos[0], l2_pos[1]); // + (Math.sin(l2_pos[0] * 4) * 40));
+                    canvas.stroke();
+                    canvas.lineWidth = 1;
+                } else {
+                    console.log("null l1_pos")
+                }
+            }
+            break;
+        case 3: // l2 and l1 spread
+        console.log("case 3");
+            for (let i = 0; i < should_render.length; i++) {
+                const [l1, l2] = should_render[i];
+                l2_pos = l2_positions[l2]
+                l1_pos = l1_positions[l1]
+                let weight = w[l1][l2]
+                let fill = WEIGHT_COLOR
+                weight = abs(weight)
 
-        // Render activation if l1 activation values are supplied
-        if (render_filter) {
-            active = render_filter[l1, l2]
-            if (active) fill = WEIGHT_COLOR_ACTIVE
-        }
-        canvas.lineWidth = weight;
-        canvas.strokeStyle = fill;
-        canvas.beginPath();
-        if (typeof l1_pos !== 'undefined') {
-            console.log("l1_pos[0] is")
-            console.log(l1_pos[0])
-            canvas.moveTo(l1_pos[0], l1_pos[1] + (Math.sin(l1_pos[0] * 4) * 40));
-            canvas.lineTo(l2_pos[0], l2_pos[1] + (Math.sin(l2_pos[0] * 4) * 40));
-            canvas.stroke();
-            canvas.lineWidth = 1;
-        } else {console.log("null l1_pos")}
+                // Render activation if l1 activation values are supplied
+                if (render_filter) {
+                    active = render_filter[l1, l2]
+                    if (active) fill = WEIGHT_COLOR_ACTIVE
+                }
+                canvas.lineWidth = weight;
+                canvas.strokeStyle = fill;
+                canvas.beginPath();
+                if (typeof l1_pos !== 'undefined') {
+                    console.log("l1_pos[0] is")
+                    console.log(l1_pos[0])
+                    canvas.moveTo(l1_pos[0], l1_pos[1] + (Math.sin(l1_pos[0] * 4) * 40));
+                    canvas.lineTo(l2_pos[0], l2_pos[1]+ (Math.sin(l2_pos[0] * 4) * 40));
+                    canvas.stroke();
+                    canvas.lineWidth = 1;
+                } else {
+                    console.log("null l1_pos")
+                }
+            }
+            break;
     }
+
     t.stop();
 }

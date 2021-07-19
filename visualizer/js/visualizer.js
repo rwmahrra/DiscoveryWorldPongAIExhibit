@@ -294,7 +294,8 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
     t.stop()
 
     t = timer("render_hidden_weights");
-    render_weights(ctx, pixel_pos, hidden_pos, rescaled_hw, hw_activations)
+    //testVar = 1;
+    render_weights(ctx, pixel_pos, hidden_pos, rescaled_hw, hw_activations, 1)
     t.stop()
     /******************************************** */
     // Re-compute hidden activations for rendering
@@ -304,7 +305,7 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
 
     // Render hidden weights
     t = timer("render_output_weights");
-    render_weights(ctx, hidden_pos, out_pos, render_rescale(output_weights), ow_activations)
+    render_weights(ctx, hidden_pos, out_pos, render_rescale(output_weights), ow_activations, 2)
     t.stop()
 
     /********************************************* */
@@ -316,7 +317,7 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
 
     // Render middle weights
     t = timer("render_middle_weights");
-    render_weights(ctx, hidden_pos, hidden_pos, rescaled_hw, hw_activations)
+    render_weights(ctx, hidden_pos, hidden_pos, rescaled_hw, hw_activations, 3)
     t.stop()
     /************************************************** */
 
