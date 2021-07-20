@@ -2,6 +2,7 @@
 This class is a relatively straightforward set of utilities used in the inference visualization proof-of-concept.
 */
 const TITLE_FONT = "30px Arial";
+const INFO_FONT = "30px Arial";
 const WEIGHT_COLOR = "#222222"
 const WEIGHT_COLOR_ACTIVE = "#9be5dc"//"#1100FF"//"#BB6666"
 const UNCHOSEN_OUT_WEIGHT_COLOR = "#999999"
@@ -312,7 +313,12 @@ function get_weight_map(weights, neuron) {
     }
     return weight_map;
 }
-
+// LW function to render info text
+function render_info(canvas, index, info_text) {
+    canvas.font = INFO_FONT;
+    canvas.textAlign = "left";
+    canvas.fillText(info_text[i], x, y-10);
+}
 
 function render_layer(canvas, neurons, left_x, right_x, y, neuron_size, activations=null, labels=null, activation_intensities=null) {
     // Scale and normalize biases around 1 to represent useful node scale factors (ranging from ~0.3 - ~1.7)
