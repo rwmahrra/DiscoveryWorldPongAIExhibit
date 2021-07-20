@@ -87,7 +87,7 @@ async function loadOpponent(scene) {
     console.log("current opponent position:")
     console.log(opponent.position);
     opponent.position.x = 0;
-    opponent.position.y = 0.8;
+    opponent.position.y = -0.6;
     opponent.position.z = 0;
     console.log("current opponent position:")
     console.log(opponent.position);

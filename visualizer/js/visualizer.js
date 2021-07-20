@@ -89,7 +89,7 @@ function myMethod(message) {
         newScore = JSON.parse(message.payloadString)["score"]
         //console.log("score received")
         if (ai_score !== newScore) {
-            console.log("ai scored")
+            //console.log("ai scored")
             ai_score = newScore;
             switch(levelg) {
                 case 1:
@@ -112,7 +112,7 @@ function myMethod(message) {
         newScore = JSON.parse(message.payloadString)["score"]
         //console.log("score received")
         if (player_score !== newScore) {
-            console.log("player scored")
+            //console.log("player scored")
             player_score = newScore;
             switch(levelg) {
                 case 1:
@@ -258,17 +258,28 @@ function render_game(ctx, frame, image_upscale = 4) {
     // ctx.drawImage(depthCanvas, img_x-50, img_y, img_w, img_h); // LW
 
 
+    // var image = new Image();
+    // image.src = 'data:image/jpg;base64,' + depthFeedStr //canvas.toDataURL(depthFeedStr, 1)
+    
+    // //depth_ctx.drawImage(image, 0, 0)
+    // image.onload = function() {
+
+    //     console.log('drawing image')
+    //     ctx.drawImage(image, canvas_width * (0), canvas_height * (2.5/6), image.width * 3, image.height * 3)
+    // }
+    //document.body.appendChild(image)
+
+}
+function render_depth_feed(ctx, image_upscale = 4) {
     var image = new Image();
     image.src = 'data:image/jpg;base64,' + depthFeedStr //canvas.toDataURL(depthFeedStr, 1)
     
     //depth_ctx.drawImage(image, 0, 0)
     image.onload = function() {
 
-        console.log('drawing image')
-        ctx.drawImage(image, canvas_width * (0), canvas_height * (3/6), image.width * 4, image.height * 4)
+        // console.log('drawing image')
+        ctx.drawImage(image, d_canvas_width * (1/6), d_canvas_height * (2.8/6), image.width * image_upscale, image.height * image_upscale)
     }
-    //document.body.appendChild(image)
-
 }
 
 function render_weight_image(ctx, hl_activations, image_upscale = 4) {
@@ -308,7 +319,7 @@ function render_weight_image(ctx, hl_activations, image_upscale = 4) {
     ctx.drawImage(weightImageCanvas, img_x * 2, img_y, img_w, img_h);
 }
 
-function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activations) {
+function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activations, d_ctx) {
     // Clean slate before redraw
     ctx.clearRect(0, 0, canvas_width, canvas_height); 
 
@@ -324,6 +335,7 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
 
     let t = timer("render_game");
     // Render game frame
+    render_depth_feed(d_ctx)
     render_game(ctx, render_frame);
     t.stop()
 
@@ -387,8 +399,10 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
 function render_loop() {
     if(last_activations && last_activations != last_rendered_activations) {
         const ctx = canvas.getContext("2d");
+        const d_ctx = d_canvas.getContext("2d");
+        
         const [state_frame, hl_activations, ol_activations] = JSON.parse(last_activations);
-        render_tick(ctx, state_frame, state_frame, hl_activations, ol_activations);
+        render_tick(ctx, state_frame, state_frame, hl_activations, ol_activations, d_ctx);
         last_rendered_activations = last_activations;
     }
     // Break out of render loop if we receive a new model to render
@@ -488,6 +502,10 @@ function init() {
     canvas = document.getElementById("visualizer");
     const ctx = canvas.getContext("2d");
 
+    
+    d_canvas = document.getElementById("depth");
+    const d_ctx = d_canvas.getContext("2d");
+
     // Size canvas to full screen
     //canvas.width = 10;
     canvas.width = document.body.clientWidth/(6/4); //document.body.clientWidth;
@@ -495,9 +513,19 @@ function init() {
     canvas.y = 50
     canvas.x = 0 // does nothing
     canvas.style.left = (document.body.clientWidth/6)+'px'; // LW
-    canvas.style.top = 15;
+    canvas.style.top = (15) + 'px';
+    canvas.style.position = 'absolute';
     console.log("canvas.left is ")
     console.log(canvas.left)
+
+    d_canvas.width = document.body.clientWidth/(1); //document.body.clientWidth;
+    d_canvas.height = document.body.clientHeight /2.5;//document.body.clientHeight; // LW
+    d_canvas.style.left = (0)+'px'; // LW
+    d_canvas.style.top = (15) + 'px';
+    d_canvas.style.position = 'absolute';
+
+    d_canvas_width = d_canvas.width
+    d_canvas_height = d_canvas.height
 
     // Save canvas dimensions
     //canvas_width = 10;//
@@ -513,7 +541,7 @@ function init() {
     frameCanvas = document.createElement('canvas');
     // This one will hold a model weight image overlay to see what the network is picking up on
     weightImageCanvas = document.createElement('canvas');
-    depthCanvas = document.createElement('canvas');
+    //depthCanvas = document.createElement('canvas');
 
     initialized = true;
 }
@@ -525,6 +553,7 @@ function morphOp(value){
 
 // Intentionally global. Canvas is for base drawing. Frame canvas holds game frame images.
 var canvas = null;
+var d_canvas = null;
 var frameCanvas = null;
 var weightImageCanvas = null;
 var depthCanvas = null;
@@ -566,6 +595,8 @@ var img_x = null; // These need to be computed based on canvas dimensions
 var img_y = null;
 var canvas_width = null;
 var canvas_height = null;
+var d_canvas_width = null;
+var d_canvas_height = null;
 
 var last_activations = null;
 var last_rendered_activations = null;
@@ -580,6 +611,8 @@ var ai_score = 0;
 var player_score = 0;
 
 var labelChosen = 0;
+
+
 
 var depthFeedStr = "";
 
