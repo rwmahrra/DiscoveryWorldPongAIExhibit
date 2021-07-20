@@ -333,7 +333,7 @@ function render_layer(canvas, neurons, left_x, right_x, y, neuron_size, activati
         b = neurons[i];
         x = left_x + (i * neuron_size) + ((i+1) * padding) + (neuron_size / 2);
         //console.log("Neuron size is: ");
-        //console.log(neuron_size);frameCanvas
+        //console.log(neuron_size);
         //console.log("b is: ");
         //console.log(b);
         // LW

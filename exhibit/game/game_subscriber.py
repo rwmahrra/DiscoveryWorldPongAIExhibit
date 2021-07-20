@@ -15,6 +15,11 @@ class GameSubscriber:
         if request_action:
             self.client.publish("game/frame", payload=json.dumps({"frame": frame}))
 
+    # LW - get depth camera feed into browser
+    def emit_depth_feed(self, feed):
+        self.client.publish("depth/feed", payload=json.dumps({"feed": feed}))
+        #print(f'emitting depth feed: {feed}')
+
     def emit_level(self, level):
         self.client.publish("game/level", payload=json.dumps({"level": level}), qos=2)
 

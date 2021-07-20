@@ -41,6 +41,9 @@ class GameDriver:
         self.subscriber.emit_state(env.get_packet_info(), request_action=True)
         last_frame_time = time.time()
 
+        # LW send depth camera feed over MQTT
+        #self.subscriber.emit_depth_feed()
+
         # Track skipped frame statistics
         frame_skips = []
 
@@ -74,6 +77,8 @@ class GameDriver:
                     self.subscriber.emit_state(env.get_packet_info(), request_action=True)
                 else:
                     self.subscriber.emit_state(env.get_packet_info(), request_action=False)
+                #print(env.depth_feed)
+                self.subscriber.emit_depth_feed(env.depth_feed)
                 to_sleep = next_frame_time - time.time()
                 if to_sleep < 0:
                     placeholder = 1
@@ -82,6 +87,7 @@ class GameDriver:
                     time.sleep(to_sleep)
 
                 last_frame_time = time.time()
+            #self.subscriber.emit_depth_feed(env.depth_feed)
 
             last_frame_time = time.time()
 

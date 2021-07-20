@@ -8,6 +8,7 @@ function onConnect() {
   client.subscribe("player2/score"); // player 2 is ai
   client.subscribe("player1/score"); // player 1 is human
   client.subscribe("ai/activation");
+  client.subscribe("depth/feed");
 }
 
 // called when the client loses its connection
@@ -33,6 +34,7 @@ function onMessageArrived(message) {
     }
 }
 function myMethod(message) {
+    //console.log(message.destinationName)
     if(message.destinationName === "game/level") {
         level = JSON.parse(message.payloadString)["level"];
         levelg = level
@@ -134,6 +136,13 @@ function myMethod(message) {
                     break;
             }
         }
+    } else if(message.destinationName === "depth/feed") {
+        //console.log('received depth image')
+        depthFeedStr = (JSON.parse(message.payloadString)["feed"])
+        //console.log(depthFeedStr)
+        //decoded = atob(rawfeed)
+
+        
     }
 }
 
@@ -225,6 +234,41 @@ function render_game(ctx, frame, image_upscale = 4) {
 
     frame_ctx.putImageData(imageData, 0, 0);
     ctx.drawImage(frameCanvas, img_x, img_y, img_w, img_h); // LW
+
+    // depth image stream
+    // depthCanvas.width = frame_width
+    // depthCanvas.height = frame_height
+    // const depth_ctx = depthCanvas.getContext("2d");
+    // const depthImageData = depth_ctx.getImageData(0, 0, frame_width, frame_height);
+    // const depthData = depthImageData.data;
+    //console.log("depthFeedStr")
+    //console.log(depthFeedStr)
+    // for(let i = 0; i < depthFeedStr.length; i++) {
+    //     idx = i * 4;
+    //     // console.log("frame[i]  is:")
+    //     // console.log(frame[i])
+    //     //if (frame[i] !== 0) {console.log("frame has nonzero value")} 
+    //     frameData[idx] = depthFeedStr[i]; // Red
+    //     frameData[idx+1] = depthFeedStr[i]; // Green
+    //     frameData[idx+2] = depthFeedStr[i]; // Blue
+    //     frameData[idx+3] = 255; // Alpha
+    // }
+
+    // depth_ctx.putImageData(depthImageData, 0, 0);
+    // ctx.drawImage(depthCanvas, img_x-50, img_y, img_w, img_h); // LW
+
+
+    var image = new Image();
+    image.src = 'data:image/jpg;base64,' + depthFeedStr //canvas.toDataURL(depthFeedStr, 1)
+    
+    //depth_ctx.drawImage(image, 0, 0)
+    image.onload = function() {
+
+        console.log('drawing image')
+        ctx.drawImage(image, canvas_width * (0), canvas_height * (3/6), image.width * 4, image.height * 4)
+    }
+    //document.body.appendChild(image)
+
 }
 
 function render_weight_image(ctx, hl_activations, image_upscale = 4) {
@@ -469,6 +513,7 @@ function init() {
     frameCanvas = document.createElement('canvas');
     // This one will hold a model weight image overlay to see what the network is picking up on
     weightImageCanvas = document.createElement('canvas');
+    depthCanvas = document.createElement('canvas');
 
     initialized = true;
 }
@@ -482,6 +527,7 @@ function morphOp(value){
 var canvas = null;
 var frameCanvas = null;
 var weightImageCanvas = null;
+var depthCanvas = null;
 
 // Track initialization status
 var initialized = false;
@@ -534,5 +580,7 @@ var ai_score = 0;
 var player_score = 0;
 
 var labelChosen = 0;
+
+var depthFeedStr = "";
 
 window.onload = init

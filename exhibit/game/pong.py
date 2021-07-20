@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+import base64
 import math
 import keyboard
 from random import choice, randint, random
@@ -34,6 +35,8 @@ class Pong:
     
     align_to = rs.stream.color
     align = rs.align(align_to)  
+
+    depth_feed = ""
 
     #def __init__(self, speedUp = 1):
         #self.SPEEDUP  = speedUp
@@ -96,6 +99,8 @@ class Pong:
             
             return mean/2000
         return 0.5
+    # def get_depth_feed():
+    #     return Pong.depth_feed
     def get_human_x():
         #try to get the frame 50 times
         for i in range(50): 
@@ -189,7 +194,12 @@ class Pong:
             cv2.namedWindow('Filtered', cv2.WINDOW_NORMAL)
             depth_cropped_3d_colormap = cv2.line(depth_cropped_3d_colormap, (int(m),h), (int(m),0), (255,255,255), 1)
             cv2.imshow('Filtered',  depth_cropped_3d_colormap)
-
+            
+            buffer = cv2.imencode('.jpg', depth_cropped_3d_colormap)[1].tostring()
+            Pong.depth_feed = base64.b64encode(buffer).decode()
+            #print(Pong.depth_feed)
+            # print("***")
+            # print(depth_feed)
             #img = cv2.EncodeImage(".jpg", img).tostring()
 
             #key = cv2.waitKey(1)
