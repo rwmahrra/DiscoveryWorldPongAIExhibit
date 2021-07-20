@@ -235,40 +235,6 @@ function render_game(ctx, frame, image_upscale = 4) {
     frame_ctx.putImageData(imageData, 0, 0);
     ctx.drawImage(frameCanvas, img_x, img_y, img_w, img_h); // LW
 
-    // depth image stream
-    // depthCanvas.width = frame_width
-    // depthCanvas.height = frame_height
-    // const depth_ctx = depthCanvas.getContext("2d");
-    // const depthImageData = depth_ctx.getImageData(0, 0, frame_width, frame_height);
-    // const depthData = depthImageData.data;
-    //console.log("depthFeedStr")
-    //console.log(depthFeedStr)
-    // for(let i = 0; i < depthFeedStr.length; i++) {
-    //     idx = i * 4;
-    //     // console.log("frame[i]  is:")
-    //     // console.log(frame[i])
-    //     //if (frame[i] !== 0) {console.log("frame has nonzero value")} 
-    //     frameData[idx] = depthFeedStr[i]; // Red
-    //     frameData[idx+1] = depthFeedStr[i]; // Green
-    //     frameData[idx+2] = depthFeedStr[i]; // Blue
-    //     frameData[idx+3] = 255; // Alpha
-    // }
-
-    // depth_ctx.putImageData(depthImageData, 0, 0);
-    // ctx.drawImage(depthCanvas, img_x-50, img_y, img_w, img_h); // LW
-
-
-    // var image = new Image();
-    // image.src = 'data:image/jpg;base64,' + depthFeedStr //canvas.toDataURL(depthFeedStr, 1)
-    
-    // //depth_ctx.drawImage(image, 0, 0)
-    // image.onload = function() {
-
-    //     console.log('drawing image')
-    //     ctx.drawImage(image, canvas_width * (0), canvas_height * (2.5/6), image.width * 3, image.height * 3)
-    // }
-    //document.body.appendChild(image)
-
 }
 function render_depth_feed(ctx, image_upscale = 4) {
     var image = new Image();
@@ -541,7 +507,6 @@ function init() {
     frameCanvas = document.createElement('canvas');
     // This one will hold a model weight image overlay to see what the network is picking up on
     weightImageCanvas = document.createElement('canvas');
-    //depthCanvas = document.createElement('canvas');
 
     initialized = true;
 }
@@ -556,7 +521,6 @@ var canvas = null;
 var d_canvas = null;
 var frameCanvas = null;
 var weightImageCanvas = null;
-var depthCanvas = null;
 
 // Track initialization status
 var initialized = false;
@@ -586,6 +550,7 @@ var MIN_PADDING = 4.0; // LW was 3. Used at line 212
 var HIDDEN_LAYER_Y = 0.30; // LQ was 0.35
 var OUTPUT_LAYER_Y = 0.13; // LW was 0.1
 var OUTPUT_LABELS = ["LEFT", "RIGHT", "NONE"]
+var INFO_TEXT = ["text1", "text2", "text3"]
 var image_upscale = 4;
 var frame_width = 192 / 2; // Base state dimension, scaled down by two
 var frame_height = 160 / 2; // LW was /2
