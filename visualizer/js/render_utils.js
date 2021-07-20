@@ -2,10 +2,10 @@
 This class is a relatively straightforward set of utilities used in the inference visualization proof-of-concept.
 */
 const TITLE_FONT = "30px Arial";
-const WEIGHT_COLOR = "#888888"
+const WEIGHT_COLOR = "#222222"
 const WEIGHT_COLOR_ACTIVE = "#9be5dc"//"#1100FF"//"#BB6666"
-const UNCHOSEN_OUT_WEIGHT_COLOR = "#222222"
-const WEIGHT_COLOR_ACTIVE2 = "#2E6E99"
+const UNCHOSEN_OUT_WEIGHT_COLOR = "#999999"
+const WEIGHT_COLOR_ACTIVE2 = "#00AEBD"
 const NEURON_COLOR = "#222222" // 000000
 const NEURON_COLOR_ACTIVE = "#22ffff"//"#DD2222"
 const ACTIVE_WEIGHT_THRESHOLD = 1
@@ -493,8 +493,8 @@ function render_weights(canvas, l1_positions, l2_positions, w, render_filter=nul
                     active = render_filter[l1, l2]
                     if (active) fill = WEIGHT_COLOR_ACTIVE
                 }
-                canvas.lineWidth = weight*1.8;
-                if (l2 !== labelChosen) {canvas.lineWidth = canvas.lineWidth/7; fill = UNCHOSEN_OUT_WEIGHT_COLOR;}
+                canvas.lineWidth = weight*2.5;
+                if (l2 !== labelChosen) {canvas.lineWidth = canvas.lineWidth/8; fill = UNCHOSEN_OUT_WEIGHT_COLOR;}
                 canvas.strokeStyle = fill;
                 canvas.beginPath();
                     canvas.moveTo(l1_pos[0], l1_pos[1] + (Math.sin(l1_pos[0]/canvas_width * SPREAD_VALUE) * 40));

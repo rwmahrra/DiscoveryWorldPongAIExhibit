@@ -56,8 +56,8 @@ function myMethod(message) {
                 setTimeout(smugZero, 0)
                 rightInterval1 = setInterval(right10, 2910)
                 rightInterval0 = setInterval(rightZero, 3650)
-                rightInterval1 = setInterval(left10, 2750)
-                rightInterval0 = setInterval(leftZero, 3550)
+                leftInterval1 = setInterval(left10, 2750)
+                leftInterval0 = setInterval(leftZero, 3550)
                 break;
             case 2:
                 setTimeout(smug07, 500)
@@ -66,8 +66,8 @@ function myMethod(message) {
                 //setTimeout(mad10, 5000)
                 rightInterval1 = setInterval(right10, 3709)
                 rightInterval0 = setInterval(rightZero, 4550)
-                rightInterval1 = setInterval(left10, 3610)
-                rightInterval0 = setInterval(leftZero, 4200)
+                leftInterval1 = setInterval(left10, 3610)
+                leftInterval0 = setInterval(leftZero, 4200)
                 break;
             case 3:
                 setTimeout(smug09, 5000)
