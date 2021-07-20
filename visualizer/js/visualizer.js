@@ -50,7 +50,14 @@ function myMethod(message) {
         clearInterval(rightInterval1);
         clearInterval(leftInterval0);
         clearInterval(leftInterval1);
+
+        const info_ctx = infoCanvas.getContext("2d");
+
         switch(level) {
+            case 0:
+                
+                render_info(info_ctx, 0, INFO_TEXT)
+                break;
             case 1:
                 morphOp("Happy",0.0)
                 setTimeout(smugZero, 0)
@@ -58,6 +65,9 @@ function myMethod(message) {
                 rightInterval0 = setInterval(rightZero, 3650)
                 leftInterval1 = setInterval(left10, 2750)
                 leftInterval0 = setInterval(leftZero, 3550)
+
+                render_info(info_ctx, 1, INFO_TEXT)
+
                 break;
             case 2:
                 setTimeout(smug07, 500)
@@ -68,6 +78,9 @@ function myMethod(message) {
                 rightInterval0 = setInterval(rightZero, 4550)
                 leftInterval1 = setInterval(left10, 3610)
                 leftInterval0 = setInterval(leftZero, 4200)
+
+                render_info(info_ctx, 2, INFO_TEXT)
+
                 break;
             case 3:
                 setTimeout(smug09, 5000)
@@ -79,6 +92,9 @@ function myMethod(message) {
                 //rightInterval0 = setInterval(rightZero, 5600)
                 rightInterval1 = setInterval(left10, 4910)
                 //rightInterval0 = setInterval(leftZero, 6250)
+
+                render_info(info_ctx, 3, INFO_TEXT)
+
                 break;
         }
 
@@ -143,7 +159,7 @@ function myMethod(message) {
         //decoded = atob(rawfeed)
 
         
-    }
+    } 
 }
 
 function smugZero() {
@@ -366,6 +382,7 @@ function render_loop() {
     if(last_activations && last_activations != last_rendered_activations) {
         const ctx = canvas.getContext("2d");
         const d_ctx = d_canvas.getContext("2d");
+        //const info_ctx = infoCanvas.getContext("2d");
         
         const [state_frame, hl_activations, ol_activations] = JSON.parse(last_activations);
         render_tick(ctx, state_frame, state_frame, hl_activations, ol_activations, d_ctx);
@@ -472,6 +489,9 @@ function init() {
     d_canvas = document.getElementById("depth");
     const d_ctx = d_canvas.getContext("2d");
 
+    infoCanvas = document.getElementById("info");
+    const info_ctx = infoCanvas.getContext("2d");
+
     // Size canvas to full screen
     //canvas.width = 10;
     canvas.width = document.body.clientWidth/(6/4); //document.body.clientWidth;
@@ -492,6 +512,15 @@ function init() {
 
     d_canvas_width = d_canvas.width
     d_canvas_height = d_canvas.height
+    
+    infoCanvas.width = document.body.clientWidth/(6/1); //document.body.clientWidth;
+    infoCanvas.height = document.body.clientHeight /1;//document.body.clientHeight; // LW
+    infoCanvas.style.left = (document.body.clientWidth/(6/5))+'px'; // LW
+    infoCanvas.style.top = (document.body.clientWidth/(6/2)) + 'px';
+    infoCanvas.style.position = 'absolute';
+
+    infoCanvas_width = infoCanvas.width
+    infoCanvas_height = infoCanvas.height
 
     // Save canvas dimensions
     //canvas_width = 10;//
@@ -521,6 +550,7 @@ var canvas = null;
 var d_canvas = null;
 var frameCanvas = null;
 var weightImageCanvas = null;
+var infoCanvas = null;
 
 // Track initialization status
 var initialized = false;
@@ -550,7 +580,7 @@ var MIN_PADDING = 4.0; // LW was 3. Used at line 212
 var HIDDEN_LAYER_Y = 0.30; // LQ was 0.35
 var OUTPUT_LAYER_Y = 0.13; // LW was 0.1
 var OUTPUT_LABELS = ["LEFT", "RIGHT", "NONE"]
-var INFO_TEXT = ["text1", "text2", "text3"]
+var INFO_TEXT = ["Can you beat the AI? \nStep in to play...", "text1", "text2", "text3"]
 var image_upscale = 4;
 var frame_width = 192 / 2; // Base state dimension, scaled down by two
 var frame_height = 160 / 2; // LW was /2
@@ -562,6 +592,8 @@ var canvas_width = null;
 var canvas_height = null;
 var d_canvas_width = null;
 var d_canvas_height = null;
+var infoCanvas_width = null;
+var infoCanvas_height = null;
 
 var last_activations = null;
 var last_rendered_activations = null;

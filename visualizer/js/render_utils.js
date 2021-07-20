@@ -315,9 +315,13 @@ function get_weight_map(weights, neuron) {
 }
 // LW function to render info text
 function render_info(canvas, index, info_text) {
+    console.log("rendering info text")
+    canvas.clearRect(0, 0, infoCanvas_width, infoCanvas_height)
     canvas.font = INFO_FONT;
-    canvas.textAlign = "left";
-    canvas.fillText(info_text[i], x, y-10);
+    canvas.fillStyle = "#007a85"
+    canvas.textAlign = "center";
+    console.log(info_text[index])
+    canvas.fillText(info_text[index], 50, 50);
 }
 
 function render_layer(canvas, neurons, left_x, right_x, y, neuron_size, activations=null, labels=null, activation_intensities=null) {

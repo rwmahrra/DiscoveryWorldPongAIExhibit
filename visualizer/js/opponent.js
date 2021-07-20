@@ -94,7 +94,7 @@ async function loadOpponent(scene) {
 
     morph(opponent, morphTargets.Happy, 0.0);
 
-    initGui();
+    //initGui();
 }
 
 function initGui() {
