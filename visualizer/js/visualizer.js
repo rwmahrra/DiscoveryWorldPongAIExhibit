@@ -252,7 +252,7 @@ function render_game(ctx, frame, image_upscale = 4) {
     ctx.drawImage(frameCanvas, img_x, img_y, img_w, img_h); // LW
 
 }
-function render_depth_feed(ctx, image_upscale = 4) {
+function render_depth_feed(ctx, image_upscale = 2.8) {
     var image = new Image();
     image.src = 'data:image/jpg;base64,' + depthFeedStr //canvas.toDataURL(depthFeedStr, 1)
     
@@ -260,7 +260,7 @@ function render_depth_feed(ctx, image_upscale = 4) {
     image.onload = function() {
 
         // console.log('drawing image')
-        ctx.drawImage(image, d_canvas_width * (1/6), d_canvas_height * (2.8/6), image.width * image_upscale, image.height * image_upscale)
+        ctx.drawImage(image, d_canvas_width * (1/6), d_canvas_height -(image.height*image_upscale), image.width * image_upscale, image.height * image_upscale)
     }
 }
 
@@ -296,7 +296,7 @@ function render_weight_image(ctx, hl_activations, image_upscale = 4) {
     img_w = frame_width * image_upscale;
     img_h = frame_height * image_upscale;
     img_x = document.body.clientWidth/2//(canvas_width - img_w)/2;
-    img_y = canvas_height - (img_h );//+ (canvas_height / 10)); // LW
+    img_y = canvas_height - (img_h);//+ (canvas_height / 10)); // LW
 
     ctx.drawImage(weightImageCanvas, img_x * 2, img_y, img_w, img_h);
 }
@@ -495,7 +495,7 @@ function init() {
     // Size canvas to full screen
     //canvas.width = 10;
     canvas.width = document.body.clientWidth/(6/4); //document.body.clientWidth;
-    canvas.height = document.body.clientHeight /2.5;//document.body.clientHeight; // LW
+    canvas.height = document.body.clientHeight /2.2;//document.body.clientHeight; // LW
     canvas.y = 50
     canvas.x = 0 // does nothing
     canvas.style.left = (document.body.clientWidth/6)+'px'; // LW
@@ -505,7 +505,7 @@ function init() {
     console.log(canvas.left)
 
     d_canvas.width = document.body.clientWidth/(1); //document.body.clientWidth;
-    d_canvas.height = document.body.clientHeight /2.5;//document.body.clientHeight; // LW
+    d_canvas.height = canvas.height//document.body.clientHeight /2.5;//document.body.clientHeight; // LW
     d_canvas.style.left = (0)+'px'; // LW
     d_canvas.style.top = (15) + 'px';
     d_canvas.style.position = 'absolute';
@@ -513,10 +513,10 @@ function init() {
     d_canvas_width = d_canvas.width
     d_canvas_height = d_canvas.height
     
-    infoCanvas.width = document.body.clientWidth/(6/1); //document.body.clientWidth;
+    infoCanvas.width = document.body.clientWidth/(6/2); //document.body.clientWidth;
     infoCanvas.height = document.body.clientHeight /1;//document.body.clientHeight; // LW
-    infoCanvas.style.left = (document.body.clientWidth/(6/5))+'px'; // LW
-    infoCanvas.style.top = (document.body.clientWidth/(6/2)) + 'px';
+    infoCanvas.style.left = (document.body.clientWidth/(6/4))+'px'; // LW
+    infoCanvas.style.top = (document.body.clientHeight/(7/2)) + 'px';
     infoCanvas.style.position = 'absolute';
 
     infoCanvas_width = infoCanvas.width
@@ -577,11 +577,14 @@ var rescaled_hw = null;
 // Rendering config
 var NEURON_SIZE = null;
 var MIN_PADDING = 4.0; // LW was 3. Used at line 212
-var HIDDEN_LAYER_Y = 0.30; // LQ was 0.35
+var HIDDEN_LAYER_Y = 0.33; // LQ was 0.35
 var OUTPUT_LAYER_Y = 0.13; // LW was 0.1
 var OUTPUT_LABELS = ["LEFT", "RIGHT", "NONE"]
-var INFO_TEXT = ["Can you beat the AI? \nStep in to play...", "text1", "text2", "text3"]
-var image_upscale = 4;
+var INFO_TEXT = ["Can you beat the AI? \nStep in to play...", 
+"Hello human, I am an Artificial Intelligence. \nMy brain is a 'Neural Network' that learns by playing table tennis thousands of times. \n \nMove your body side to side to control your paddle.\nSee if you can beat me!", 
+"text2", 
+"text3"];
+var image_upscale = 2.5;//4
 var frame_width = 192 / 2; // Base state dimension, scaled down by two
 var frame_height = 160 / 2; // LW was /2
 var img_w = frame_width * image_upscale;

@@ -2,7 +2,7 @@
 This class is a relatively straightforward set of utilities used in the inference visualization proof-of-concept.
 */
 const TITLE_FONT = "30px Arial";
-const INFO_FONT = "30px Arial";
+const INFO_FONT = "15px Arial";
 const WEIGHT_COLOR = "#222222"
 const WEIGHT_COLOR_ACTIVE = "#9be5dc"//"#1100FF"//"#BB6666"
 const UNCHOSEN_OUT_WEIGHT_COLOR = "#999999"
@@ -318,10 +318,14 @@ function render_info(canvas, index, info_text) {
     console.log("rendering info text")
     canvas.clearRect(0, 0, infoCanvas_width, infoCanvas_height)
     canvas.font = INFO_FONT;
-    canvas.fillStyle = "#007a85"
-    canvas.textAlign = "center";
+    canvas.fillStyle = "#222222"
+    canvas.textAlign = "left";
     console.log(info_text[index])
-    canvas.fillText(info_text[index], 50, 50);
+
+    texts = info_text[index].split('\n');
+    for (var i = 0; i < texts.length; i++){
+        canvas.fillText(texts[i], 0, 35 +(i*20));
+    }
 }
 
 function render_layer(canvas, neurons, left_x, right_x, y, neuron_size, activations=null, labels=null, activation_intensities=null) {
@@ -352,9 +356,10 @@ function render_layer(canvas, neurons, left_x, right_x, y, neuron_size, activati
             create_circle(x, y, (neuron_size / 2) * b * 2.5, canvas, color = fill);
             canvas.font = TITLE_FONT;
             canvas.textAlign = "center";
+            
             canvas.fillText(labels[i], x, y-10);
         } else {
-            create_circle(x, y + (Math.sin(x/canvas_width*SPREAD_VALUE)*40), (neuron_size / 2) * b * 2.5, canvas, color = fill);
+            create_circle(x, y + (Math.sin(x/canvas_width*SPREAD_VALUE)*30), (neuron_size / 2) * b * 2.5, canvas, color = fill);
         }
         coordinates.push([x, y])
     }
@@ -482,7 +487,7 @@ function render_weights(canvas, l1_positions, l2_positions, w, render_filter=nul
                 canvas.strokeStyle = fill;
                 canvas.beginPath();
                     canvas.moveTo(l1_pos[0], l1_pos[1]); // + (Math.sin(l1_pos[0] * 4) * 40));
-                    canvas.lineTo(l2_pos[0], l2_pos[1] + (Math.sin(l2_pos[0]/canvas_width * SPREAD_VALUE) * 40));
+                    canvas.lineTo(l2_pos[0], l2_pos[1] + (Math.sin(l2_pos[0]/canvas_width * SPREAD_VALUE) * 30));
                     canvas.stroke();
                     canvas.lineWidth = 1;
             }
@@ -507,7 +512,7 @@ function render_weights(canvas, l1_positions, l2_positions, w, render_filter=nul
                 if (l2 !== labelChosen) {canvas.lineWidth = canvas.lineWidth/8; fill = UNCHOSEN_OUT_WEIGHT_COLOR;}
                 canvas.strokeStyle = fill;
                 canvas.beginPath();
-                    canvas.moveTo(l1_pos[0], l1_pos[1] + (Math.sin(l1_pos[0]/canvas_width * SPREAD_VALUE) * 40));
+                    canvas.moveTo(l1_pos[0], l1_pos[1] + (Math.sin(l1_pos[0]/canvas_width * SPREAD_VALUE) * 30));
                     canvas.lineTo(l2_pos[0], l2_pos[1]); // + (Math.sin(l2_pos[0] * 4) * 40));
                     canvas.stroke();
                     canvas.lineWidth = 1;
@@ -548,8 +553,8 @@ function render_weights(canvas, l1_positions, l2_positions, w, render_filter=nul
                 if (typeof l1_pos !== 'undefined') {
                     // console.log("l1_pos[0] is")
                     // console.log(l1_pos[0])
-                    canvas.moveTo(l1_pos[0], l1_pos[1] + (Math.sin(l1_pos[0]/canvas_width * SPREAD_VALUE) * 40));
-                    canvas.lineTo(l2_pos[0], l2_pos[1]+ (Math.sin(l2_pos[0]/canvas_width * SPREAD_VALUE) * 40));
+                    canvas.moveTo(l1_pos[0], l1_pos[1] + (Math.sin(l1_pos[0]/canvas_width * SPREAD_VALUE) * 30));
+                    canvas.lineTo(l2_pos[0], l2_pos[1]+ (Math.sin(l2_pos[0]/canvas_width * SPREAD_VALUE) * 30));
                     canvas.stroke();
                     canvas.lineWidth = 1;
                 } else {
