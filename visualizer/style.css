@@ -13,6 +13,14 @@ canvas {
 
 .visualizer {
     width: 100%;
+    position:absolute;
+}
+.depth {
+    width: 100%;
+    position:absolute;
+}
+.wrapper {
+   position:relative;
 }
 
 .opponent {
