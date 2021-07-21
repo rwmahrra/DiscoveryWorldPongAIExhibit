@@ -323,7 +323,7 @@ function render_info(canvas, index, info_text) {
     canvas.font = INFO_FONT;
     if (index == 0) {
         canvas.font = INFO_FONT0;
-        text_spacing = 55
+        text_spacing = 65
     }
     canvas.fillStyle = "#333333"
     canvas.textAlign = "left";
