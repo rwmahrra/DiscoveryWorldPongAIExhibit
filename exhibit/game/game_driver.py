@@ -27,7 +27,7 @@ class GameDriver:
             print("          Waiting for user interaction . . . ")
             while Pong.get_human_x() == 0.5 :
                 time.sleep(0.01)
-                print(Pong.get_human_x())
+                #print(Pong.get_human_x())
             print(Pong.get_human_x())
             self.subscriber.emit_level(1)
             print("          Human detected, beginning game. ")

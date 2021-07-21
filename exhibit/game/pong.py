@@ -115,11 +115,11 @@ class Pong:
             
             # cropping the image based on a width and height percentage
             w,h = depth_image.shape
-            ws, we = int(w/2 - (w * Pong.crop_percentage_w)), int(w/2 + (w * Pong.crop_percentage_w))
-            hs, he = int(h/2 - (h * Pong.crop_percentage_h)), int(h/2 + (h * Pong.crop_percentage_h))
+            ws, we = int(w/2 - (w * Pong.crop_percentage_w)/2), int(w/2 + (w * Pong.crop_percentage_w)/2)
+            hs, he = int(h/2 - (h * Pong.crop_percentage_h)/2), int(h/2 + (h * Pong.crop_percentage_h)/2)
             #print("dimension: {}, {}, width: {},{} height: {},{}".format(w,h,ws,we,hs,he))
-            #depth_cropped = depth_image[ws:we, hs:he]
-            depth_cropped = depth_image
+            depth_cropped = depth_image[ws:we, hs:he]
+            #depth_cropped = depth_image
 
             cutoffImage = np.where((depth_cropped < Pong.clipping_distance) & (depth_cropped > 0.1), True, False)
 
