@@ -595,10 +595,10 @@ var MIN_PADDING = 3.8; // LW was 3. Used at line 212
 var HIDDEN_LAYER_Y = 0.475; // LQ was 0.35
 var OUTPUT_LAYER_Y = 0.12; // LW was 0.1
 var OUTPUT_LABELS = ["LEFT", "RIGHT", "NONE"]
-var INFO_TEXT = ["Can you beat the AI? \nStep in to play...\n \nGo over applications here maybe?", 
-"Hello human, I am an Artificial Intelligence. \nMy brain is a 'Neural Network' that learns by playing. \n \nMove your body side to side to control your paddle.\nSee if you can beat me!", 
-"This is what I see and my Neural Network. Each circle \nis like a neuron in a human brain. The neurons that \nlight up choose if I move my paddle left or right.\n \nI made it easy for you that round... \nCan you beat a model that was trained for more time?", 
-"When I was learning to play this game, I got rewards \nthat told me what actions were good and bad. I changed \nmy Neural Network to improve a little each time.\nThis is called Reinforcement Learning.\n \nCan you beat my hardest model?\nI've trained thousands of times to \nperfect this Neural Network."];
+var INFO_TEXT = ["Can you beat the AI? \nStep in to play...\n \n \n \nArtificial Intelligence does more than just play games! AI can be used for:\n    Self-Driving Cars\n    Medical Diagnosis\n    Language Translation\n    Virtual Assistants", 
+"Hello human, I am an Artificial Intelligence. \nMy brain is a 'Neural Network' that learns by playing. \n \nMove your body side to side to control your paddle.\nSee if you can beat me!\n \n \n \nArtificial Intelligence does more than just play games! AI can be used for:\n    Self-Driving Cars\n    Medical Diagnosis\n    Language Translation\n    Virtual Assistants", 
+"This is what I see and my Neural Network. Each circle \nis like a neuron in a human brain. The neurons that \nlight up choose if I move my paddle left or right.\n \nI made it easy for you that round... \nCan you beat a model that was trained for more time?\n \n \n \nArtificial Intelligence does more than just play games! AI can be used for:\n    Self-Driving Cars\n    Medical Diagnosis\n    Language Translation\n    Virtual Assistants", 
+"When I was learning to play this game, I got rewards \nthat told me what actions were good and bad. I changed \nmy Neural Network to improve a little each time.\nThis is called Reinforcement Learning.\n \nCan you beat my hardest model?\nI've trained thousands of times to \nperfect this Neural Network.\n \n \n \nArtificial Intelligence does more than just play games! AI can be used for:\n    Self-Driving Cars\n    Medical Diagnosis\n    Language Translation\n    Virtual Assistants"];
 var image_upscale = 4;//4
 var frame_width = 192 / 2; // Base state dimension, scaled down by two
 var frame_height = 160 / 2; // LW was /2
