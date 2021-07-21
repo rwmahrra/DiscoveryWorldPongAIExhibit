@@ -2,8 +2,8 @@
 This class is a relatively straightforward set of utilities used in the inference visualization proof-of-concept.
 */
 const TITLE_FONT = "30px Arial";
-const INFO_FONT = "20px Verdana";
-const INFO_FONT0 = "40px Verdana";
+const INFO_FONT = "30px monospace";
+const INFO_FONT0 = "40px monospace";
 const WEIGHT_COLOR = "#222222"
 const WEIGHT_COLOR_ACTIVE = "#9be5dc"//"#1100FF"//"#BB6666"
 const UNCHOSEN_OUT_WEIGHT_COLOR = "#999999"
@@ -322,13 +322,13 @@ function render_info(canvas, index, info_text) {
     if (index == 0) {
         canvas.font = INFO_FONT0;
     }
-    canvas.fillStyle = "#222222"
+    canvas.fillStyle = "#333333"
     canvas.textAlign = "left";
     console.log(info_text[index])
 
     texts = info_text[index].split('\n');
     for (var i = 0; i < texts.length; i++){
-        canvas.fillText(texts[i], 0, 35 +(i*25));
+        canvas.fillText(texts[i], 0, 35 +(i*35));
     }
 }
 

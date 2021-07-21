@@ -595,8 +595,8 @@ var OUTPUT_LAYER_Y = 0.13; // LW was 0.1
 var OUTPUT_LABELS = ["LEFT", "RIGHT", "NONE"]
 var INFO_TEXT = ["Can you beat the AI? \nStep in to play...", 
 "Hello human, I am an Artificial Intelligence. \nMy brain is a 'Neural Network' that learns by playing. \n \nMove your body side to side to control your paddle.\nSee if you can beat me!", 
-"text2", 
-"text3"];
+"This is what I see and my Neural Network. \nEach circle is like a neuron in a human brain. \nThe neurons that light up choose if I move my paddle left or right.\n \nI made it easy for you that round. \nCan you beat a model that was trained for more time?", 
+"When I was learning to play this game, I got rewards that told me what actions were good and bad.\nI changed my neural network to improva a little each time.\n \nCan you beat my hardest model?\nI've trained thousands of times to perfect this Neural Network."];
 var image_upscale = 2.5;//4
 var frame_width = 192 / 2; // Base state dimension, scaled down by two
 var frame_height = 160 / 2; // LW was /2
