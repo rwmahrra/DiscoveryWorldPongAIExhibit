@@ -469,7 +469,7 @@ class Pong:
                     self.x = round(Pong.WIDTH / 6)
                     self.right = True
                     
-                if self.delay_counter <= 10:
+                if self.delay_counter <= 40:
                     self.delay_counter += 1 #give a delay before the ball starts off again
                     #print(f'delay count {self.delay_counter}')
                 else:

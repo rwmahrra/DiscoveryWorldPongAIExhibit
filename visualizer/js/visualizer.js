@@ -229,7 +229,7 @@ function leftZero() {
 }
 
 
-function render_game(ctx, frame, image_upscale = 7) {
+function render_game(ctx, frame, image_upscale = 2) {
     frame = scale(frame, 255);
 
     frameCanvas.width = frame_width
@@ -256,11 +256,13 @@ function render_game(ctx, frame, image_upscale = 7) {
         frameData[idx+3] = 255; // Alpha
     }
 
+    // img_w = frame_width * image_upscale;
+    // img_h = frame_height * image_upscale;
     frame_ctx.putImageData(imageData, 0, 0);
     ctx.drawImage(frameCanvas, img_x, img_y, img_w, img_h); // LW
 
 }
-function render_depth_feed(ctx, image_upscale = 3.2) {
+function render_depth_feed(ctx, image_upscale = 3.6) {
     var image = new Image();
     image.src = 'data:image/jpg;base64,' + depthFeedStr //canvas.toDataURL(depthFeedStr, 1)
     
@@ -422,10 +424,10 @@ function init_model(level) {
                 structure = easy_model;
                 break;
             case 2:
-                structure = easy_model//medium_model;
+                structure = medium_model;
                 break;
             case 3:
-                structure = easy_model//hard_model;
+                structure = hard_model;
                 break;
         }
         // Parse out the structure
@@ -590,14 +592,14 @@ var rescaled_hw = null;
 // Rendering config
 var NEURON_SIZE = null;
 var MIN_PADDING = 3.8; // LW was 3. Used at line 212
-var HIDDEN_LAYER_Y = 0.5; // LQ was 0.35
+var HIDDEN_LAYER_Y = 0.475; // LQ was 0.35
 var OUTPUT_LAYER_Y = 0.12; // LW was 0.1
 var OUTPUT_LABELS = ["LEFT", "RIGHT", "NONE"]
 var INFO_TEXT = ["Can you beat the AI? \nStep in to play...\n \nGo over applications here maybe?", 
 "Hello human, I am an Artificial Intelligence. \nMy brain is a 'Neural Network' that learns by playing. \n \nMove your body side to side to control your paddle.\nSee if you can beat me!", 
-"This is what I see and my Neural Network. Each circle \nis like a neuron in a human brain. The neurons that \nlight up choose if I move my paddle left or right.\n \nI made it easy for you that round. \nCan you beat a model that was trained for more time?", 
-"When I was learning to play this game, I got rewards that told me what \nactions were good and bad. I changed my Neural Network to improve a little each time.\n \nCan you beat my hardest model?\nI've trained thousands of times to \nperfect this Neural Network."];
-var image_upscale = 2.5;//4
+"This is what I see and my Neural Network. Each circle \nis like a neuron in a human brain. The neurons that \nlight up choose if I move my paddle left or right.\n \nI made it easy for you that round... \nCan you beat a model that was trained for more time?", 
+"When I was learning to play this game, I got rewards \nthat told me what actions were good and bad. I changed \nmy Neural Network to improve a little each time.\nThis is called Reinforcement Learning.\n \nCan you beat my hardest model?\nI've trained thousands of times to \nperfect this Neural Network."];
+var image_upscale = 4;//4
 var frame_width = 192 / 2; // Base state dimension, scaled down by two
 var frame_height = 160 / 2; // LW was /2
 var img_w = frame_width * image_upscale;
