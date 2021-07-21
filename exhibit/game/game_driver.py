@@ -29,6 +29,7 @@ class GameDriver:
                 time.sleep(0.01)
                 print(Pong.get_human_x())
             print(Pong.get_human_x())
+            self.subscriber.emit_level(1)
             print("          Human detected, beginning game. ")
             
         
@@ -120,7 +121,10 @@ if __name__ == "__main__":
         
         # Wait for AI agent to spin up
         for level in range(1,4):
-            subscriber.emit_level(level) # was 3
+            if level == 1: 
+                subscriber.emit_level(0)
+            else:
+                subscriber.emit_level(level) # was 3
             time.sleep(5)
             start = time.time()
             instance = GameDriver(subscriber, opponent, agent)

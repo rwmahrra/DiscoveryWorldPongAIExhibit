@@ -123,8 +123,6 @@ class Pong:
 
             cutoffImage = np.where((depth_cropped < Pong.clipping_distance) & (depth_cropped > 0.1), True, False)
 
-            
-
             #print(f'cutoffImage shape is {cutoffImage.shape}, depth_cropped shape is {depth_cropped.shape}');
             avg_x = 0;
             avg_x_array = np.array([])
@@ -137,7 +135,7 @@ class Pong:
                         avg_x_array = np.append(avg_x_array,b)
                         countB = countB+1
             # if we got no pixels in depth, return dumb value
-            if countB <= 25: 
+            if countB <= 40: 
                 return 0.5
             avg_x_array.sort()
             islands = []
@@ -187,13 +185,14 @@ class Pong:
             depth_cropped_3d_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_cropped_3d_actual, alpha=0.03), cv2.COLORMAP_RAINBOW)
             depth_cropped_3d_colormap = np.where((depth_cropped_3d_actual < Pong.clipping_distance) & (depth_cropped_3d_actual > 0.1), depth_cropped_3d_colormap, grey_color2 )
 
-            images = np.hstack((bg_removed, depth_colormap))
+            # Uncomment these lines to have a window showing the camera feeds
+            # images = np.hstack((bg_removed, depth_colormap))
             
-            cv2.namedWindow('Align Example', cv2.WINDOW_NORMAL)
-            cv2.imshow('Align Example',  images)
-            cv2.namedWindow('Filtered', cv2.WINDOW_NORMAL)
+            # cv2.namedWindow('Align Example', cv2.WINDOW_NORMAL)
+            # cv2.imshow('Align Example',  images)
+            # cv2.namedWindow('Filtered', cv2.WINDOW_NORMAL)
             depth_cropped_3d_colormap = cv2.line(depth_cropped_3d_colormap, (int(m),h), (int(m),0), (255,255,255), 1)
-            cv2.imshow('Filtered',  depth_cropped_3d_colormap)
+            # cv2.imshow('Filtered',  depth_cropped_3d_colormap)
             
             buffer = cv2.imencode('.jpg', depth_cropped_3d_colormap)[1].tostring()
             Pong.depth_feed = base64.b64encode(buffer).decode()

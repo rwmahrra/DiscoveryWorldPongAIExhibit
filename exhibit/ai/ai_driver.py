@@ -10,17 +10,20 @@ import cv2
 
 class AIDriver:
     #MODEL = 'validation/canstop_randomstart_6850.h5'#'../../validation/newhit_10k.h5'
-    MODEL_1 = f'./validation/canstop_randomstart_10k.h5'
+    MODEL_1 = f'./validation/canstop_randomstart_3k.h5'
     MODEL_2 = f'./validation/canstop_randomstart_6850.h5'
-    MODEL_3 = f'./models/r/555.h5'
+    MODEL_3 = f'./validation/canstop_randomstart_10k.h5'
     level = 1
     def publish_inference(self):
 
         #print("testing*** check if level changed")
         if (AIDriver.level != self.state.game_level):
+            temp = AIDriver.level
             AIDriver.level = self.state.game_level
             print(f'level changed to {AIDriver.level}')
-            if self.state.game_level == 1:
+            if self.state.game_level == 0:
+                self.agent.load(AIDriver.MODEL_1)
+            elif self.state.game_level == 1 and temp != 0:
                 self.agent.load(AIDriver.MODEL_1)
             elif self.state.game_level == 2:
                 self.agent.load(AIDriver.MODEL_2)

@@ -2,7 +2,8 @@
 This class is a relatively straightforward set of utilities used in the inference visualization proof-of-concept.
 */
 const TITLE_FONT = "30px Arial";
-const INFO_FONT = "15px Arial";
+const INFO_FONT = "20px Verdana";
+const INFO_FONT0 = "40px Verdana";
 const WEIGHT_COLOR = "#222222"
 const WEIGHT_COLOR_ACTIVE = "#9be5dc"//"#1100FF"//"#BB6666"
 const UNCHOSEN_OUT_WEIGHT_COLOR = "#999999"
@@ -318,13 +319,16 @@ function render_info(canvas, index, info_text) {
     console.log("rendering info text")
     canvas.clearRect(0, 0, infoCanvas_width, infoCanvas_height)
     canvas.font = INFO_FONT;
+    if (index == 0) {
+        canvas.font = INFO_FONT0;
+    }
     canvas.fillStyle = "#222222"
     canvas.textAlign = "left";
     console.log(info_text[index])
 
     texts = info_text[index].split('\n');
     for (var i = 0; i < texts.length; i++){
-        canvas.fillText(texts[i], 0, 35 +(i*20));
+        canvas.fillText(texts[i], 0, 35 +(i*25));
     }
 }
 
@@ -483,7 +487,7 @@ function render_weights(canvas, l1_positions, l2_positions, w, render_filter=nul
                     active = render_filter[l1, l2]
                     if (active) fill = WEIGHT_COLOR_ACTIVE
                 }
-                canvas.lineWidth = weight*1.8;
+                canvas.lineWidth = weight*1.2;
                 canvas.strokeStyle = fill;
                 canvas.beginPath();
                     canvas.moveTo(l1_pos[0], l1_pos[1]); // + (Math.sin(l1_pos[0] * 4) * 40));
@@ -508,7 +512,7 @@ function render_weights(canvas, l1_positions, l2_positions, w, render_filter=nul
                     active = render_filter[l1, l2]
                     if (active) fill = WEIGHT_COLOR_ACTIVE
                 }
-                canvas.lineWidth = weight*2.5;
+                canvas.lineWidth = weight*1.5;
                 if (l2 !== labelChosen) {canvas.lineWidth = canvas.lineWidth/8; fill = UNCHOSEN_OUT_WEIGHT_COLOR;}
                 canvas.strokeStyle = fill;
                 canvas.beginPath();
@@ -547,7 +551,7 @@ function render_weights(canvas, l1_positions, l2_positions, w, render_filter=nul
                     if (active) fill = WEIGHT_COLOR_ACTIVE2
                     // if (active) console.log("active")
                 }
-                canvas.lineWidth = weight * 6; // LW
+                canvas.lineWidth = weight * 5; // LW
                 canvas.strokeStyle = fill;
                 canvas.beginPath();
                 if (typeof l1_pos !== 'undefined') {

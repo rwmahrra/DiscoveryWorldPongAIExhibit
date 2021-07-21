@@ -18,28 +18,28 @@ function onConnectionLost(responseObject) {
   }
 }
 
-// called when a message arrives
-function onMessageArrived(message) {
-    if(message.destinationName === "ai/activation") {
-        // Save the raw string instead of parsing because we may skip this
-        // frame if we get a new one before the next render - no need to waste cycles
-        last_activations = message.payloadString;
-    } else if(message.destinationName === "game/level") {
-        level = JSON.parse(message.payloadString)["level"];
-        model_initialized = false;
-        init_model(level);
-        console.log("next level");
-        //console.log(op);
-        //morph(op, morphTargets.Frustrated, 1)
-    }
-}
+// // called when a message arrives
+// function onMessageArrived(message) {
+//     if(message.destinationName === "ai/activation") {
+//         // Save the raw string instead of parsing because we may skip this
+//         // frame if we get a new one before the next render - no need to waste cycles
+//         last_activations = message.payloadString;
+//     } else if(message.destinationName === "game/level") {
+//         level = JSON.parse(message.payloadString)["level"];
+//         model_initialized = false;
+//         init_model(level);
+//         console.log("next level");
+//         //console.log(op);
+//         //morph(op, morphTargets.Frustrated, 1)
+//     }
+// }
 function myMethod(message) {
     //console.log(message.destinationName)
     if(message.destinationName === "game/level") {
         level = JSON.parse(message.payloadString)["level"];
         levelg = level
         model_initialized = false;
-        init_model(level);
+        //init_model(level);
         console.log("Changing to level:")
         console.log(level);
         ai_score = 0;
@@ -55,10 +55,16 @@ function myMethod(message) {
 
         switch(level) {
             case 0:
-                
+                level = 1
+                levelg = 1
+                console.log('level 0. level set to:')
+                console.log(level)
                 render_info(info_ctx, 0, INFO_TEXT)
+                
+                init_model(level);
                 break;
             case 1:
+                console.log('level 1')
                 morphOp("Happy",0.0)
                 setTimeout(smugZero, 0)
                 rightInterval1 = setInterval(right10, 2910)
@@ -67,6 +73,7 @@ function myMethod(message) {
                 leftInterval0 = setInterval(leftZero, 3550)
 
                 render_info(info_ctx, 1, INFO_TEXT)
+                init_model(level);
 
                 break;
             case 2:
@@ -80,7 +87,8 @@ function myMethod(message) {
                 leftInterval0 = setInterval(leftZero, 4200)
 
                 render_info(info_ctx, 2, INFO_TEXT)
-
+                
+                init_model(level);
                 break;
             case 3:
                 setTimeout(smug09, 5000)
@@ -94,7 +102,7 @@ function myMethod(message) {
                 //rightInterval0 = setInterval(leftZero, 6250)
 
                 render_info(info_ctx, 3, INFO_TEXT)
-
+                init_model(level);
                 break;
         }
 
@@ -379,6 +387,7 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
 }
 
 function render_loop() {
+    //console.log("render_loop()")
     if(last_activations && last_activations != last_rendered_activations) {
         const ctx = canvas.getContext("2d");
         const d_ctx = d_canvas.getContext("2d");
@@ -401,10 +410,13 @@ function init_model(level) {
     */
     if(!initialized) {
         // Busy wait if we receive a new model before the normal init is run.
+        console.log("!initialized")
         init_model(structure);
     } else {
         const ctx = canvas.getContext("2d");
         structure = null;
+        console.log("rendering model of level:")
+        console.log(level)
         switch(level) {
             case 1:
                 structure = easy_model;
@@ -463,6 +475,7 @@ function init_model(level) {
             canvas_width, OUTPUT_LAYER_Y * canvas_height, NEURON_SIZE, null, OUTPUT_LABELS)
 
         model_initialized = true;
+        console.log("inside init model about to do requestAnimationFrame(render_loop)")
         requestAnimationFrame(render_loop);
     }
 }
@@ -477,7 +490,7 @@ function init() {
 
     // set callback handlers
     client.onConnectionLost = onConnectionLost;
-    client.onMessageArrived = myMethod, onMessageArrived;
+    client.onMessageArrived = myMethod; // onMessageArrived;
 
     // connect the client
     client.connect({onSuccess:onConnect});
@@ -515,8 +528,8 @@ function init() {
     
     infoCanvas.width = document.body.clientWidth/(6/2); //document.body.clientWidth;
     infoCanvas.height = document.body.clientHeight /1;//document.body.clientHeight; // LW
-    infoCanvas.style.left = (document.body.clientWidth/(6/4))+'px'; // LW
-    infoCanvas.style.top = (document.body.clientHeight/(7/2)) + 'px';
+    infoCanvas.style.left = (document.body.clientWidth/(7/4.6))+'px'; // LW
+    infoCanvas.style.top = (document.body.clientHeight/(7/1.5)) + 'px';
     infoCanvas.style.position = 'absolute';
 
     infoCanvas_width = infoCanvas.width
@@ -581,7 +594,7 @@ var HIDDEN_LAYER_Y = 0.33; // LQ was 0.35
 var OUTPUT_LAYER_Y = 0.13; // LW was 0.1
 var OUTPUT_LABELS = ["LEFT", "RIGHT", "NONE"]
 var INFO_TEXT = ["Can you beat the AI? \nStep in to play...", 
-"Hello human, I am an Artificial Intelligence. \nMy brain is a 'Neural Network' that learns by playing table tennis thousands of times. \n \nMove your body side to side to control your paddle.\nSee if you can beat me!", 
+"Hello human, I am an Artificial Intelligence. \nMy brain is a 'Neural Network' that learns by playing. \n \nMove your body side to side to control your paddle.\nSee if you can beat me!", 
 "text2", 
 "text3"];
 var image_upscale = 2.5;//4
@@ -605,6 +618,8 @@ let rightInterval1;
 let rightInterval0;
 let leftInterval1;
 let leftInterval0;
+
+let textInterval;
 
 var levelg = 1;
 var ai_score = 0;
