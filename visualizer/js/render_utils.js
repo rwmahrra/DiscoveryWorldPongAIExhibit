@@ -3,16 +3,17 @@ This class is a relatively straightforward set of utilities used in the inferenc
 */
 const TITLE_FONT = "30px Arial";
 const INFO_FONT = "30px monospace";
-const INFO_FONT0 = "40px monospace";
+const INFO_FONT0 = "50px monospace";
 const WEIGHT_COLOR = "#222222"
 const WEIGHT_COLOR_ACTIVE = "#9be5dc"//"#1100FF"//"#BB6666"
-const UNCHOSEN_OUT_WEIGHT_COLOR = "#999999"
+const UNCHOSEN_OUT_WEIGHT_COLOR = "#666666"
 const WEIGHT_COLOR_ACTIVE2 = "#00AEBD"
 const NEURON_COLOR = "#222222" // 000000
 const NEURON_COLOR_ACTIVE = "#22ffff"//"#DD2222"
 const ACTIVE_WEIGHT_THRESHOLD = 1
 
 const SPREAD_VALUE = 9855
+const VERTICAL_SPREAD = 120
 
 // For benchmarking
 var timer = function(name) {
@@ -318,9 +319,11 @@ function get_weight_map(weights, neuron) {
 function render_info(canvas, index, info_text) {
     console.log("rendering info text")
     canvas.clearRect(0, 0, infoCanvas_width, infoCanvas_height)
+    text_spacing = 40;
     canvas.font = INFO_FONT;
     if (index == 0) {
         canvas.font = INFO_FONT0;
+        text_spacing = 55
     }
     canvas.fillStyle = "#333333"
     canvas.textAlign = "left";
@@ -328,7 +331,7 @@ function render_info(canvas, index, info_text) {
 
     texts = info_text[index].split('\n');
     for (var i = 0; i < texts.length; i++){
-        canvas.fillText(texts[i], 0, 35 +(i*35));
+        canvas.fillText(texts[i], 0, 35 +(i*text_spacing));
     }
 }
 
@@ -361,9 +364,9 @@ function render_layer(canvas, neurons, left_x, right_x, y, neuron_size, activati
             canvas.font = TITLE_FONT;
             canvas.textAlign = "center";
             
-            canvas.fillText(labels[i], x, y-10);
+            canvas.fillText(labels[i], x, y-18);
         } else {
-            create_circle(x, y + (Math.sin(x/canvas_width*SPREAD_VALUE)*30), (neuron_size / 2) * b * 2.5, canvas, color = fill);
+            create_circle(x, y + (Math.sin(x/canvas_width*SPREAD_VALUE)*VERTICAL_SPREAD), (neuron_size / 2) * b * 2.5, canvas, color = fill);
         }
         coordinates.push([x, y])
     }
@@ -491,7 +494,7 @@ function render_weights(canvas, l1_positions, l2_positions, w, render_filter=nul
                 canvas.strokeStyle = fill;
                 canvas.beginPath();
                     canvas.moveTo(l1_pos[0], l1_pos[1]); // + (Math.sin(l1_pos[0] * 4) * 40));
-                    canvas.lineTo(l2_pos[0], l2_pos[1] + (Math.sin(l2_pos[0]/canvas_width * SPREAD_VALUE) * 30));
+                    canvas.lineTo(l2_pos[0], l2_pos[1] + (Math.sin(l2_pos[0]/canvas_width * SPREAD_VALUE) * VERTICAL_SPREAD));
                     canvas.stroke();
                     canvas.lineWidth = 1;
             }
@@ -516,7 +519,7 @@ function render_weights(canvas, l1_positions, l2_positions, w, render_filter=nul
                 if (l2 !== labelChosen) {canvas.lineWidth = canvas.lineWidth/8; fill = UNCHOSEN_OUT_WEIGHT_COLOR;}
                 canvas.strokeStyle = fill;
                 canvas.beginPath();
-                    canvas.moveTo(l1_pos[0], l1_pos[1] + (Math.sin(l1_pos[0]/canvas_width * SPREAD_VALUE) * 30));
+                    canvas.moveTo(l1_pos[0], l1_pos[1] + (Math.sin(l1_pos[0]/canvas_width * SPREAD_VALUE) * VERTICAL_SPREAD));
                     canvas.lineTo(l2_pos[0], l2_pos[1]); // + (Math.sin(l2_pos[0] * 4) * 40));
                     canvas.stroke();
                     canvas.lineWidth = 1;
@@ -557,8 +560,8 @@ function render_weights(canvas, l1_positions, l2_positions, w, render_filter=nul
                 if (typeof l1_pos !== 'undefined') {
                     // console.log("l1_pos[0] is")
                     // console.log(l1_pos[0])
-                    canvas.moveTo(l1_pos[0], l1_pos[1] + (Math.sin(l1_pos[0]/canvas_width * SPREAD_VALUE) * 30));
-                    canvas.lineTo(l2_pos[0], l2_pos[1]+ (Math.sin(l2_pos[0]/canvas_width * SPREAD_VALUE) * 30));
+                    canvas.moveTo(l1_pos[0], l1_pos[1] + (Math.sin(l1_pos[0]/canvas_width * SPREAD_VALUE) * VERTICAL_SPREAD));
+                    canvas.lineTo(l2_pos[0], l2_pos[1]+ (Math.sin(l2_pos[0]/canvas_width * SPREAD_VALUE) * VERTICAL_SPREAD));
                     canvas.stroke();
                     canvas.lineWidth = 1;
                 } else {

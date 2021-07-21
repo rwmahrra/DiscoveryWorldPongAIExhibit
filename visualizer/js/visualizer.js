@@ -229,7 +229,7 @@ function leftZero() {
 }
 
 
-function render_game(ctx, frame, image_upscale = 4) {
+function render_game(ctx, frame, image_upscale = 7) {
     frame = scale(frame, 255);
 
     frameCanvas.width = frame_width
@@ -260,7 +260,7 @@ function render_game(ctx, frame, image_upscale = 4) {
     ctx.drawImage(frameCanvas, img_x, img_y, img_w, img_h); // LW
 
 }
-function render_depth_feed(ctx, image_upscale = 2.8) {
+function render_depth_feed(ctx, image_upscale = 3.2) {
     var image = new Image();
     image.src = 'data:image/jpg;base64,' + depthFeedStr //canvas.toDataURL(depthFeedStr, 1)
     
@@ -268,11 +268,11 @@ function render_depth_feed(ctx, image_upscale = 2.8) {
     image.onload = function() {
 
         // console.log('drawing image')
-        ctx.drawImage(image, d_canvas_width * (1/6), d_canvas_height -(image.height*image_upscale), image.width * image_upscale, image.height * image_upscale)
+        ctx.drawImage(image, (d_canvas_width/3) - (image.width/2), d_canvas_height -(image.height*image_upscale), image.width * image_upscale, image.height * image_upscale)
     }
 }
 
-function render_weight_image(ctx, hl_activations, image_upscale = 4) {
+function render_weight_image(ctx, hl_activations, image_upscale = 5) {
     // Get the neuron with the strongest activity
     const top_neuron = argmax(hl_activations);
 
@@ -507,11 +507,11 @@ function init() {
 
     // Size canvas to full screen
     //canvas.width = 10;
-    canvas.width = document.body.clientWidth/(6/4); //document.body.clientWidth;
-    canvas.height = document.body.clientHeight /2.2;//document.body.clientHeight; // LW
+    canvas.width = document.body.clientWidth/(6/2.5); //document.body.clientWidth;
+    canvas.height = document.body.clientHeight*(.9);// /2.2;//document.body.clientHeight; // LW
     canvas.y = 50
     canvas.x = 0 // does nothing
-    canvas.style.left = (document.body.clientWidth/6)+'px'; // LW
+    canvas.style.left = (15) + (60) + 'px';//(document.body.clientWidth/6)+'px'; // LW
     canvas.style.top = (15) + 'px';
     canvas.style.position = 'absolute';
     console.log("canvas.left is ")
@@ -526,10 +526,10 @@ function init() {
     d_canvas_width = d_canvas.width
     d_canvas_height = d_canvas.height
     
-    infoCanvas.width = document.body.clientWidth/(6/2); //document.body.clientWidth;
+    infoCanvas.width = document.body.clientWidth/(6/3); //document.body.clientWidth;
     infoCanvas.height = document.body.clientHeight /1;//document.body.clientHeight; // LW
-    infoCanvas.style.left = (document.body.clientWidth/(7/4.6))+'px'; // LW
-    infoCanvas.style.top = (document.body.clientHeight/(7/1.5)) + 'px';
+    infoCanvas.style.left = (document.body.clientWidth/(7/3.5))+'px'; // LW
+    infoCanvas.style.top = (45) + 'px';//(document.body.clientHeight/(7/1.5)) + 'px';
     infoCanvas.style.position = 'absolute';
 
     infoCanvas_width = infoCanvas.width
@@ -541,8 +541,8 @@ function init() {
     //canvas_height = 10; //
     canvas_height = canvas.height;//document.body.clientHeight /2; // LW
 
-    img_x = (canvas_width - img_w)/2;
-    img_x = (canvas_width - img_w)/2; // LW
+    img_x = (canvas_width - img_w)/2 -(canvas_width/4);
+    //img_x = (canvas_width - img_w)/2; // LW
     img_y = canvas_height - (img_h);// + (canvas_height / 10)); // LW
     
     // We will update this with game state pixels and embed it on the visualizer canvas
@@ -589,14 +589,14 @@ var rescaled_hw = null;
 
 // Rendering config
 var NEURON_SIZE = null;
-var MIN_PADDING = 4.0; // LW was 3. Used at line 212
-var HIDDEN_LAYER_Y = 0.33; // LQ was 0.35
-var OUTPUT_LAYER_Y = 0.13; // LW was 0.1
+var MIN_PADDING = 3.8; // LW was 3. Used at line 212
+var HIDDEN_LAYER_Y = 0.5; // LQ was 0.35
+var OUTPUT_LAYER_Y = 0.12; // LW was 0.1
 var OUTPUT_LABELS = ["LEFT", "RIGHT", "NONE"]
-var INFO_TEXT = ["Can you beat the AI? \nStep in to play...", 
+var INFO_TEXT = ["Can you beat the AI? \nStep in to play...\n \nGo over applications here maybe?", 
 "Hello human, I am an Artificial Intelligence. \nMy brain is a 'Neural Network' that learns by playing. \n \nMove your body side to side to control your paddle.\nSee if you can beat me!", 
-"This is what I see and my Neural Network. \nEach circle is like a neuron in a human brain. \nThe neurons that light up choose if I move my paddle left or right.\n \nI made it easy for you that round. \nCan you beat a model that was trained for more time?", 
-"When I was learning to play this game, I got rewards that told me what actions were good and bad.\nI changed my neural network to improva a little each time.\n \nCan you beat my hardest model?\nI've trained thousands of times to perfect this Neural Network."];
+"This is what I see and my Neural Network. Each circle \nis like a neuron in a human brain. The neurons that \nlight up choose if I move my paddle left or right.\n \nI made it easy for you that round. \nCan you beat a model that was trained for more time?", 
+"When I was learning to play this game, I got rewards that told me what \nactions were good and bad. I changed my Neural Network to improve a little each time.\n \nCan you beat my hardest model?\nI've trained thousands of times to \nperfect this Neural Network."];
 var image_upscale = 2.5;//4
 var frame_width = 192 / 2; // Base state dimension, scaled down by two
 var frame_height = 160 / 2; // LW was /2
