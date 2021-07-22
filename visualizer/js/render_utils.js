@@ -327,11 +327,25 @@ function render_info(canvas, index, info_text) {
     }
     canvas.fillStyle = "#333333"
     canvas.textAlign = "left";
+
+    var gradient = canvas.createLinearGradient(0, 0, infoCanvas_width, 0);
+    var added = 0;
+    gradient.addColorStop("0", "deepskyblue");
+    gradient.addColorStop("0.5", "blue");
+    gradient.addColorStop("1.0", "darkviolet");
+
+
     console.log(info_text[index])
 
     texts = info_text[index].split('\n');
     for (var i = 0; i < texts.length; i++){
-        canvas.fillText(texts[i], 0, 35 +(i*text_spacing));
+        if (i > texts.length - 5) {
+            canvas.fillStyle = gradient;//"#2ab50a"
+            text_spacing = 40;
+            canvas.font = INFO_FONT;
+            added = 40
+        }
+        canvas.fillText(texts[i], 0, 35 + added +(i*text_spacing));
     }
 }
 
