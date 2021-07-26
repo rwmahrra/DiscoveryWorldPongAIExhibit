@@ -247,7 +247,7 @@ class Pong:
                 while start > Pong.Paddle.EDGE_BUFFER:
                     valid_starts.append(start)
                     start -= self.speed
-                self.y = choice(valid_starts)
+                self.y = choice(valid_starts) 
 
             self.w = self.WIDTH
             self.h = self.HEIGHT
@@ -317,7 +317,7 @@ class Pong:
         DIAMETER = Config.BALL_DIAMETER
         SPEED = 2
         BOUNCE_ANGLES = [0, 60, 45, 30, -30, -45, -60]  # True to original Atari Pong
-        START_ANGLES = [0, 45, 30, 15, 10, -10, -15, -30, -45]#[0]
+        START_ANGLES = [0, 40, 30, 20, 15, 10, 5, -5, -10, -15, -20, -30, -40]#[0]
 
         def spawn_hit_practice(self):
             """
@@ -343,7 +343,9 @@ class Pong:
             if self.hit_practice:
                 self.spawn_hit_practice()
             else:
-                self.x = round((Pong.WIDTH / 2) - 1)
+                #self.x = round((Pong.WIDTH / 2) - 1)
+                self.x = round(Pong.WIDTH / 6) # LW start the ball not in the center
+
                 self.y = round((Pong.HEIGHT / 2) - 1)
                 self.speed = self.SPEED * Pong.SPEEDUP
                 self.velocity = (0, 0)
@@ -363,12 +365,12 @@ class Pong:
             else:
                 self.right = None
                 # self.x = round(Pong.WIDTH / 6)
-                self.y = round(Pong.HEIGHT / 2)
+                #self.y = round(Pong.HEIGHT / 2) # LW - puts ball to middle, can look bad
                 self.speed = self.SPEED * Pong.SPEEDUP
                 self.velocity = (0, 0)
                 self.w = self.DIAMETER
                 self.h = self.DIAMETER
-            self.delay_counter = 0;
+            self.delay_counter = 0
 
         def get_vector(self, deg, scale):
             """
@@ -436,12 +438,13 @@ class Pong:
 
                 self.angle = choice(Pong.Ball.START_ANGLES)
                 
-                if randint(0, 1) == 1 and self.delay_counter == 0:
+                #if randint(0, 1) == 1 and self.delay_counter == 0:
+                if Pong.score_left + Pong.score_right == 1 and self.delay_counter == 0:
                     # change to your side
                     self.x = round((Pong.WIDTH / 6)*5)
                     self.right = False
-                elif self.delay_counter ==0 :
-                    self.x = round(Pong.WIDTH / 6)
+                elif self.delay_counter == 0:
+                    self.x = round(Pong.WIDTH / 6) # if flipping which is first also change line 347
                     self.right = True
                     
                 if self.delay_counter <= 40:
@@ -479,8 +482,10 @@ class Pong:
                 self.y = 0
                 self.bounce(y=True)
 
-    def __init__(self, hit_practice=False, level = 1, pipeline = None, decimation_filter = None, crop_percentage_w = None, crop_percentage_h = None):
+    def __init__(self, hit_practice=False, level = 1, pipeline = None, decimation_filter = None, crop_percentage_w = None, crop_percentage_h = None, clipping_distance = None):
 
+        if pipeline == None:
+            print('pipeline equal to None')
         
         Pong.SPEEDUP = 1 + (0.4*level) 
         print(f'Pong environment init level {level} and SPEEDUP is {Pong.SPEEDUP}')
@@ -496,8 +501,8 @@ class Pong:
         # Holds last raw screen pixels for rendering
         self.last_screen = None
         self.hit_practice = hit_practice
-        self.score_left = 0
-        self.score_right = 0
+        Pong.score_left = 0
+        Pong.score_right = 0
         self.left = Pong.Paddle("left") if not self.hit_practice else None
         self.right = Pong.Paddle("right")
         self.ball = Pong.Ball(hit_practice=hit_practice)
@@ -538,13 +543,14 @@ class Pong:
         Pong.pipeline = pipeline
         Pong.crop_percentage_w = crop_percentage_w
         Pong.crop_percentage_h = crop_percentage_h
+        Pong.clipping_distance = clipping_distance
 
     def reset(self):
         """
         Reset game state
         """
-        self.score_left = 0
-        self.score_right = 0
+        Pong.score_left = 0
+        Pong.score_right = 0
         if not self.hit_practice: self.left.reset()
         self.right.reset()
         self.ball.reset()
@@ -557,7 +563,7 @@ class Pong:
         Fetch score tuple at the current frame
         :return: integer tuple: (left score, right score)
         """
-        return self.score_left, self.score_right
+        return Pong.score_left, Pong.score_right
 
     def get_bot_data(self, left=False, right=False):
         """
@@ -646,14 +652,14 @@ class Pong:
 
                 if self.ball.x < 0:
                     Pong.play_sound("score")
-                    self.score_right += 1
+                    Pong.score_right += 1
                     reward_l -= 1.0
                     reward_r += 1.0
                     self.ball.reset()
                     self.right.reset(hit_practice=True)
                 elif self.ball.x > Pong.WIDTH:
                     Pong.play_sound("score")
-                    self.score_left += 1
+                    Pong.score_left += 1
                     reward_l += 1.0
                     reward_r -= 1.0
                     self.ball.reset()
@@ -661,7 +667,7 @@ class Pong:
                 self.ball.update()
                 self.right.update()
                 done = False
-                if self.score_right >= Pong.MAX_SCORE or self.score_left >= Pong.MAX_SCORE:
+                if Pong.score_right >= Pong.MAX_SCORE or Pong.score_left >= Pong.MAX_SCORE:
                     done = True
         screen = self.render()
         #self.show(self.render(), 3)
@@ -701,7 +707,7 @@ class Pong:
 
                 if self.ball.x < 0:
                     Pong.play_sound("score")
-                    self.score_right += 1
+                    Pong.score_right += 1
                     reward_l -= 1.0
                     reward_r += 1.0
                     self.ball.reset()
@@ -709,7 +715,7 @@ class Pong:
                     self.right.reset()
                 elif self.ball.x > Pong.WIDTH:
                     Pong.play_sound("score")
-                    self.score_left += 1
+                    Pong.score_left += 1
                     reward_l += 1.0
                     reward_r -= 1.0
                     self.ball.reset()
@@ -719,7 +725,7 @@ class Pong:
                 self.right.update()
                 self.ball.update()
                 done = False
-                if self.score_right >= Pong.MAX_SCORE or self.score_left >= Pong.MAX_SCORE:
+                if Pong.score_right >= Pong.MAX_SCORE or Pong.score_left >= Pong.MAX_SCORE:
                     done = True
 
             screen = self.render()
@@ -749,7 +755,7 @@ class Pong:
         Return all info necessary for regular update messages
         :return: Tuple representing ((puck_x, puck_y), paddle1_y, paddle2_y, paddle1_score, paddle2_score, game_frame))
         """
-        return ((self.ball.x, self.ball.y), self.left.y, self.right.y, self.score_left, self.score_right,  self.frames)
+        return ((self.ball.x, self.ball.y), self.left.y, self.right.y, Pong.score_left, Pong.score_right,  self.frames)
 
     def get_screen(self):
         """

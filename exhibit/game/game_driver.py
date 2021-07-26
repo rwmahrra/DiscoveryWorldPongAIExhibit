@@ -18,7 +18,7 @@ It polls the agents for actions and advances frames and game state at a steady r
 class GameDriver:
     def run(self, level):
 
-        env = Pong(level = level)
+        env = Pong(level = level, pipeline = self.pipeline, decimation_filter = self.decimation_filter, crop_percentage_w = self.crop_percentage_w, crop_percentage_h = self.crop_percentage_h, clipping_distance = self.clipping_distance)
         currentFPS = (level * 40) + 40#Config.GAME_FPS 
 
         if type(self.left_agent) == BotPlayer: self.left_agent.attach_env(env)
@@ -92,7 +92,7 @@ class GameDriver:
             #print(f"Behind frames: {np.mean(frame_skips)} mean, {np.std(frame_skips)} stdev, "
                   #f"{np.max(frame_skips)} max, {np.unique(frame_skips, return_counts=True)}")
 
-    def __init__(self, subscriber, left_agent, right_agent, pipeline, decimation_filter, crop_percentage_w, crop_percentage_h):
+    def __init__(self, subscriber, left_agent, right_agent, pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance):
         self.subscriber = subscriber
         self.left_agent = left_agent
         self.right_agent = right_agent
@@ -100,6 +100,7 @@ class GameDriver:
         self.decimation_filter = decimation_filter
         self.crop_percentage_w = crop_percentage_w
         self.crop_percentage_h = crop_percentage_h
+        self.clipping_distance = clipping_distance
 
 def check_for_player(pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance):
         #try to get the frame 50 times
@@ -192,7 +193,7 @@ if __name__ == "__main__":
 
         #time.sleep(1)
         start = time.time()
-            
+        
         #wait until human detected, if no human after a few seconds, back to zero
 
         if level == 0:
@@ -216,9 +217,12 @@ if __name__ == "__main__":
                 elif counter > 200:
                     level = 0
                     print(f'            No Player detected, resetting game')
+                    print(f'            Game reset to level {level} (zero).')
                     subscriber.emit_level(level)
                     break
                 counter = counter + 1
+                time.sleep(0.01)
+
         else: # level == 3
             level = 0
             print(f'            Game reset to level {level} (zero).')
