@@ -24,15 +24,6 @@ class GameDriver:
         if type(self.left_agent) == BotPlayer: self.left_agent.attach_env(env)
         if type(self.right_agent) == BotPlayer: self.right_agent.attach_env(env)
 
-        #wait until start
-        if level == 1 :
-            print("          Waiting for user interaction . . . ")
-            while Pong.get_human_x() == 0.5 :
-                time.sleep(0.01)
-                #print(Pong.get_human_x())
-            print(Pong.get_human_x())
-            self.subscriber.emit_level(1)
-            print("          Human detected, beginning game. ")
             
         
         
@@ -110,6 +101,45 @@ class GameDriver:
         self.crop_percentage_w = crop_percentage_w
         self.crop_percentage_h = crop_percentage_h
 
+def check_for_player(pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance):
+        #try to get the frame 50 times
+        for i in range(50): 
+            frames = pipeline.wait_for_frames()
+            depth = frames.get_depth_frame()
+            #color = frames.get_color_frame()
+            if not depth: continue
+
+            # filtering the image to make it less noisy and inconsistent
+            depth_filtered = decimation_filter.process(depth)
+            depth_image = np.asanyarray(depth_filtered.get_data())
+            
+            # cropping the image based on a width and height percentage
+            w,h = depth_image.shape
+            ws, we = int(w/2 - (w * crop_percentage_w)/2), int(w/2 + (w * crop_percentage_w)/2)
+            hs, he = int(h/2 - (h * crop_percentage_h)/2), int(h/2 + (h * crop_percentage_h)/2)
+            #print("dimension: {}, {}, width: {},{} height: {},{}".format(w,h,ws,we,hs,he))
+            depth_cropped = depth_image[ws:we, hs:he]
+            #depth_cropped = depth_image
+
+            cutoffImage = np.where((depth_cropped < clipping_distance) & (depth_cropped > 0.1), True, False)
+
+            #print(f'cutoffImage shape is {cutoffImage.shape}, depth_cropped shape is {depth_cropped.shape}');
+            avg_x = 0
+            avg_x_array = np.array([])
+            countB = 0
+            for a in range(np.size(cutoffImage,0)):
+                for b in range(np.size(cutoffImage,1)):
+                    if cutoffImage[a,b] :
+                        avg_x += b
+                        #print(b)
+                        avg_x_array = np.append(avg_x_array,b)
+                        countB = countB+1
+            # if we got no pixels in depth, return false
+            if countB <= 40: 
+                return False
+
+            return True # successfully found a player, return true
+        return False # failed to get camera image, return false
 
 if __name__ == "__main__":
 
@@ -149,21 +179,51 @@ if __name__ == "__main__":
     # filter out far away so we only have a person
     clipping_distance_in_meters = 1.8 #2 meter
     clipping_distance = clipping_distance_in_meters / depth_scale
-    print(f'clipping distance is : {clipping_distance}');
+    print(f'clipping distance is : {clipping_distance}')
+
+    level = 0
+    # start at level 0, our start state when nobody is playing
+    subscriber.emit_level(level) 
+
+    # was orginally in the loop
+    instance = GameDriver(subscriber, opponent, agent, pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance)
 
     while True:
-        level = 1
-        
-        # Wait for AI agent to spin up
-        for level in range(1,4):
-            if level == 1: 
-                subscriber.emit_level(0)
-            else:
-                subscriber.emit_level(level) 
-            time.sleep(5)
-            start = time.time()
-            instance = GameDriver(subscriber, opponent, agent, pipeline, decimation_filter, crop_percentage_w, crop_percentage_h)
-            instance.run(level)
 
-        print(f"Completed simulation in {time.time() - start}s")
+        #time.sleep(1)
+        start = time.time()
+            
+        #wait until human detected, if no human after a few seconds, back to zero
+
+        if level == 0:
+            print("          Waiting for user interaction to begin game . . . ")
+            while not check_for_player(pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance):
+                time.sleep(0.01)
+            level = 1
+            print(f'          Human detected, beginning level {level}. ')
+            subscriber.emit_level(level) 
+            instance.run(level)
+        elif level == 1 or level == 2:
+            print("          Waiting for user interaction to advance level . . . ")
+            counter = 0
+            while True:
+                if check_for_player(pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance):
+                    level = level + 1
+                    print(f'          Human detected, beginning level {level}. ')
+                    subscriber.emit_level(level)
+                    instance.run(level)
+                    break
+                elif counter > 200:
+                    level = 0
+                    print(f'            No Player detected, resetting game')
+                    subscriber.emit_level(level)
+                    break
+                counter = counter + 1
+        else: # level == 3
+            level = 0
+            print(f'            Game reset to level {level} (zero).')
+            subscriber.emit_level(level)
+
+
+
 

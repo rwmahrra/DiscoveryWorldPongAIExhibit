@@ -1,7 +1,7 @@
 
 class Config:
     PADDING = 10  # Distance between screen edge and player paddles (px)
-    MAX_SCORE = 4  # Points one side must win to finish game, 21
+    MAX_SCORE = 2  # Points one side must win to finish game, 21
     WIDTH = 160  # Game window width (px)
     HEIGHT = 192  # Game window height (px)
     SPEEDUP = 1  # Flat multiplier to game movement speeds
