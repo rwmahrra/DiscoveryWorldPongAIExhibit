@@ -22,15 +22,20 @@ class AIDriver:
             AIDriver.level = self.state.game_level
             print(f'level changed to {AIDriver.level}')
             if self.state.game_level == 0:
-                self.agent.load(AIDriver.MODEL_1)
+                self.agent = self.agent1
+                #self.agent1.load(AIDriver.MODEL_1)
             elif self.state.game_level == 1 and temp != 0:
-                self.agent.load(AIDriver.MODEL_1)
+                self.agent = self.agent1
+                #self.agent1.load(AIDriver.MODEL_1)
             elif self.state.game_level == 2:
-                self.agent.load(AIDriver.MODEL_2)
+                self.agent = self.agent2
+                #self.agent1.load(AIDriver.MODEL_2)
             elif self.state.game_level == 3:
-                self.agent.load(AIDriver.MODEL_3)
+                self.agent = self.agent3
+                #self.agent1.load(AIDriver.MODEL_3)
             else:
-                self.agent.load(AIDriver.MODEL_2)
+                self.agent = self.agent1
+                #self.agent1.load(AIDriver.MODEL_2)
         
         # Get latest state diff
         diff_state = self.state.render_latest_diff()
@@ -58,8 +63,13 @@ class AIDriver:
     def __init__(self, paddle1=True):
         self.paddle1 = paddle1
         self.paddle2 = not self.paddle1
-        self.agent = PGAgent(Config.CUSTOM_STATE_SIZE, Config.CUSTOM_ACTION_SIZE)
-        self.agent.load(AIDriver.MODEL_1)
+        self.agent1 = PGAgent(Config.CUSTOM_STATE_SIZE, Config.CUSTOM_ACTION_SIZE)
+        self.agent1.load(AIDriver.MODEL_1)
+        self.agent = self.agent1
+        self.agent2 = PGAgent(Config.CUSTOM_STATE_SIZE, Config.CUSTOM_ACTION_SIZE)
+        self.agent2.load(AIDriver.MODEL_2)
+        self.agent3 = PGAgent(Config.CUSTOM_STATE_SIZE, Config.CUSTOM_ACTION_SIZE)
+        self.agent3.load(AIDriver.MODEL_3)
         self.state = AISubscriber(trigger_event=lambda: self.publish_inference())
         self.last_frame_id = self.state.frame
         self.last_tick = time.time()
