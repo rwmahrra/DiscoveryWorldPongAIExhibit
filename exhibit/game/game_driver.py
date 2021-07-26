@@ -3,6 +3,8 @@ import numpy as np
 from exhibit.game.player import BotPlayer, AIPlayer, HumanPlayer, CameraPlayer
 import time
 
+import pyrealsense2 as rs
+
 from exhibit.shared.config import Config
 from exhibit.game.pong import Pong
 
@@ -99,10 +101,14 @@ class GameDriver:
             #print(f"Behind frames: {np.mean(frame_skips)} mean, {np.std(frame_skips)} stdev, "
                   #f"{np.max(frame_skips)} max, {np.unique(frame_skips, return_counts=True)}")
 
-    def __init__(self, subscriber, left_agent, right_agent):
+    def __init__(self, subscriber, left_agent, right_agent, pipeline, decimation_filter, crop_percentage_w, crop_percentage_h):
         self.subscriber = subscriber
         self.left_agent = left_agent
         self.right_agent = right_agent
+        self.pipeline = pipeline
+        self.decimation_filter = decimation_filter
+        self.crop_percentage_w = crop_percentage_w
+        self.crop_percentage_h = crop_percentage_h
 
 
 if __name__ == "__main__":
@@ -115,7 +121,36 @@ if __name__ == "__main__":
     #opponent = HumanPlayer('w', 's')
     agent = AIPlayer(subscriber, left=True)
     #agent = HumanPlayer('o', 'l')
-    
+
+    decimation_filter = rs.decimation_filter()
+    decimation_filter.set_option(rs.option.filter_magnitude, 6)
+
+    crop_percentage_w = 1.0
+    crop_percentage_h = 1.0
+
+    print("starting with crop w at {}".format(crop_percentage_w * 100))
+    print("starting with crop h at {}".format(crop_percentage_h * 100))
+
+    pipeline = rs.pipeline()
+
+    config = rs.config()
+    config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+    config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+
+    profile = pipeline.start(config)
+
+    # Getting the depth sensor's depth scale (see rs-align example for explanation)
+    depth_sensor = profile.get_device().first_depth_sensor()
+    depth_scale = depth_sensor.get_depth_scale()
+    print("Depth Scale is: " , depth_scale)
+
+    # We will be removing the background of objects more than
+    #  clipping_distance_in_meters meters away
+    # filter out far away so we only have a person
+    clipping_distance_in_meters = 1.8 #2 meter
+    clipping_distance = clipping_distance_in_meters / depth_scale
+    print(f'clipping distance is : {clipping_distance}');
+
     while True:
         level = 1
         
@@ -124,10 +159,11 @@ if __name__ == "__main__":
             if level == 1: 
                 subscriber.emit_level(0)
             else:
-                subscriber.emit_level(level) # was 3
+                subscriber.emit_level(level) 
             time.sleep(5)
             start = time.time()
-            instance = GameDriver(subscriber, opponent, agent)
+            instance = GameDriver(subscriber, opponent, agent, pipeline, decimation_filter, crop_percentage_w, crop_percentage_h)
             instance.run(level)
+
         print(f"Completed simulation in {time.time() - start}s")
 
