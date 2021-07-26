@@ -79,28 +79,11 @@ class Pong:
                 print('failed to take mean of depth_cropped, could be zero values')
                 print(ex)
                 mean = 0.5
-            #mean = np.mean(  np.where( ~(depth_cropped > Pong.clipping_distance) &~(depth_cropped <= 0.1), depth_cropped, null )  )
-            #mean = np.mean(depth_cropped)
-            #print(f'the mean value from filtering is: {mean}')
-            #print(f'the mean value of just the cropped image is: {np.mean(depth_cropped)}')
-            #depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_cropped, alpha=0.03), cv2.COLORMAP_JET)
-
             
-            #filtered_image = np.where( ~(depth_cropped_3d > Pong.clipping_distance) &~(depth_cropped_3d <= 0.1) ,depth_colormap, 153)
-            #images = np.hstack(filtered_image, filtered_image)
-
-            #cv2.namedWindow('Align Example', cv2.WINDOW_NORMAL)
-            #cv2.imshow('Align Example',  images)
-            #key = cv2.waitKey(1)
-            # Press esc or 'q' to close the image window
-            #if key & 0xFF == ord('q') or key == 27:
-              #  cv2.destroyAllWindows()
-              #  break
             
             return mean/2000
-        return 0.5
-    # def get_depth_feed():
-    #     return Pong.depth_feed
+        return 0.5 # middle value for when no player found
+        
     def get_human_x():
         #try to get the frame 50 times
         for i in range(50): 
@@ -156,15 +139,12 @@ class Pong:
             bigIsland = np.array([])
             for array in islands:
                 if np.size(array,0) > np.size(bigIsland,0): bigIsland = array
-            #print(f'first value = {avg_x_array[0]} last value = {avg_x_array[np.size(avg_x_array,0) -1]}')
-            #print(f'count of acceptable pixels is: {countB}')
-            #print(f'{((avg_x/countB)/(np.size(cutoffImage,1)) * 1.4) -0.2}. avg_x/countB = {avg_x/countB}. size of cutoffImage = {np.size(cutoffImage,1)}. count = {countB}')
-            #return ((avg_x/countB)/(np.size(cutoffImage,1)) * 1.4) -0.2
-            #print(avg_x_array)
+            
             #print(np.median(bigIsland))
             m = (np.median(bigIsland))
 
-            # DISPLAYING ***************************************
+            # DISPLAYING ******************************************************************************
+
             aligned_frames = Pong.align.process(frames)
             # Get aligned frames
             aligned_depth_frame = aligned_frames.get_depth_frame() # aligned_depth_frame is a 640x480 depth image
@@ -196,13 +176,8 @@ class Pong:
             
             buffer = cv2.imencode('.jpg', depth_cropped_3d_colormap)[1].tostring()
             Pong.depth_feed = base64.b64encode(buffer).decode()
-            #print(Pong.depth_feed)
-            # print("***")
-            # print(depth_feed)
-            #img = cv2.EncodeImage(".jpg", img).tostring()
 
-            #key = cv2.waitKey(1)
-            # **************************************************
+            # *****************************************************************************************
 
             return (m/(np.size(cutoffImage,1)) * 1.4) -0.2
         return 0.5
@@ -342,7 +317,7 @@ class Pong:
         DIAMETER = Config.BALL_DIAMETER
         SPEED = 2
         BOUNCE_ANGLES = [0, 60, 45, 30, -30, -45, -60]  # True to original Atari Pong
-        START_ANGLES = [0, 60, 45, 30, 15, 10, -10, -15, -30, -45, -60]#[0]
+        START_ANGLES = [0, 45, 30, 15, 10, -10, -15, -30, -45]#[0]
 
         def spawn_hit_practice(self):
             """
@@ -504,10 +479,10 @@ class Pong:
                 self.y = 0
                 self.bounce(y=True)
 
-    def __init__(self, hit_practice=False, level = 1):
+    def __init__(self, hit_practice=False, level = 1, pipeline = None, decimation_filter = None, crop_percentage_w = None, crop_percentage_h = None):
 
         
-        Pong.SPEEDUP = 1 + (0.4*level) # level
+        Pong.SPEEDUP = 1 + (0.4*level) 
         print(f'Pong environment init level {level} and SPEEDUP is {Pong.SPEEDUP}')
         
         """
@@ -528,36 +503,41 @@ class Pong:
         self.ball = Pong.Ball(hit_practice=hit_practice)
         self.frames = 0
 
-        Pong.decimation_filter = rs.decimation_filter()
-        Pong.decimation_filter.set_option(rs.option.filter_magnitude, 6)
+        # Pong.decimation_filter = rs.decimation_filter()
+        # Pong.decimation_filter.set_option(rs.option.filter_magnitude, 6)
 
-        Pong.crop_percentage_w = 1.0
-        Pong.crop_percentage_h = 1.0
+        # Pong.crop_percentage_w = 1.0
+        # Pong.crop_percentage_h = 1.0
         
 
-        print("starting with crop w at {}".format(Pong.crop_percentage_w * 100))
-        print("starting with crop h at {}".format(Pong.crop_percentage_h * 100))
+        # print("starting with crop w at {}".format(Pong.crop_percentage_w * 100))
+        # print("starting with crop h at {}".format(Pong.crop_percentage_h * 100))
     
-        Pong.pipeline = rs.pipeline()
+        # Pong.pipeline = rs.pipeline()
 
-        Pong.config = rs.config()
-        Pong.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-        Pong.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+        # Pong.config = rs.config()
+        # Pong.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+        # Pong.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
     
-        profile = Pong.pipeline.start(self.config)
+        # profile = Pong.pipeline.start(self.config)
 
 
-        # Getting the depth sensor's depth scale (see rs-align example for explanation)
-        depth_sensor = profile.get_device().first_depth_sensor()
-        depth_scale = depth_sensor.get_depth_scale()
-        print("Depth Scale is: " , depth_scale)
+        # # Getting the depth sensor's depth scale (see rs-align example for explanation)
+        # depth_sensor = profile.get_device().first_depth_sensor()
+        # depth_scale = depth_sensor.get_depth_scale()
+        # print("Depth Scale is: " , depth_scale)
 
-        # We will be removing the background of objects more than
-        #  clipping_distance_in_meters meters away
-        # filter out far away so we only have a person
-        clipping_distance_in_meters = 1.8 #2 meter
-        Pong.clipping_distance = clipping_distance_in_meters / depth_scale
-        print(f'Pong.clipping distance is : {Pong.clipping_distance}');
+        # # We will be removing the background of objects more than
+        # #  clipping_distance_in_meters meters away
+        # # filter out far away so we only have a person
+        # clipping_distance_in_meters = 1.8 #2 meter
+        # Pong.clipping_distance = clipping_distance_in_meters / depth_scale
+        # print(f'Pong.clipping distance is : {Pong.clipping_distance}');
+
+        Pong.decimation_filter = decimation_filter
+        Pong.pipeline = pipeline
+        Pong.crop_percentage_w = crop_percentage_w
+        Pong.crop_percentage_h = crop_percentage_h
 
     def reset(self):
         """
