@@ -218,7 +218,7 @@ class Pong:
             self.h = self.HEIGHT
             self.velocity = [0, 0]
             self.speed = self.SPEED * Pong.SPEEDUP
-            print(f'Pong.SPEEDUP is equal to {Pong.SPEEDUP}')
+            #print(f'Pong.SPEEDUP is equal to {Pong.SPEEDUP}')
             if side == "left":
                 self.x = Pong.PADDING
             elif side == "right":
@@ -344,7 +344,7 @@ class Pong:
                 self.spawn_hit_practice()
             else:
                 #self.x = round((Pong.WIDTH / 2) - 1)
-                self.x = round(Pong.WIDTH / 6) # LW start the ball not in the center
+                self.x = round((Pong.WIDTH / 6)*5) # LW start the ball not in the center
 
                 self.y = round((Pong.HEIGHT / 2) - 1)
                 self.speed = self.SPEED * Pong.SPEEDUP
@@ -365,7 +365,7 @@ class Pong:
             else:
                 self.right = None
                 # self.x = round(Pong.WIDTH / 6)
-                #self.y = round(Pong.HEIGHT / 2) # LW - puts ball to middle, can look bad
+                self.y = round(Pong.HEIGHT / 2) 
                 self.speed = self.SPEED * Pong.SPEEDUP
                 self.velocity = (0, 0)
                 self.w = self.DIAMETER
@@ -441,13 +441,13 @@ class Pong:
                 #if randint(0, 1) == 1 and self.delay_counter == 0:
                 if Pong.score_left + Pong.score_right == 1 and self.delay_counter == 0:
                     # change to your side
-                    self.x = round((Pong.WIDTH / 6)*5)
-                    self.right = False
-                elif self.delay_counter == 0:
                     self.x = round(Pong.WIDTH / 6) # if flipping which is first also change line 347
                     self.right = True
+                elif self.delay_counter == 0:
+                    self.x = round((Pong.WIDTH / 6)*5)
+                    self.right = False
                     
-                if self.delay_counter <= 40:
+                if self.delay_counter <= 15: # was 40
                     self.delay_counter += 1 #give a delay before the ball starts off again
                     #print(f'delay count {self.delay_counter}')
                 else:
