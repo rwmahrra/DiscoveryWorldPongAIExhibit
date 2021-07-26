@@ -4,13 +4,23 @@ import {
     PerspectiveCamera,
     WebGLRenderer,
     AmbientLight,
-} from "https://threejs.org/build/three.module.js";
+} from '/vendor/three/build/three.module.js';
+//} from 'C:/Users/"DW Pong"/Downloads/DiscoveryWorldPongAIExhibit-master/DiscoveryWorldPongAIExhibit-master/visualizer/vendor/three/build/three.module.js';
 import {
     GLTFLoader
-} from "https://threejs.org/examples/jsm/loaders/GLTFLoader.js";
+} from '/vendor/three/examples/jsm/loaders/GLTFLoader.js';
+//} from 'C:/Users/"DW Pong"/Downloads/DiscoveryWorldPongAIExhibit-master/DiscoveryWorldPongAIExhibit-master/visualizer/vendor/three/examples/jsm/loaders/GLTFLoader.js'
 import {
     GUI
-} from "https://threejs.org/examples/jsm/libs/dat.gui.module.js";
+} from '/vendor/three/examples/jsm/libs/dat.gui.module.js';
+//} from 'C:/Users/"DW Pong"/Downloads/DiscoveryWorldPongAIExhibit-master/DiscoveryWorldPongAIExhibit-master/visualizer/vendor/three/examples/jsm/libs/dat.gui.module.js'
+// } from "https://threejs.org/build/three.module.js";
+// import {
+//     GLTFLoader
+// } from "https://threejs.org/examples/jsm/loaders/GLTFLoader.js";
+// import {
+//     GUI
+// } from "https://threejs.org/examples/jsm/libs/dat.gui.module.js";
 //import * from "/js/visualizer.js"
 
 let container, camera, scene, renderer, opponent;
