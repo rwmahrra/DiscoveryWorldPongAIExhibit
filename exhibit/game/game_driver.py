@@ -273,7 +273,7 @@ if __name__ == "__main__":
             has_bad_values = False 
 
             # take 40 measurements of the player to see if they actually are trying to
-            for counter in range(0,40):
+            for counter in range(0,30):
                 c_value = check_for_still_player(pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance)
                 if c_value == -0.5:
                     # c_value is our dummy value for not seeing a human blob
@@ -303,7 +303,7 @@ if __name__ == "__main__":
                     subscriber.emit_level(level)
                     instance.run(level) # RUN LEVEL (2 or 3)
                     break
-                elif counter > 300: # counter of 300 is about 2-3 seconds
+                elif counter > 250: # counter of 300 is about 2-3 seconds
                     # if we've been waiting for too long for a player to enter, reset game
                     level = 0
                     print(f'            No Player detected, resetting game')
