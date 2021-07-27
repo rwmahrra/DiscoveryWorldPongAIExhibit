@@ -142,6 +142,69 @@ def check_for_player(pipeline, decimation_filter, crop_percentage_w, crop_percen
             return True # successfully found a player, return true
         return False # failed to get camera image, return false
 
+def check_for_still_player(pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance):
+        #try to get the frame 50 times
+        for i in range(50): 
+            frames = pipeline.wait_for_frames()
+            depth = frames.get_depth_frame()
+            #color = frames.get_color_frame()
+            if not depth: continue
+
+            # filtering the image to make it less noisy and inconsistent
+            depth_filtered = decimation_filter.process(depth)
+            depth_image = np.asanyarray(depth_filtered.get_data())
+            
+            # cropping the image based on a width and height percentage
+            w,h = depth_image.shape
+            ws, we = int(w/2 - (w * crop_percentage_w)/2), int(w/2 + (w * crop_percentage_w)/2)
+            hs, he = int(h/2 - (h * crop_percentage_h)/2), int(h/2 + (h * crop_percentage_h)/2)
+            #print("dimension: {}, {}, width: {},{} height: {},{}".format(w,h,ws,we,hs,he))
+            depth_cropped = depth_image[ws:we, hs:he]
+            #depth_cropped = depth_image
+
+            cutoffImage = np.where((depth_cropped < clipping_distance) & (depth_cropped > 0.1), True, False)
+
+            #print(f'cutoffImage shape is {cutoffImage.shape}, depth_cropped shape is {depth_cropped.shape}');
+            avg_x = 0
+            avg_x_array = np.array([])
+            countB = 0
+            for a in range(np.size(cutoffImage,0)):
+                for b in range(np.size(cutoffImage,1)):
+                    if cutoffImage[a,b] :
+                        avg_x += b
+                        #print(b)
+                        avg_x_array = np.append(avg_x_array,b)
+                        countB = countB+1
+            # if we got no pixels in depth, return false
+            if countB <= 40: 
+                return -5.0
+            
+            avg_x_array.sort()
+            islands = []
+            i_min = 0
+            i_max = 0
+            p = avg_x_array[0]
+            for index in range(np.size(avg_x_array,0)) :
+                n = avg_x_array[index]
+                if n > p+1 and not i_min == i_max : # if the island is done
+                    islands.append(avg_x_array[i_min:i_max])
+                    i_min = index
+                i_max = index
+                p = n
+            if not i_min == i_max: islands.append(avg_x_array[i_min:i_max])
+            
+
+            #print(islands)
+            bigIsland = np.array([])
+            for array in islands:
+                if np.size(array,0) > np.size(bigIsland,0): bigIsland = array
+            
+            #print(np.median(bigIsland))
+            m = (np.median(bigIsland))
+
+            return (m/(np.size(cutoffImage,1)) * 1) # -0.2 # return value
+        return -5.0 # failed to get camera image, return bas value
+
 if __name__ == "__main__":
 
     print("from gameDriver, about to init GameSubscriber")
@@ -178,7 +241,7 @@ if __name__ == "__main__":
     # We will be removing the background of objects more than
     #  clipping_distance_in_meters meters away
     # filter out far away so we only have a person
-    clipping_distance_in_meters = 1.8 #2 meter
+    clipping_distance_in_meters = 1.0 #2 meter
     clipping_distance = clipping_distance_in_meters / depth_scale
     print(f'clipping distance is : {clipping_distance}')
 
@@ -200,8 +263,22 @@ if __name__ == "__main__":
             print("          Waiting for user interaction to begin game . . . ")
             while not check_for_player(pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance):
                 time.sleep(0.01)
+            print("          Human detected, checking if still . . . ")
+            arrayVals = np.array([]) # empty numpy array to store values to check if person is still
+            has_bad_values = False
+            for counter in range(0,40):
+                c_value = check_for_still_player(pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance)
+                if c_value == -0.5:
+                    # c_value is our dummy value for not seeing a human blob
+                    # continue loop back at waiting for interaction
+                    has_bad_values = True
+                arrayVals = np.append(arrayVals, c_value)
+            if np.std(arrayVals) > 0.07 or has_bad_values:
+                print("          No still player.        ")
+                continue
+
             level = 1
-            print(f'          Human detected, beginning level {level}. ')
+            print(f'          Still human detected, beginning level {level}. ')
             subscriber.emit_level(level) 
             instance.run(level)
         elif level == 1 or level == 2:
