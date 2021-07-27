@@ -249,6 +249,7 @@ if __name__ == "__main__":
 
     level = 0
     # start at level 0, our start state when nobody is playing
+    time.sleep(1) # wait a second for connection stuff to happen. It was previoiusly connecting only after it tried to emit
     subscriber.emit_level(level) 
 
     # was orginally in the loop
@@ -289,6 +290,7 @@ if __name__ == "__main__":
             level = 1
             print(f'          Still human detected, beginning level {level}. ')
             subscriber.emit_level(level) 
+            # right here would be where you would add time.sleep(0.9) to add a delay for some start graphic in emulate 3d
             instance.run(level) # RUN LEVEL (1)
         elif level == 1 or level == 2: # if we just played level 1 or 2 and now have to play level 3
             print("          Waiting for user interaction to advance level . . . ")
@@ -301,7 +303,8 @@ if __name__ == "__main__":
                     subscriber.emit_level(level)
                     instance.run(level) # RUN LEVEL (2 or 3)
                     break
-                elif counter > 300: # if we've been waiting for too long for a player to enter, reset game
+                elif counter > 300: # counter of 300 is about 2-3 seconds
+                    # if we've been waiting for too long for a player to enter, reset game
                     level = 0
                     print(f'            No Player detected, resetting game')
                     print(f'            Game reset to level {level} (zero).')
@@ -311,6 +314,7 @@ if __name__ == "__main__":
                 time.sleep(0.01)
 
         else: # level == 3
+            # if there was a level 4, the logic would be here
             level = 0 # the game is over so we need to reset to level 0 (the state before the game starts)
             print(f'            Game reset to level {level} (zero).')
             subscriber.emit_level(level)
