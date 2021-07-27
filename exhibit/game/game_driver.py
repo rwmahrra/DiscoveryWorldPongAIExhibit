@@ -102,6 +102,7 @@ class GameDriver:
         self.crop_percentage_h = crop_percentage_h
         self.clipping_distance = clipping_distance
 
+# checks if theres a big enough player sized blob
 def check_for_player(pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance):
         #try to get the frame 50 times
         for i in range(50): 
@@ -142,6 +143,7 @@ def check_for_player(pipeline, decimation_filter, crop_percentage_w, crop_percen
             return True # successfully found a player, return true
         return False # failed to get camera image, return false
 
+# checks if there is a player and returns their position from 0 to 1 so that we can tell if theyre walking through or still to play
 def check_for_still_player(pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance):
         #try to get the frame 50 times
         for i in range(50): 
@@ -252,20 +254,24 @@ if __name__ == "__main__":
     # was orginally in the loop
     instance = GameDriver(subscriber, opponent, agent, pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance)
 
-    while True:
+    while True: # play the exhibit on loop forever
 
         #time.sleep(1)
         start = time.time()
         
         #wait until human detected, if no human after a few seconds, back to zero
 
-        if level == 0:
+        if level == 0: # if the game hasn't started yet and the next level would be level 1
             print("          Waiting for user interaction to begin game . . . ")
+            # checking if theres a large enough human blob to track
             while not check_for_player(pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance):
-                time.sleep(0.01)
+                time.sleep(0.01) # will just loop and stay at level zero until it sees someone
             print("          Human detected, checking if still . . . ")
+
             arrayVals = np.array([]) # empty numpy array to store values to check if person is still
-            has_bad_values = False
+            has_bad_values = False 
+
+            # take 40 measurements of the player to see if they actually are trying to
             for counter in range(0,40):
                 c_value = check_for_still_player(pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance)
                 if c_value == -0.5:
@@ -273,37 +279,43 @@ if __name__ == "__main__":
                     # continue loop back at waiting for interaction
                     has_bad_values = True
                 arrayVals = np.append(arrayVals, c_value)
+            
+            # if standard deviation of values from check_for_still_player was too variable (person walking by) or there was no person:
             if np.std(arrayVals) > 0.07 or has_bad_values:
+                # either there wasn't a person blob large enough, or the player wasn't still. Don't start game
                 print("          No still player.        ")
                 continue
 
             level = 1
             print(f'          Still human detected, beginning level {level}. ')
             subscriber.emit_level(level) 
-            instance.run(level)
-        elif level == 1 or level == 2:
+            instance.run(level) # RUN LEVEL (1)
+        elif level == 1 or level == 2: # if we just played level 1 or 2 and now have to play level 3
             print("          Waiting for user interaction to advance level . . . ")
             counter = 0
             while True:
                 if check_for_player(pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance):
+                    # there is still a large enough player blob present, move on to next level
                     level = level + 1
                     print(f'          Human detected, beginning level {level}. ')
                     subscriber.emit_level(level)
-                    instance.run(level)
+                    instance.run(level) # RUN LEVEL (2 or 3)
                     break
-                elif counter > 200:
+                elif counter > 300: # if we've been waiting for too long for a player to enter, reset game
                     level = 0
                     print(f'            No Player detected, resetting game')
                     print(f'            Game reset to level {level} (zero).')
                     subscriber.emit_level(level)
                     break
-                counter = counter + 1
+                counter = counter + 1 # incrementing a counter as a way to timeout of the game if nobody is playing
                 time.sleep(0.01)
 
         else: # level == 3
-            level = 0
+            level = 0 # the game is over so we need to reset to level 0 (the state before the game starts)
             print(f'            Game reset to level {level} (zero).')
             subscriber.emit_level(level)
+            time.sleep(1) # wait 1 second so person has time to leave and next person can come in
+
 
 
 
