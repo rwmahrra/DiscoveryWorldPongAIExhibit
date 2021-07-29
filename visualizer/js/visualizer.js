@@ -37,7 +37,7 @@ function myMethod(message) {
     //console.log(message.destinationName)
     if(message.destinationName === "game/level") {
         level = JSON.parse(message.payloadString)["level"];
-        levelg = level
+        levelg = level // levelg is global 
         model_initialized = false;
         //init_model(level);
         console.log("Changing to level:")
@@ -59,7 +59,7 @@ function myMethod(message) {
                 levelg = 1
                 console.log('level 0. level set to:')
                 console.log(level)
-                render_info(info_ctx, 0, INFO_TEXT)
+                //render_info(info_ctx, 0, INFO_TEXT)
                 
                 init_model(level);
                 break;
@@ -72,7 +72,7 @@ function myMethod(message) {
                 leftInterval1 = setInterval(left10, 2750)
                 leftInterval0 = setInterval(leftZero, 3550)
 
-                render_info(info_ctx, 1, INFO_TEXT)
+                //render_info(info_ctx, 1, INFO_TEXT)
                 init_model(level);
 
                 break;
@@ -86,7 +86,7 @@ function myMethod(message) {
                 leftInterval1 = setInterval(left10, 3610)
                 leftInterval0 = setInterval(leftZero, 4200)
 
-                render_info(info_ctx, 2, INFO_TEXT)
+                //render_info(info_ctx, 2, INFO_TEXT)
                 
                 init_model(level);
                 break;
@@ -101,7 +101,7 @@ function myMethod(message) {
                 rightInterval1 = setInterval(left10, 4910)
                 //rightInterval0 = setInterval(leftZero, 6250)
 
-                render_info(info_ctx, 3, INFO_TEXT)
+                //render_info(info_ctx, 3, INFO_TEXT)
                 init_model(level);
                 break;
         }
@@ -250,14 +250,26 @@ function render_game(ctx, frame, image_upscale = 2) {
         // console.log("frame[i]  is:")
         // console.log(frame[i])
         //if (frame[i] !== 0) {console.log("frame has nonzero value")} 
-        frameData[idx] = 230-frame[i]; // Red
-        frameData[idx+1] = 230-frame[i]; // Green
-        frameData[idx+2] = 230-frame[i]; // Blue
+        frameData[idx] = 220-frame[i]; // Red
+        frameData[idx+1] = 220-frame[i]; // Green
+        frameData[idx+2] = 220-frame[i]; // Blue
         frameData[idx+3] = 255; // Alpha
     }
 
     // img_w = frame_width * image_upscale;
     // img_h = frame_height * image_upscale;
+
+    // TODD draw a yellow rectangle around the element 
+    // if level = 1
+    // if (levelg == 1) {
+    //     console.log("draiwng yellow rectangle around game view")
+    //     frame_ctx.beginPath();
+    //     frame_ctx.rect(0, 0, frame_width, frame_height);
+    //     //frame_ctx.stroke();
+    //     frame_ctx.fillStyle = "yellow";
+    //     frame_ctx.fill();
+    // }
+
     frame_ctx.putImageData(imageData, 0, 0);
     ctx.drawImage(frameCanvas, img_x, img_y, img_w, img_h); // LW
 
@@ -327,6 +339,16 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
 
     let t = timer("render_game");
     // Render game frame
+
+    if (levelg == 1) {
+        console.log("draiwng yellow rectangle around game view")
+        ctx.beginPath();
+        ctx.rect(img_x - (0.25*frame_width), img_y - (0.25*frame_width), 2*frame_width, 2*frame_height);
+        //frame_ctx.stroke();
+        ctx.fillStyle = "yellow";
+        ctx.fill();
+    }
+
     render_depth_feed(d_ctx)
     render_game(ctx, render_frame);
     t.stop()
@@ -595,10 +617,10 @@ var MIN_PADDING = 3.8; // LW was 3. Used at line 212
 var HIDDEN_LAYER_Y = 0.475; // LQ was 0.35
 var OUTPUT_LAYER_Y = 0.12; // LW was 0.1
 var OUTPUT_LABELS = ["LEFT", "RIGHT", "NONE"]
-var INFO_TEXT = ["Can you beat the AI? \nStep in to play...\n \nArtificial Intelligence does more than just play games! \nAI can be used for:\n    Self-Driving cars        Medical Diagnosis\n    Language Translation    Virtual Assistants", 
-"Hello human, I am an Artificial Intelligence. \nMy brain is a 'Neural Network' that learns by playing. \n \nMove your body side to side to control your paddle.\nSee if you can beat me!\n \nArtificial Intelligence does more than just play games! \nAI can be used for:\n    Self-Driving cars        Medical Diagnosis\n    Language Translation    Virtual Assistants", 
-"This is what I see and my Neural Network. Each circle \nis like a neuron in a human brain. The neurons that \nlight up choose if I move my paddle left or right.\n \nI made it easy for you that round... \nCan you beat a model that was trained for more time?\nArtificial Intelligence does more than just play games! \nAI can be used for:\n    Self-Driving cars        Medical Diagnosis\n    Language Translation    Virtual Assistants", 
-"When I was learning to play this game, I got rewards \nthat told me what actions were good and bad. I changed \nmy Neural Network to improve a little each time.\nThis is called Reinforcement Learning.\n \nCan you beat my hardest model? I've trained thousands of times \nto perfect this Neural Network.\nArtificial Intelligence does more than just play games! \nAI can be used for:\n    Self-Driving cars        Medical Diagnosis\n    Language Translation    Virtual Assistants"];
+//var INFO_TEXT = ["Can you beat the AI? \nStep in to play...\n \nArtificial Intelligence does more than just play games! \nAI can be used for:\n    Self-Driving cars        Medical Diagnosis\n    Language Translation    Virtual Assistants", 
+// "Hello human, I am an Artificial Intelligence. \nMy brain is a 'Neural Network' that learns by playing. \n \nMove your body side to side to control your paddle.\nSee if you can beat me!\n \nArtificial Intelligence does more than just play games! \nAI can be used for:\n    Self-Driving cars        Medical Diagnosis\n    Language Translation    Virtual Assistants", 
+// "This is what I see and my Neural Network. Each circle \nis like a neuron in a human brain. The neurons that \nlight up choose if I move my paddle left or right.\n \nI made it easy for you that round... \nCan you beat a model that was trained for more time?\nArtificial Intelligence does more than just play games! \nAI can be used for:\n    Self-Driving cars        Medical Diagnosis\n    Language Translation    Virtual Assistants", 
+// "When I was learning to play this game, I got rewards \nthat told me what actions were good and bad. I changed \nmy Neural Network to improve a little each time.\nThis is called Reinforcement Learning.\n \nCan you beat my hardest model? I've trained thousands of times \nto perfect this Neural Network.\nArtificial Intelligence does more than just play games! \nAI can be used for:\n    Self-Driving cars        Medical Diagnosis\n    Language Translation    Virtual Assistants"];
 var image_upscale = 4;//4
 var frame_width = 192 / 2; // Base state dimension, scaled down by two
 var frame_height = 160 / 2; // LW was /2
