@@ -282,7 +282,7 @@ if __name__ == "__main__":
                 arrayVals = np.append(arrayVals, c_value)
             
             # if standard deviation of values from check_for_still_player was too variable (person walking by) or there was no person:
-            if np.std(arrayVals) > 0.07 or has_bad_values:
+            if np.std(arrayVals) > 0.06 or has_bad_values:
                 # either there wasn't a person blob large enough, or the player wasn't still. Don't start game
                 print("          No still player.        ")
                 continue
