@@ -487,7 +487,7 @@ class Pong:
         if pipeline == None:
             print('pipeline equal to None')
         
-        Pong.SPEEDUP = 1 + (0.4*level) 
+        Pong.SPEEDUP = 1 + 0.4 # (0.4*level) # uncomment this to make it faster each level
         print(f'Pong environment init level {level} and SPEEDUP is {Pong.SPEEDUP}')
         
         """
@@ -725,7 +725,8 @@ class Pong:
                 self.right.update()
                 self.ball.update()
                 done = False
-                if Pong.score_right >= Pong.MAX_SCORE or Pong.score_left >= Pong.MAX_SCORE:
+                #if Pong.score_right >= Pong.MAX_SCORE or Pong.score_left >= Pong.MAX_SCORE:
+                if Pong.score_right + Pong.score_left >= Pong.MAX_SCORE:
                     done = True
 
             screen = self.render()
