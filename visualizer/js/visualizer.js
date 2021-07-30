@@ -46,10 +46,10 @@ function myMethod(message) {
         player_score = 0;
         morphAllZero()
         morphOp("Smug", 0.5)
-        clearInterval(rightInterval0);
-        clearInterval(rightInterval1);
-        clearInterval(leftInterval0);
-        clearInterval(leftInterval1);
+        // clearInterval(rightInterval0);
+        // clearInterval(rightInterval1);
+        // clearInterval(leftInterval0);
+        // clearInterval(leftInterval1);
 
         const info_ctx = infoCanvas.getContext("2d");
 
@@ -67,10 +67,14 @@ function myMethod(message) {
                 console.log('level 1')
                 morphOp("Happy",0.0)
                 setTimeout(smugZero, 0)
-                rightInterval1 = setInterval(right10, 2910)
-                rightInterval0 = setInterval(rightZero, 3650)
-                leftInterval1 = setInterval(left10, 2750)
-                leftInterval0 = setInterval(leftZero, 3550)
+                right10();
+                leftZero();
+                setTimeout(rightZero, 1000)
+                setTimeout(left10, 2000)
+                // rightInterval1 = setInterval(right10, 2910)
+                // rightInterval0 = setInterval(rightZero, 3650)
+                // leftInterval1 = setInterval(left10, 2750)
+                // leftInterval0 = setInterval(leftZero, 3550)
 
                 //render_info(info_ctx, 1, INFO_TEXT)
                 init_model(level);
@@ -81,10 +85,15 @@ function myMethod(message) {
                 morphOp("Happy",0.2)
                 setTimeout(smugZero, 5000)
                 //setTimeout(mad10, 5000)
-                rightInterval1 = setInterval(right10, 3709)
-                rightInterval0 = setInterval(rightZero, 4550)
-                leftInterval1 = setInterval(left10, 3610)
-                leftInterval0 = setInterval(leftZero, 4200)
+                // rightInterval1 = setInterval(right10, 3709)
+                // rightInterval0 = setInterval(rightZero, 4550)
+                // leftInterval1 = setInterval(left10, 3610)
+                // leftInterval0 = setInterval(leftZero, 4200)
+                
+                left10();
+                rightZero();
+                setTimeout(leftZero, 700)
+                setTimeout(left10, 2000)
 
                 //render_info(info_ctx, 2, INFO_TEXT)
                 
@@ -95,12 +104,18 @@ function myMethod(message) {
                 morphOp("Happy",0.4)
                 morphOp("Mad", 0.3)
                 //setTimeout(smugZero, 5000)
-                //setTimeout(mad10, 5000)
-                rightInterval1 = setInterval(right10, 5505)
-                //rightInterval0 = setInterval(rightZero, 5600)
-                rightInterval1 = setInterval(left10, 4910)
+                // //setTimeout(mad10, 5000)
+                // rightInterval1 = setInterval(right10, 5505)
+                // //rightInterval0 = setInterval(rightZero, 5600)
+                // rightInterval1 = setInterval(left10, 4910)
                 //rightInterval0 = setInterval(leftZero, 6250)
-
+                
+                right10();
+                leftZero();
+                setTimeout(rightZero, 1500)
+                setTimeout(left10, 2500)
+                setTimeout(leftZero, 3500)
+                setTimeout(right10, 4000)
                 //render_info(info_ctx, 3, INFO_TEXT)
                 init_model(level);
                 break;
@@ -119,16 +134,28 @@ function myMethod(message) {
                 case 1:
                     morphOp("Happy", 1.0)
                     setTimeout(happyZero, 1000)
+                    left10();
+                    rightZero();
+                    setTimeout(leftZero, 500)
+                    setTimeout(right10, 2000)
                     break;
                 case 2:
                     morphOp("Smug", 1.0)
                     setTimeout(smug07, 1000)
+                    right10();
+                    leftZero();
+                    setTimeout(rightZero, 700)
+                    setTimeout(left10, 2500)
                     break;
                 case 3:
                     morphOp("Smug", 1.0)
                     setTimeout(smug09, 1000)
                     morphOp("Happy", 0.5)
                     setTimeout(happyZero, 1000)
+                    right10();
+                    leftZero();
+                    setTimeout(rightZero, 2200)
+                    setTimeout(left10, 3400)
                     break;
             }
         }
@@ -260,16 +287,6 @@ function render_game(ctx, frame, image_upscale = 2) {
     // img_w = frame_width * image_upscale;
     // img_h = frame_height * image_upscale;
 
-    // TODD draw a yellow rectangle around the element 
-    // if level = 1
-    // if (levelg == 1) {
-    //     console.log("draiwng yellow rectangle around game view")
-    //     frame_ctx.beginPath();
-    //     frame_ctx.rect(0, 0, frame_width, frame_height);
-    //     //frame_ctx.stroke();
-    //     frame_ctx.fillStyle = "yellow";
-    //     frame_ctx.fill();
-    // }
 
     frame_ctx.putImageData(imageData, 0, 0);
     ctx.drawImage(frameCanvas, img_x, img_y, img_w, img_h); // LW
@@ -279,11 +296,12 @@ function render_depth_feed(ctx, image_upscale = 3.6) {
     var image = new Image();
     image.src = 'data:image/jpg;base64,' + depthFeedStr //canvas.toDataURL(depthFeedStr, 1)
     
-    // scale image_upscale to fit to the left of the pong screen
-    //           the left edge of yellow box / this image width
+    
 
     //depth_ctx.drawImage(image, 0, 0)
     image.onload = function() {
+        // scale image_upscale to fit to the left of the pong screen
+        // the left edge of yellow box / this image width
         image_upscale = (img_x - (0.1*img_w)) /image.width;
 
         // console.log('drawing image ***')
@@ -350,14 +368,13 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
     else {labelChosen = 2}
 
 
-    
     if (levelg == 1) {
         //console.log("draiwng yellow rectangle around game view")
         ctx.beginPath();
         ctx.strokeStyle = "yellow";
         ctx.lineWidth = 15;
         ctx.fillStyle = "yellow";
-        ctx.strokeRect(img_x - (0.05*img_w), img_y - (0.05*img_h), 1.1*img_w, 1.1*img_h);
+        ctx.strokeRect(img_x - (0.05 * img_w), img_y - (0.05 * img_h), 1.1 * img_w, 1.1 * img_h);
         //ctx.strokeRect(img_x - (0.1*img_w), img_y - (0.1*img_h), 1.2*img_w, 1.2*img_h);
         //frame_ctx.stroke();
         //ctx.fill();
@@ -366,11 +383,16 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
         ctx.beginPath();
         ctx.strokeStyle = "yellow";
         ctx.lineWidth = 15;
-        ctx.strokeRect(0, (img_y - (0.2*img_h)) - (VERTICAL_SPREAD) - (VERTICAL_SPREAD*1.1), canvas_width, 2 * VERTICAL_SPREAD *1.1);
+        ctx.strokeRect(0, (img_y - (0.2 * img_h)) - (VERTICAL_SPREAD) - (VERTICAL_SPREAD * 1.1), canvas_width, 2 * VERTICAL_SPREAD * 1.1);
+    } else if (levelg == 3) {
+        //console.log("draiwng yellow rectangle around labels")
+        ctx.beginPath();
+        ctx.strokeStyle = "yellow";
+        ctx.lineWidth = 15;
+        ctx.strokeRect(canvas_width * (1/5), OUTPUT_LAYER_Y * canvas_height /6, canvas_width * (3/5), canvas_height * OUTPUT_LAYER_Y * 1.2);
         //frame_ctx.stroke();
         //ctx.stroke();
     }
-    
     let t = timer("render_game");
     // Render game frame
 
@@ -406,7 +428,7 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
     t = timer("render_output_weights");
     render_weights(ctx, hidden_pos, out_pos, render_rescale(output_weights), ow_activations, 2)
     t.stop()
-
+// t
     /********************************************* */
     //console.log('about to do the new activations')
     // Re-compute middle activations for rendering
