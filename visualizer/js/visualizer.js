@@ -278,11 +278,18 @@ function render_depth_feed(ctx, image_upscale = 3.6) {
     var image = new Image();
     image.src = 'data:image/jpg;base64,' + depthFeedStr //canvas.toDataURL(depthFeedStr, 1)
     
+    // scale image_upscale to fit to the left of the pong screen
+    //           the left edge of yellow box / this image width
+
     //depth_ctx.drawImage(image, 0, 0)
     image.onload = function() {
+        image_upscale = (img_x - (0.1*img_w)) /image.width;
 
-        // console.log('drawing image')
-        ctx.drawImage(image, (d_canvas_width/3) - (image.width/2), d_canvas_height -(image.height*image_upscale), image.width * image_upscale, image.height * image_upscale)
+        // console.log('drawing image ***')
+        // console.log(image_upscale)
+        //ctx.drawImage(image, (d_canvas_width/3) - (image.width/2), d_canvas_height -(image.height*image_upscale), image.width * image_upscale, image.height * image_upscale)
+        //ctx.drawImage(image, 0, d_canvas_height -(image.height*image_upscale), image.width * image_upscale, image.height * image_upscale)
+        ctx.drawImage(image, 0, (img_y + (.5 * img_h)) -( 0.5 * image.height*image_upscale), image.width * image_upscale, image.height * image_upscale)
     }
 }
 
@@ -317,7 +324,8 @@ function render_weight_image(ctx, hl_activations, image_upscale = 5) {
 
     img_w = frame_width * image_upscale;
     img_h = frame_height * image_upscale;
-    img_x = img_w / 10; // (canvas_width - img_w)/2 -(canvas_width/4) + (img_w /10);
+    img_x = (canvas_width * 3/4) - (img_w/2) - (img_w/10);
+    //img_x = img_w / 10; // (canvas_width - img_w)/2 -(canvas_width/4) + (img_w /10);
     //img_x = (canvas_width - img_w)/2; // LW
     img_y = canvas_height - (img_h) - (img_h/10);
     // img_x = document.body.clientWidth/2//(canvas_width - img_w)/2;
@@ -343,14 +351,14 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
     let t = timer("render_game");
     // Render game frame
 
-    //if (levelg == 1) {
-        console.log("draiwng yellow rectangle around game view")
+    if (levelg == 1) {
+        //console.log("draiwng yellow rectangle around game view")
         ctx.beginPath();
         ctx.rect(img_x - (0.1*img_w), img_y - (0.1*img_h), 1.2*img_w, 1.2*img_h);
         //frame_ctx.stroke();
         ctx.fillStyle = "yellow";
         ctx.fill();
-    //}
+    }
 
     render_depth_feed(d_ctx)
     render_game(ctx, render_frame);
@@ -497,7 +505,7 @@ function init_model(level) {
 
         // Render neuron nodes, saving calculated positions for weight rendering
         hidden_pos = render_layer(ctx, render_rescale(hidden_biases, 1), 0,
-            canvas_width, HIDDEN_LAYER_Y * canvas_height , NEURON_SIZE)
+            canvas_width, (img_y - (0.2*img_h)) - (VERTICAL_SPREAD), NEURON_SIZE)
 
         out_pos = render_layer(ctx, render_rescale(output_biases, 1), 0,
             canvas_width, OUTPUT_LAYER_Y * canvas_height, NEURON_SIZE, null, OUTPUT_LABELS)
@@ -535,10 +543,10 @@ function init() {
 
     // Size canvas to full screen
     //canvas.width = 10;
-    canvas.width = document.body.clientWidth/(6/2.5); //document.body.clientWidth;
+    canvas.width = document.body.clientWidth*(.6) -(document.body.clientWidth/60); //document.body.clientWidth;
     canvas.height = document.body.clientHeight - 2*(document.body.clientHeight/60);// /2.2;//document.body.clientHeight; // LW
-    canvas.y = 50
-    canvas.x = 0 // does nothing
+    // canvas.y = 50
+    // canvas.x = 0 // does nothing
     canvas.style.left = (document.body.clientWidth/60)+'px'; // LW
     canvas.style.top = (document.body.clientWidth/120) + 'px';
     canvas.style.position = 'absolute';
@@ -549,10 +557,10 @@ function init() {
     console.log("VERTICAL_SPREAD:")
     console.log(VERTICAL_SPREAD);
 
-    d_canvas.width = document.body.clientWidth/(1); //document.body.clientWidth;
-    d_canvas.height = canvas.height//document.body.clientHeight /2.5;//document.body.clientHeight; // LW
-    d_canvas.style.left = (0)+'px'; // LW
-    d_canvas.style.top = (document.body.clientWidth/60) + 'px';
+    d_canvas.width = canvas.width; //document.body.clientWidth/(1); //document.body.clientWidth;
+    d_canvas.height = canvas.height; //document.body.clientHeight /2.5;//document.body.clientHeight; // LW
+    d_canvas.style.left = canvas.style.left; //(0)+'px'; // LW
+    d_canvas.style.top = canvas.style.top; //(document.body.clientWidth/60) + 'px';
     d_canvas.style.position = 'absolute';
 
     d_canvas_width = d_canvas.width
@@ -573,7 +581,8 @@ function init() {
     //canvas_height = 10; //
     canvas_height = canvas.height;//document.body.clientHeight /2; // LW
 
-    img_x = img_w / 10; // (canvas_width - img_w)/2 -(canvas_width/4) + (img_w /10);
+    //img_x = img_w / 10; // (canvas_width - img_w)/2 -(canvas_width/4) + (img_w /10);
+    img_x = (canvas_width * 3/4) - (img_w/2) - (img_w/10);
     //img_x = (canvas_width - img_w)/2; // LW
     img_y = canvas_height - (img_h) - (img_h/10);// + (canvas_height / 10)); // LW
     
