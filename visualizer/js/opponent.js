@@ -148,8 +148,8 @@ function morph(mesh, target, value) {
 }
 
 function onWindowResize() {
-    //camera.aspect = window.innerWidth / (window.innerHeight);
-    //camera.updateProjectionMatrix();
-    //renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = document.body.clientWidth / document.body.clientHeight; // window.innerWidth / (window.innerHeight);
+    camera.updateProjectionMatrix();
+    renderer.setSize(document.body.clientWidth, document.body.clientHeight); //renderer.setSize(window.innerWidth, window.innerHeight);
     
 }

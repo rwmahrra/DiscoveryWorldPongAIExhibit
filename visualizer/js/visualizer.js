@@ -657,9 +657,41 @@ function init() {
     // This one will hold a model weight image overlay to see what the network is picking up on
     weightImageCanvas = document.createElement('canvas');
 
+    window.addEventListener('resize', onWindowResizeV, false);
+
     initialized = true;
 }
  
+
+function onWindowResizeV() {
+    console.log("ON WINDOW RESIZE")
+    canvas.width = document.body.clientWidth*(.6) -(document.body.clientWidth/60); //document.body.clientWidth;
+    canvas.height = document.body.clientHeight - 2*(document.body.clientHeight/60);// /2.2;//document.body.clientHeight; // LW
+    
+    canvas_width = canvas.width;
+    canvas_height = canvas.height;
+    
+    canvas.style.left = (document.body.clientWidth/60)+'px'; // LW
+    canvas.style.top = (document.body.clientWidth/120) + 'px';
+    
+    image_upscale = canvas.width / 225
+    img_w = frame_width * image_upscale;
+    img_h = frame_height * image_upscale;
+    img_x = (canvas_width * 3/4) - (img_w/2) - (img_w/10);
+    img_y = canvas_height - (img_h) - (img_h/10);
+    
+    d_canvas.width = canvas.width; //document.body.clientWidth/(1); //document.body.clientWidth;
+    d_canvas.height = canvas.height; //document.body.clientHeight /2.5;//document.body.clientHeight; // LW
+    d_canvas.style.left = canvas.style.left; //(0)+'px'; // LW
+    d_canvas.style.top = canvas.style.top;
+    
+    d_canvas_width = d_canvas.width
+    d_canvas_height = d_canvas.height
+
+    VERTICAL_SPREAD = (document.body.clientHeight/8)
+    
+}
+
 function morphOp(value){
     console.log("empty morphOp function")};
 
