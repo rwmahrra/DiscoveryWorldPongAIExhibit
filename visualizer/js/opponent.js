@@ -80,6 +80,8 @@ function init() {
     console.log("logging from opponent:")
     window.morphOp();
     window.morphOp = morph2;
+    window.emptyAnimateFunction();
+    window.emptyAnimateFunction = move;
     //window.tester(3);
     loadOpponent(scene);
 
@@ -96,7 +98,7 @@ async function loadOpponent(scene) {
 
     console.log("current opponent position:")
     console.log(opponent.position);
-    opponent.position.x = 1.27;
+    opponent.position.x = 1.67;
     opponent.position.y = -0.7;
     opponent.position.z = 0;
     console.log("current opponent position:")
@@ -105,6 +107,11 @@ async function loadOpponent(scene) {
     morph(opponent, morphTargets.Happy, 0.0);
 
     //initGui();
+}
+
+function move(value) {
+    
+    opponent.position.y = value;
 }
 
 function initGui() {

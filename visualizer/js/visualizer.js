@@ -56,7 +56,7 @@ function myMethod(message) {
         switch(level) {
             case 0:
                 level = 1
-                levelg = 1
+                //levelg = 1
                 //console.log('level 0. level set to:')
                 //console.log(level)
                 //render_info(info_ctx, 0, INFO_TEXT)
@@ -476,6 +476,19 @@ function render_loop() {
         render_tick(ctx, state_frame, state_frame, hl_activations, ol_activations, d_ctx);
         last_rendered_activations = last_activations;
     }
+
+    newOpPos = opPosArr[levelg];
+    if (Math.abs(oldOpPos - newOpPos) <= 0.01) {
+        oldOpPos = newOpPos;
+        emptyAnimateFunction(oldOpPos);
+    } else if (oldOpPos != newOpPos && newOpPos > oldOpPos) {
+        oldOpPos = oldOpPos + 0.005;
+        emptyAnimateFunction(oldOpPos);
+        //oldOpPos = newOpPos;
+    } else {
+        oldOpPos = oldOpPos - 0.005;
+        emptyAnimateFunction(oldOpPos);
+    }
     // Break out of render loop if we receive a new model to render
     if(model_initialized) {
         requestAnimationFrame(render_loop);
@@ -651,6 +664,10 @@ function morphOp(value){
     console.log("empty morphOp function")};
 
 
+function emptyAnimateFunction(value){
+    console.log("empty emptyAnimateFunction function")};
+
+
 
 // Intentionally global. Canvas is for base drawing. Frame canvas holds game frame images.
 var canvas = null;
@@ -721,7 +738,9 @@ var player_score = 0;
 
 var labelChosen = 0;
 
-
+var oldOpPos = -0.7;
+var opPosArr = [0.0, 0.7, -0.7, -0.7]
+var newOpPos = -0.7;
 
 var depthFeedStr = "";
 
