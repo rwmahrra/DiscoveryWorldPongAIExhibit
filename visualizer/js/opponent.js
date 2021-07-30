@@ -68,8 +68,8 @@ function init() {
     //renderer.setSize(container.clientWidth, container.clientHeight);
 
     container.appendChild(renderer.domElement);
-    console.log("container opponent canvas pos:")
-    console.log(renderer.domElement.style.top)   
+    // console.log("container opponent canvas pos:")
+    // console.log(renderer.domElement.style.top)   // doesn't work
 
     window.addEventListener('resize', onWindowResize, false);
 
