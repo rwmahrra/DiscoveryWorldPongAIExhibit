@@ -369,19 +369,24 @@ function render_layer(canvas, neurons, left_x, right_x, y, neuron_size, activati
             }
         }
         b = neurons[i];
-        x = left_x + (i * neuron_size) + ((i+1) * padding) + (neuron_size / 2);
+
         //console.log("Neuron size is: ");
         //console.log(neuron_size);
         //console.log("b is: ");
         //console.log(b);
         // LW
         if (labels) {
+            q = i;
+            if (q == 1) {q = 2;} // swap right and none labels so none is middle
+            else if (q == 2) {q = 1;}
+            x = left_x + (q * neuron_size) + ((q+1) * padding) + (neuron_size / 2);
             create_circle(x, y, (neuron_size / 2) * b * 2.5, canvas, color = fill);
             canvas.font = TITLE_FONT;
             canvas.textAlign = "center";
             
-            canvas.fillText(labels[i], x, y-18);
-        } else {
+            canvas.fillText(labels[i], x, y/2); // y-18
+        } else {        
+            x = left_x + (i * neuron_size) + ((i+1) * padding) + (neuron_size / 2);
             create_circle(x, y + (Math.sin(x/canvas_width*SPREAD_VALUE)*VERTICAL_SPREAD), (neuron_size / 2) * b * 2.5, canvas, color = fill);
         }
         coordinates.push([x, y])
@@ -517,6 +522,9 @@ function render_weights(canvas, l1_positions, l2_positions, w, render_filter=nul
             break;
         case 2: // l1 spread
             //console.log("case 2");
+            // temp1 = out_pos[1]; // temp store position of middle
+            // out_pos[1] = out_pos[2]; // swaps right to be on the right
+            // out_pos[2] = temp1; // swaps none to be in the middle
             for (let i = 0; i < should_render.length; i++) {
                 const [l1, l2] = should_render[i];
                 // if (l2 !== labelChosen) {continue;} // LW only do lines to the chosen direction

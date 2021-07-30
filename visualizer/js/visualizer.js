@@ -523,7 +523,7 @@ function init_model(level) {
         console.log('canvas_height is:')
         console.log(canvas_height);
         NEURON_SIZE = (canvas_height - (hidden_biases.length * MIN_PADDING)) / (hidden_biases.length)
-        NEURON_SIZE = 0.6;
+        NEURON_SIZE = 0.8;
         // Render neuron nodes, saving calculated positions for weight rendering
         hidden_pos = render_layer(ctx, render_rescale(hidden_biases, 1), 0,
             canvas_width, (img_y - (0.2*img_h)) - (VERTICAL_SPREAD), NEURON_SIZE)
@@ -662,8 +662,8 @@ var rescaled_hw = null;
 // Rendering config
 var NEURON_SIZE = null;
 var MIN_PADDING = 3.8; // LW was 3. Used at line 212
-var HIDDEN_LAYER_Y = 0.475; // LQ was 0.35
-var OUTPUT_LAYER_Y = 0.12; // LW was 0.1
+var HIDDEN_LAYER_Y = 0.475; // LQ was 0.35 // no longer used
+var OUTPUT_LAYER_Y = 0.08; // LW was 0.1
 var OUTPUT_LABELS = ["LEFT", "RIGHT", "NONE"]
 //var INFO_TEXT = ["Can you beat the AI? \nStep in to play...\n \nArtificial Intelligence does more than just play games! \nAI can be used for:\n    Self-Driving cars        Medical Diagnosis\n    Language Translation    Virtual Assistants", 
 // "Hello human, I am an Artificial Intelligence. \nMy brain is a 'Neural Network' that learns by playing. \n \nMove your body side to side to control your paddle.\nSee if you can beat me!\n \nArtificial Intelligence does more than just play games! \nAI can be used for:\n    Self-Driving cars        Medical Diagnosis\n    Language Translation    Virtual Assistants", 
