@@ -13,7 +13,7 @@ const NEURON_COLOR_ACTIVE = "#22ffff"//"#DD2222"
 const ACTIVE_WEIGHT_THRESHOLD = 1
 
 const SPREAD_VALUE = 9855
-const VERTICAL_SPREAD = 120
+var VERTICAL_SPREAD = 120
 
 // For benchmarking
 var timer = function(name) {

@@ -317,10 +317,13 @@ function render_weight_image(ctx, hl_activations, image_upscale = 5) {
 
     img_w = frame_width * image_upscale;
     img_h = frame_height * image_upscale;
-    img_x = document.body.clientWidth/2//(canvas_width - img_w)/2;
-    img_y = canvas_height - (img_h);//+ (canvas_height / 10)); // LW
+    img_x = img_w / 10; // (canvas_width - img_w)/2 -(canvas_width/4) + (img_w /10);
+    //img_x = (canvas_width - img_w)/2; // LW
+    img_y = canvas_height - (img_h) - (img_h/10);
+    // img_x = document.body.clientWidth/2//(canvas_width - img_w)/2;
+    // img_y = canvas_height - (img_h);//+ (canvas_height / 10)); // LW
 
-    ctx.drawImage(weightImageCanvas, img_x * 2, img_y, img_w, img_h);
+    ctx.drawImage(weightImageCanvas, img_x, img_y, img_w, img_h); // x was x2
 }
 
 function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activations, d_ctx) {
@@ -340,14 +343,14 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
     let t = timer("render_game");
     // Render game frame
 
-    if (levelg == 1) {
+    //if (levelg == 1) {
         console.log("draiwng yellow rectangle around game view")
         ctx.beginPath();
-        ctx.rect(img_x - (0.25*frame_width), img_y - (0.25*frame_width), 2*frame_width, 2*frame_height);
+        ctx.rect(img_x - (0.1*img_w), img_y - (0.1*img_h), 1.2*img_w, 1.2*img_h);
         //frame_ctx.stroke();
         ctx.fillStyle = "yellow";
         ctx.fill();
-    }
+    //}
 
     render_depth_feed(d_ctx)
     render_game(ctx, render_frame);
@@ -394,7 +397,8 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
 
     t = timer("render_layers");
     render_layer(ctx, render_rescale(hidden_biases, 1), 0,
-        canvas_width, HIDDEN_LAYER_Y * canvas_height, NEURON_SIZE, hl_activations)
+        canvas_width, (img_y - (0.2*img_h)) - (VERTICAL_SPREAD), NEURON_SIZE, hl_activations)
+        //canvas_width, HIDDEN_LAYER_Y * canvas_height, NEURON_SIZE, hl_activations)
     render_layer(ctx, render_rescale(output_biases, 1), 0,
         canvas_width, OUTPUT_LAYER_Y * canvas_height, NEURON_SIZE, null, OUTPUT_LABELS, ol_activations)
     t.stop()
@@ -532,19 +536,23 @@ function init() {
     // Size canvas to full screen
     //canvas.width = 10;
     canvas.width = document.body.clientWidth/(6/2.5); //document.body.clientWidth;
-    canvas.height = document.body.clientHeight*(.9);// /2.2;//document.body.clientHeight; // LW
+    canvas.height = document.body.clientHeight - 2*(document.body.clientHeight/60);// /2.2;//document.body.clientHeight; // LW
     canvas.y = 50
     canvas.x = 0 // does nothing
-    canvas.style.left = (15) + (60) + 'px';//(document.body.clientWidth/6)+'px'; // LW
-    canvas.style.top = (15) + 'px';
+    canvas.style.left = (document.body.clientWidth/60)+'px'; // LW
+    canvas.style.top = (document.body.clientWidth/120) + 'px';
     canvas.style.position = 'absolute';
     console.log("canvas.left is ")
     console.log(canvas.left)
 
+    VERTICAL_SPREAD = (document.body.clientHeight/8)
+    console.log("VERTICAL_SPREAD:")
+    console.log(VERTICAL_SPREAD);
+
     d_canvas.width = document.body.clientWidth/(1); //document.body.clientWidth;
     d_canvas.height = canvas.height//document.body.clientHeight /2.5;//document.body.clientHeight; // LW
     d_canvas.style.left = (0)+'px'; // LW
-    d_canvas.style.top = (15) + 'px';
+    d_canvas.style.top = (document.body.clientWidth/60) + 'px';
     d_canvas.style.position = 'absolute';
 
     d_canvas_width = d_canvas.width
@@ -553,7 +561,7 @@ function init() {
     infoCanvas.width = document.body.clientWidth/(6/3); //document.body.clientWidth;
     infoCanvas.height = document.body.clientHeight /1;//document.body.clientHeight; // LW
     infoCanvas.style.left = (document.body.clientWidth/(7/3.5))+'px'; // LW
-    infoCanvas.style.top = (45) + 'px';//(document.body.clientHeight/(7/1.5)) + 'px';
+    infoCanvas.style.top = (document.body.clientWidth/20) + 'px';//(document.body.clientHeight/(7/1.5)) + 'px';
     infoCanvas.style.position = 'absolute';
 
     infoCanvas_width = infoCanvas.width
@@ -565,9 +573,9 @@ function init() {
     //canvas_height = 10; //
     canvas_height = canvas.height;//document.body.clientHeight /2; // LW
 
-    img_x = (canvas_width - img_w)/2 -(canvas_width/4);
+    img_x = img_w / 10; // (canvas_width - img_w)/2 -(canvas_width/4) + (img_w /10);
     //img_x = (canvas_width - img_w)/2; // LW
-    img_y = canvas_height - (img_h);// + (canvas_height / 10)); // LW
+    img_y = canvas_height - (img_h) - (img_h/10);// + (canvas_height / 10)); // LW
     
     // We will update this with game state pixels and embed it on the visualizer canvas
     frameCanvas = document.createElement('canvas');
