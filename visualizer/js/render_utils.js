@@ -317,7 +317,7 @@ function get_weight_map(weights, neuron) {
 }
 // LW function to render info text
 function render_info(canvas, index, info_text) {
-    console.log("rendering info text")
+    //console.log("rendering info text")
     canvas.clearRect(0, 0, infoCanvas_width, infoCanvas_height)
     text_spacing = 40;
     canvas.font = INFO_FONT;
@@ -335,7 +335,7 @@ function render_info(canvas, index, info_text) {
     gradient.addColorStop("1.0", "darkviolet");
 
 
-    console.log(info_text[index])
+    //console.log(info_text[index])
 
     texts = info_text[index].split('\n');
     for (var i = 0; i < texts.length; i++){
@@ -354,6 +354,8 @@ function render_layer(canvas, neurons, left_x, right_x, y, neuron_size, activati
     neurons = abs(scale(neurons, 10));
     neurons = add(neurons, 1); // Ensure no neurons are zero-sized
     coordinates = [];
+
+
     if (neuron_size <= 0) {neuron_size = 0.72}
     padding = ((right_x - left_x) - (neurons.length * neuron_size)) / (neurons.length + 1);
     for(let i = 0; i < neurons.length; i++) {

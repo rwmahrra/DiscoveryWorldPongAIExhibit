@@ -40,8 +40,8 @@ function myMethod(message) {
         levelg = level // levelg is global 
         model_initialized = false;
         //init_model(level);
-        console.log("Changing to level:")
-        console.log(level);
+        //console.log("Changing to level:")
+        //console.log(level);
         ai_score = 0;
         player_score = 0;
         morphAllZero()
@@ -57,8 +57,8 @@ function myMethod(message) {
             case 0:
                 level = 1
                 levelg = 1
-                console.log('level 0. level set to:')
-                console.log(level)
+                //console.log('level 0. level set to:')
+                //console.log(level)
                 //render_info(info_ctx, 0, INFO_TEXT)
                 
                 init_model(level);
@@ -232,6 +232,7 @@ function leftZero() {
 function render_game(ctx, frame, image_upscale = 2) {
     frame = scale(frame, 255);
 
+    image_upscale = canvas.width / 225
     frameCanvas.width = frame_width
     frameCanvas.height = frame_height
     //console.log(frameCanvas.x_pos)
@@ -296,7 +297,7 @@ function render_depth_feed(ctx, image_upscale = 3.6) {
 function render_weight_image(ctx, hl_activations, image_upscale = 5) {
     // Get the neuron with the strongest activity
     const top_neuron = argmax(hl_activations);
-
+    console.log('INSIDE RENDER WEIGHT IMAGE')
     // Select its weight with respect to each input pixel
     let frame = get_weight_map(hidden_weights, top_neuron)
     max_weight = max(frame)
@@ -348,21 +349,37 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
     else if (percent_prob[1] > percent_prob[2]) {labelChosen = 1}
     else {labelChosen = 2}
 
-    let t = timer("render_game");
-    // Render game frame
 
+    
     if (levelg == 1) {
         //console.log("draiwng yellow rectangle around game view")
         ctx.beginPath();
-        ctx.rect(img_x - (0.1*img_w), img_y - (0.1*img_h), 1.2*img_w, 1.2*img_h);
-        //frame_ctx.stroke();
+        ctx.strokeStyle = "yellow";
+        ctx.lineWidth = 15;
         ctx.fillStyle = "yellow";
-        ctx.fill();
+        ctx.strokeRect(img_x - (0.05*img_w), img_y - (0.05*img_h), 1.1*img_w, 1.1*img_h);
+        //ctx.strokeRect(img_x - (0.1*img_w), img_y - (0.1*img_h), 1.2*img_w, 1.2*img_h);
+        //frame_ctx.stroke();
+        //ctx.fill();
+    } else if (levelg == 2) {
+        //console.log("draiwng yellow rectangle around nodes")
+        ctx.beginPath();
+        ctx.strokeStyle = "yellow";
+        ctx.lineWidth = 15;
+        ctx.strokeRect(0, (img_y - (0.2*img_h)) - (VERTICAL_SPREAD) - (VERTICAL_SPREAD*1.1), canvas_width, 2 * VERTICAL_SPREAD *1.1);
+        //frame_ctx.stroke();
+        //ctx.stroke();
     }
+    
+    let t = timer("render_game");
+    // Render game frame
 
     render_depth_feed(d_ctx)
     render_game(ctx, render_frame);
     t.stop()
+
+    // render_layer(ctx, render_rescale(hidden_biases, 1), 0.1*canvas_width,
+        //canvas_width - (0.1*canvas_width), (img_y - (0.2*img_h)) - (VERTICAL_SPREAD), NEURON_SIZE, hl_activations)
 
     t = timer("render_weight_image");
     // Render game frame
@@ -403,9 +420,13 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
     t.stop()
     /************************************************** */
 
+    
     t = timer("render_layers");
+     // render node circles
     render_layer(ctx, render_rescale(hidden_biases, 1), 0,
-        canvas_width, (img_y - (0.2*img_h)) - (VERTICAL_SPREAD), NEURON_SIZE, hl_activations)
+         canvas_width, (img_y - (0.2*img_h)) - (VERTICAL_SPREAD), NEURON_SIZE, hl_activations)
+    // render_layer(ctx, render_rescale(hidden_biases, 1), (VERTICAL_SPREAD*0.1),
+    //     canvas_width - (VERTICAL_SPREAD*0.1), (img_y - (0.2*img_h)) - (VERTICAL_SPREAD), NEURON_SIZE, hl_activations)
         //canvas_width, HIDDEN_LAYER_Y * canvas_height, NEURON_SIZE, hl_activations)
     render_layer(ctx, render_rescale(output_biases, 1), 0,
         canvas_width, OUTPUT_LAYER_Y * canvas_height, NEURON_SIZE, null, OUTPUT_LABELS, ol_activations)
@@ -451,8 +472,8 @@ function init_model(level) {
     } else {
         const ctx = canvas.getContext("2d");
         structure = null;
-        console.log("rendering model of level:")
-        console.log(level)
+        //console.log("rendering model of level:")
+        //console.log(level)
         switch(level) {
             case 1:
                 structure = easy_model;
@@ -495,23 +516,26 @@ function init_model(level) {
         significant_ow = is_significant(output_weights, 0.3)
 
         // Determine appropriate base size for a neuron based on minimum allowable padding for a specific layer
-        console.log('MIN_PADDING is:')
-        console.log(MIN_PADDING);
+        //console.log('MIN_PADDING is:')
+        //console.log(MIN_PADDING);
         // console.log('hidden_biases.length is:')
         // console.log(hidden_biases.length);
         console.log('canvas_height is:')
         console.log(canvas_height);
         NEURON_SIZE = (canvas_height - (hidden_biases.length * MIN_PADDING)) / (hidden_biases.length)
-
+        NEURON_SIZE = 0.6;
         // Render neuron nodes, saving calculated positions for weight rendering
         hidden_pos = render_layer(ctx, render_rescale(hidden_biases, 1), 0,
             canvas_width, (img_y - (0.2*img_h)) - (VERTICAL_SPREAD), NEURON_SIZE)
+
+        // render_layer(ctx, render_rescale(hidden_biases, 1), 0,
+        //     canvas_width, (img_y - (0.2*img_h)) - (VERTICAL_SPREAD), NEURON_SIZE, hl_activations)
 
         out_pos = render_layer(ctx, render_rescale(output_biases, 1), 0,
             canvas_width, OUTPUT_LAYER_Y * canvas_height, NEURON_SIZE, null, OUTPUT_LABELS)
 
         model_initialized = true;
-        console.log("inside init model about to do requestAnimationFrame(render_loop)")
+        //console.log("inside init model about to do requestAnimationFrame(render_loop)")
         requestAnimationFrame(render_loop);
     }
 }
@@ -552,6 +576,13 @@ function init() {
     canvas.style.position = 'absolute';
     console.log("canvas.left is ")
     console.log(canvas.left)
+
+    image_upscale = canvas.width / 225
+    img_w = frame_width * image_upscale;
+    img_h = frame_height * image_upscale;
+    console.log("image_upscale:")
+    console.log(image_upscale);
+
 
     VERTICAL_SPREAD = (document.body.clientHeight/8)
     console.log("VERTICAL_SPREAD:")
@@ -638,7 +669,7 @@ var OUTPUT_LABELS = ["LEFT", "RIGHT", "NONE"]
 // "Hello human, I am an Artificial Intelligence. \nMy brain is a 'Neural Network' that learns by playing. \n \nMove your body side to side to control your paddle.\nSee if you can beat me!\n \nArtificial Intelligence does more than just play games! \nAI can be used for:\n    Self-Driving cars        Medical Diagnosis\n    Language Translation    Virtual Assistants", 
 // "This is what I see and my Neural Network. Each circle \nis like a neuron in a human brain. The neurons that \nlight up choose if I move my paddle left or right.\n \nI made it easy for you that round... \nCan you beat a model that was trained for more time?\nArtificial Intelligence does more than just play games! \nAI can be used for:\n    Self-Driving cars        Medical Diagnosis\n    Language Translation    Virtual Assistants", 
 // "When I was learning to play this game, I got rewards \nthat told me what actions were good and bad. I changed \nmy Neural Network to improve a little each time.\nThis is called Reinforcement Learning.\n \nCan you beat my hardest model? I've trained thousands of times \nto perfect this Neural Network.\nArtificial Intelligence does more than just play games! \nAI can be used for:\n    Self-Driving cars        Medical Diagnosis\n    Language Translation    Virtual Assistants"];
-var image_upscale = 4;//4
+var image_upscale = 4;//4;
 var frame_width = 192 / 2; // Base state dimension, scaled down by two
 var frame_height = 160 / 2; // LW was /2
 var img_w = frame_width * image_upscale;
