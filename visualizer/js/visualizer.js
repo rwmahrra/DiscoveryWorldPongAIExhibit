@@ -464,14 +464,13 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
     // ctx.fillText(down_prob, down_pos[0], down_pos[1]-40);
     // ctx.fillText(none_prob, none_pos[0], none_pos[1]-40);
 }
-
 function render_loop() {
     //console.log("render_loop()")
-    if(last_activations && last_activations != last_rendered_activations) {
+    if (last_activations && last_activations != last_rendered_activations) {
         const ctx = canvas.getContext("2d");
         const d_ctx = d_canvas.getContext("2d");
         //const info_ctx = infoCanvas.getContext("2d");
-        
+
         const [state_frame, hl_activations, ol_activations] = JSON.parse(last_activations);
         render_tick(ctx, state_frame, state_frame, hl_activations, ol_activations, d_ctx);
         last_rendered_activations = last_activations;
@@ -485,10 +484,11 @@ function render_loop() {
         oldOpPos = oldOpPos + 0.005;
         emptyAnimateFunction(oldOpPos);
         //oldOpPos = newOpPos;
-    } else {
+    } else if (oldOpPos != newOpPos) {
         oldOpPos = oldOpPos - 0.005;
         emptyAnimateFunction(oldOpPos);
     }
+    
     // Break out of render loop if we receive a new model to render
     if(model_initialized) {
         requestAnimationFrame(render_loop);
@@ -602,6 +602,7 @@ function init() {
 
     // Size canvas to full screen
     //canvas.width = 10;
+    
     canvas.width = document.body.clientWidth*(.6) -(document.body.clientWidth/60); //document.body.clientWidth;
     canvas.height = document.body.clientHeight - 2*(document.body.clientHeight/60);// /2.2;//document.body.clientHeight; // LW
     // canvas.y = 50
@@ -632,10 +633,10 @@ function init() {
     d_canvas_width = d_canvas.width
     d_canvas_height = d_canvas.height
     
-    infoCanvas.width = document.body.clientWidth/(6/3); //document.body.clientWidth;
-    infoCanvas.height = document.body.clientHeight /1;//document.body.clientHeight; // LW
-    infoCanvas.style.left = (document.body.clientWidth/(7/3.5))+'px'; // LW
-    infoCanvas.style.top = (document.body.clientWidth/20) + 'px';//(document.body.clientHeight/(7/1.5)) + 'px';
+    infoCanvas.width = document.body.clientHeight - 2*(document.body.clientHeight/60); //document.body.clientWidth;
+    infoCanvas.height = document.body.clientHeight - 2*(document.body.clientHeight/60);//document.body.clientHeight; // LW
+    infoCanvas.style.left = canvas.style.left
+    infoCanvas.style.top = canvas.style.top;
     infoCanvas.style.position = 'absolute';
 
     infoCanvas_width = infoCanvas.width
@@ -670,7 +671,7 @@ function onWindowResizeV() {
     
     canvas_width = canvas.width;
     canvas_height = canvas.height;
-    
+
     canvas.style.left = (document.body.clientWidth/60)+'px'; // LW
     canvas.style.top = (document.body.clientWidth/120) + 'px';
     
@@ -690,7 +691,46 @@ function onWindowResizeV() {
 
     VERTICAL_SPREAD = (document.body.clientHeight/8)
     
+    infoCanvas.width = document.body.clientHeight - 2*(document.body.clientHeight/60); //document.body.clientWidth;
+    infoCanvas.height = document.body.clientHeight - 2*(document.body.clientHeight/60);//document.body.clientHeight; // LW
+    infoCanvas.style.left = canvas.style.left
+    infoCanvas.style.top = canvas.style.top;
+    infoCanvas.style.position = 'absolute';
+
+    infoCanvas_width = infoCanvas.width
+    infoCanvas_height = infoCanvas.height
+    
 }
+
+// function resiseVisual(width) {
+//     console.log("RESIZE")
+//     // default .6
+//     canvas.width = document.body.clientWidth*(width) -(document.body.clientWidth/60); //document.body.clientWidth;
+//     canvas.height = document.body.clientHeight - 2*(document.body.clientHeight/60);// /2.2;//document.body.clientHeight; // LW
+    
+//     canvas_width = canvas.width;
+//     canvas_height = canvas.height;
+
+//     canvas.style.left = (document.body.clientWidth/60)+'px'; // LW
+//     canvas.style.top = (document.body.clientWidth/120) + 'px';
+    
+//     image_upscale = canvas.width / 225
+//     img_w = frame_width * image_upscale;
+//     img_h = frame_height * image_upscale;
+//     img_x = (canvas_width * 3/4) - (img_w/2) - (img_w/10);
+//     img_y = canvas_height - (img_h) - (img_h/10);
+    
+//     d_canvas.width = canvas.width; //document.body.clientWidth/(1); //document.body.clientWidth;
+//     d_canvas.height = canvas.height; //document.body.clientHeight /2.5;//document.body.clientHeight; // LW
+//     d_canvas.style.left = canvas.style.left; //(0)+'px'; // LW
+//     d_canvas.style.top = canvas.style.top;
+    
+//     d_canvas_width = d_canvas.width
+//     d_canvas_height = d_canvas.height
+
+//     VERTICAL_SPREAD = (document.body.clientHeight/8)
+    
+// }
 
 function morphOp(value){
     console.log("empty morphOp function")};
@@ -771,8 +811,13 @@ var player_score = 0;
 var labelChosen = 0;
 
 var oldOpPos = -0.7;
-var opPosArr = [0.0, 0.7, -0.7, -0.7]
+var opPosArr = [0.0, 0.7, -0.75, -0.75]
 var newOpPos = -0.7;
+
+var oldVisW = 0.6;
+var visWArr = [0.3, 0.6, 0.6, 0.6]
+var newVisW = 0.6;
+var visResizeCounter = 1;
 
 var depthFeedStr = "";
 
