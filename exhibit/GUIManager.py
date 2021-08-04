@@ -7,11 +7,18 @@ import time
 
 # event, values = sg.Window('List Comprehensions', layout, no_titlebar=True, alpha_channel=0.7).read(close=True)
 import os
+import game.game_driver
 
 
-def openFile():
-    fileName = 'string' #listbox_1.get(ACTIVE)
+def openMqttShell():
+    fileName = "hello"
+    #"C:\Users\lawood\OneDrive - Rockwell Automation, Inc\Desktop\windowsPongScriptMosquitto.bat"
     os.system("start " + fileName)
+def closeMosquittoShell():
+    os.system(signal.SIGINT)
+
+def startGameDriver():
+    game_driver.main()
 
 def long_function_thread(window):
     time.sleep(3)
@@ -51,17 +58,19 @@ while True:
         else:
             mqttActive = True
             print('starting up mqtt server')
+            openMqttShell()
             #mqttButton.button_text = "ehh"
             #mqttButton.ButtonColor = sg.theme_background_color()            
             mqttButton.update(button_color=(sg.theme_background_color() +' on '+ sg.theme_element_text_color()))
 
     elif event == 'game':
         print('starting up game driver')
+        startGameDriver()
     elif event == 'visualization':
         print('starting up visualization')
     elif event == 'Emulate3D':
         print('starting up Emulate3D')
-        openFile()
+        
     elif event == 'Ok':
         print('You entered ', values[0])
         long_function()
