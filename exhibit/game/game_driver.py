@@ -243,7 +243,7 @@ if __name__ == "__main__":
     # We will be removing the background of objects more than
     #  clipping_distance_in_meters meters away
     # filter out far away so we only have a person
-    clipping_distance_in_meters = 1.0 #2 meter
+    clipping_distance_in_meters = 1.6 #2 meter
     clipping_distance = clipping_distance_in_meters / depth_scale
     print(f'clipping distance is : {clipping_distance}')
 

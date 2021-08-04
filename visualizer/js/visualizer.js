@@ -40,25 +40,25 @@ function myMethod(message) {
         levelg = level // levelg is global 
         model_initialized = false;
         //init_model(level);
-        console.log("Changing to level:")
-        console.log(level);
+        //console.log("Changing to level:")
+        //console.log(level);
         ai_score = 0;
         player_score = 0;
         morphAllZero()
         morphOp("Smug", 0.5)
-        clearInterval(rightInterval0);
-        clearInterval(rightInterval1);
-        clearInterval(leftInterval0);
-        clearInterval(leftInterval1);
+        // clearInterval(rightInterval0);
+        // clearInterval(rightInterval1);
+        // clearInterval(leftInterval0);
+        // clearInterval(leftInterval1);
 
         const info_ctx = infoCanvas.getContext("2d");
 
         switch(level) {
             case 0:
                 level = 1
-                levelg = 1
-                console.log('level 0. level set to:')
-                console.log(level)
+                //levelg = 1
+                //console.log('level 0. level set to:')
+                //console.log(level)
                 //render_info(info_ctx, 0, INFO_TEXT)
                 
                 init_model(level);
@@ -67,10 +67,14 @@ function myMethod(message) {
                 console.log('level 1')
                 morphOp("Happy",0.0)
                 setTimeout(smugZero, 0)
-                rightInterval1 = setInterval(right10, 2910)
-                rightInterval0 = setInterval(rightZero, 3650)
-                leftInterval1 = setInterval(left10, 2750)
-                leftInterval0 = setInterval(leftZero, 3550)
+                right10();
+                leftZero();
+                setTimeout(rightZero, 1000)
+                setTimeout(left10, 2000)
+                // rightInterval1 = setInterval(right10, 2910)
+                // rightInterval0 = setInterval(rightZero, 3650)
+                // leftInterval1 = setInterval(left10, 2750)
+                // leftInterval0 = setInterval(leftZero, 3550)
 
                 //render_info(info_ctx, 1, INFO_TEXT)
                 init_model(level);
@@ -81,10 +85,15 @@ function myMethod(message) {
                 morphOp("Happy",0.2)
                 setTimeout(smugZero, 5000)
                 //setTimeout(mad10, 5000)
-                rightInterval1 = setInterval(right10, 3709)
-                rightInterval0 = setInterval(rightZero, 4550)
-                leftInterval1 = setInterval(left10, 3610)
-                leftInterval0 = setInterval(leftZero, 4200)
+                // rightInterval1 = setInterval(right10, 3709)
+                // rightInterval0 = setInterval(rightZero, 4550)
+                // leftInterval1 = setInterval(left10, 3610)
+                // leftInterval0 = setInterval(leftZero, 4200)
+                
+                left10();
+                rightZero();
+                setTimeout(leftZero, 700)
+                setTimeout(left10, 2000)
 
                 //render_info(info_ctx, 2, INFO_TEXT)
                 
@@ -95,12 +104,18 @@ function myMethod(message) {
                 morphOp("Happy",0.4)
                 morphOp("Mad", 0.3)
                 //setTimeout(smugZero, 5000)
-                //setTimeout(mad10, 5000)
-                rightInterval1 = setInterval(right10, 5505)
-                //rightInterval0 = setInterval(rightZero, 5600)
-                rightInterval1 = setInterval(left10, 4910)
+                // //setTimeout(mad10, 5000)
+                // rightInterval1 = setInterval(right10, 5505)
+                // //rightInterval0 = setInterval(rightZero, 5600)
+                // rightInterval1 = setInterval(left10, 4910)
                 //rightInterval0 = setInterval(leftZero, 6250)
-
+                
+                right10();
+                leftZero();
+                setTimeout(rightZero, 1500)
+                setTimeout(left10, 2500)
+                setTimeout(leftZero, 3500)
+                setTimeout(right10, 4000)
                 //render_info(info_ctx, 3, INFO_TEXT)
                 init_model(level);
                 break;
@@ -119,16 +134,28 @@ function myMethod(message) {
                 case 1:
                     morphOp("Happy", 1.0)
                     setTimeout(happyZero, 1000)
+                    left10();
+                    rightZero();
+                    setTimeout(leftZero, 500)
+                    setTimeout(right10, 2000)
                     break;
                 case 2:
                     morphOp("Smug", 1.0)
                     setTimeout(smug07, 1000)
+                    right10();
+                    leftZero();
+                    setTimeout(rightZero, 700)
+                    setTimeout(left10, 2500)
                     break;
                 case 3:
                     morphOp("Smug", 1.0)
                     setTimeout(smug09, 1000)
                     morphOp("Happy", 0.5)
                     setTimeout(happyZero, 1000)
+                    right10();
+                    leftZero();
+                    setTimeout(rightZero, 2200)
+                    setTimeout(left10, 3400)
                     break;
             }
         }
@@ -232,6 +259,7 @@ function leftZero() {
 function render_game(ctx, frame, image_upscale = 2) {
     frame = scale(frame, 255);
 
+    image_upscale = canvas.width / 225
     frameCanvas.width = frame_width
     frameCanvas.height = frame_height
     //console.log(frameCanvas.x_pos)
@@ -259,16 +287,6 @@ function render_game(ctx, frame, image_upscale = 2) {
     // img_w = frame_width * image_upscale;
     // img_h = frame_height * image_upscale;
 
-    // TODD draw a yellow rectangle around the element 
-    // if level = 1
-    // if (levelg == 1) {
-    //     console.log("draiwng yellow rectangle around game view")
-    //     frame_ctx.beginPath();
-    //     frame_ctx.rect(0, 0, frame_width, frame_height);
-    //     //frame_ctx.stroke();
-    //     frame_ctx.fillStyle = "yellow";
-    //     frame_ctx.fill();
-    // }
 
     frame_ctx.putImageData(imageData, 0, 0);
     ctx.drawImage(frameCanvas, img_x, img_y, img_w, img_h); // LW
@@ -278,18 +296,26 @@ function render_depth_feed(ctx, image_upscale = 3.6) {
     var image = new Image();
     image.src = 'data:image/jpg;base64,' + depthFeedStr //canvas.toDataURL(depthFeedStr, 1)
     
+    
+
     //depth_ctx.drawImage(image, 0, 0)
     image.onload = function() {
+        // scale image_upscale to fit to the left of the pong screen
+        // the left edge of yellow box / this image width
+        image_upscale = (img_x - (0.1*img_w)) /image.width;
 
-        // console.log('drawing image')
-        ctx.drawImage(image, (d_canvas_width/3) - (image.width/2), d_canvas_height -(image.height*image_upscale), image.width * image_upscale, image.height * image_upscale)
+        // console.log('drawing image ***')
+        // console.log(image_upscale)
+        //ctx.drawImage(image, (d_canvas_width/3) - (image.width/2), d_canvas_height -(image.height*image_upscale), image.width * image_upscale, image.height * image_upscale)
+        //ctx.drawImage(image, 0, d_canvas_height -(image.height*image_upscale), image.width * image_upscale, image.height * image_upscale)
+        ctx.drawImage(image, 0, (img_y + (.5 * img_h)) -( 0.5 * image.height*image_upscale), image.width * image_upscale, image.height * image_upscale)
     }
 }
 
 function render_weight_image(ctx, hl_activations, image_upscale = 5) {
     // Get the neuron with the strongest activity
     const top_neuron = argmax(hl_activations);
-
+    console.log('INSIDE RENDER WEIGHT IMAGE')
     // Select its weight with respect to each input pixel
     let frame = get_weight_map(hidden_weights, top_neuron)
     max_weight = max(frame)
@@ -317,10 +343,14 @@ function render_weight_image(ctx, hl_activations, image_upscale = 5) {
 
     img_w = frame_width * image_upscale;
     img_h = frame_height * image_upscale;
-    img_x = document.body.clientWidth/2//(canvas_width - img_w)/2;
-    img_y = canvas_height - (img_h);//+ (canvas_height / 10)); // LW
+    img_x = (canvas_width * 3/4) - (img_w/2) - (img_w/10);
+    //img_x = img_w / 10; // (canvas_width - img_w)/2 -(canvas_width/4) + (img_w /10);
+    //img_x = (canvas_width - img_w)/2; // LW
+    img_y = canvas_height - (img_h) - (img_h/10);
+    // img_x = document.body.clientWidth/2//(canvas_width - img_w)/2;
+    // img_y = canvas_height - (img_h);//+ (canvas_height / 10)); // LW
 
-    ctx.drawImage(weightImageCanvas, img_x * 2, img_y, img_w, img_h);
+    ctx.drawImage(weightImageCanvas, img_x, img_y, img_w, img_h); // x was x2
 }
 
 function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activations, d_ctx) {
@@ -337,21 +367,41 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
     else if (percent_prob[1] > percent_prob[2]) {labelChosen = 1}
     else {labelChosen = 2}
 
-    let t = timer("render_game");
-    // Render game frame
 
     if (levelg == 1) {
-        console.log("draiwng yellow rectangle around game view")
+        //console.log("draiwng yellow rectangle around game view")
         ctx.beginPath();
-        ctx.rect(img_x - (0.25*frame_width), img_y - (0.25*frame_width), 2*frame_width, 2*frame_height);
-        //frame_ctx.stroke();
+        ctx.strokeStyle = "yellow";
+        ctx.lineWidth = 15;
         ctx.fillStyle = "yellow";
-        ctx.fill();
+        ctx.strokeRect(img_x - (0.05 * img_w), img_y - (0.05 * img_h), 1.1 * img_w, 1.1 * img_h);
+        //ctx.strokeRect(img_x - (0.1*img_w), img_y - (0.1*img_h), 1.2*img_w, 1.2*img_h);
+        //frame_ctx.stroke();
+        //ctx.fill();
+    } else if (levelg == 2) {
+        //console.log("draiwng yellow rectangle around nodes")
+        ctx.beginPath();
+        ctx.strokeStyle = "yellow";
+        ctx.lineWidth = 15;
+        ctx.strokeRect(0, (img_y - (0.2 * img_h)) - (VERTICAL_SPREAD) - (VERTICAL_SPREAD * 1.1), canvas_width, 2 * VERTICAL_SPREAD * 1.1);
+    } else if (levelg == 3) {
+        //console.log("draiwng yellow rectangle around labels")
+        ctx.beginPath();
+        ctx.strokeStyle = "yellow";
+        ctx.lineWidth = 15;
+        ctx.strokeRect(canvas_width * (1/5), OUTPUT_LAYER_Y * canvas_height /6, canvas_width * (3/5), canvas_height * OUTPUT_LAYER_Y * 1.2);
+        //frame_ctx.stroke();
+        //ctx.stroke();
     }
+    let t = timer("render_game");
+    // Render game frame
 
     render_depth_feed(d_ctx)
     render_game(ctx, render_frame);
     t.stop()
+
+    // render_layer(ctx, render_rescale(hidden_biases, 1), 0.1*canvas_width,
+        //canvas_width - (0.1*canvas_width), (img_y - (0.2*img_h)) - (VERTICAL_SPREAD), NEURON_SIZE, hl_activations)
 
     t = timer("render_weight_image");
     // Render game frame
@@ -378,7 +428,7 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
     t = timer("render_output_weights");
     render_weights(ctx, hidden_pos, out_pos, render_rescale(output_weights), ow_activations, 2)
     t.stop()
-
+// t
     /********************************************* */
     //console.log('about to do the new activations')
     // Re-compute middle activations for rendering
@@ -392,9 +442,14 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
     t.stop()
     /************************************************** */
 
+    
     t = timer("render_layers");
+     // render node circles
     render_layer(ctx, render_rescale(hidden_biases, 1), 0,
-        canvas_width, HIDDEN_LAYER_Y * canvas_height, NEURON_SIZE, hl_activations)
+         canvas_width, (img_y - (0.2*img_h)) - (VERTICAL_SPREAD), NEURON_SIZE, hl_activations)
+    // render_layer(ctx, render_rescale(hidden_biases, 1), (VERTICAL_SPREAD*0.1),
+    //     canvas_width - (VERTICAL_SPREAD*0.1), (img_y - (0.2*img_h)) - (VERTICAL_SPREAD), NEURON_SIZE, hl_activations)
+        //canvas_width, HIDDEN_LAYER_Y * canvas_height, NEURON_SIZE, hl_activations)
     render_layer(ctx, render_rescale(output_biases, 1), 0,
         canvas_width, OUTPUT_LAYER_Y * canvas_height, NEURON_SIZE, null, OUTPUT_LABELS, ol_activations)
     t.stop()
@@ -409,18 +464,31 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
     // ctx.fillText(down_prob, down_pos[0], down_pos[1]-40);
     // ctx.fillText(none_prob, none_pos[0], none_pos[1]-40);
 }
-
 function render_loop() {
     //console.log("render_loop()")
-    if(last_activations && last_activations != last_rendered_activations) {
+    if (last_activations && last_activations != last_rendered_activations) {
         const ctx = canvas.getContext("2d");
         const d_ctx = d_canvas.getContext("2d");
         //const info_ctx = infoCanvas.getContext("2d");
-        
+
         const [state_frame, hl_activations, ol_activations] = JSON.parse(last_activations);
         render_tick(ctx, state_frame, state_frame, hl_activations, ol_activations, d_ctx);
         last_rendered_activations = last_activations;
     }
+
+    newOpPos = opPosArr[levelg];
+    if (Math.abs(oldOpPos - newOpPos) <= 0.01) {
+        oldOpPos = newOpPos;
+        emptyAnimateFunction(oldOpPos);
+    } else if (oldOpPos != newOpPos && newOpPos > oldOpPos) {
+        oldOpPos = oldOpPos + 0.005;
+        emptyAnimateFunction(oldOpPos);
+        //oldOpPos = newOpPos;
+    } else if (oldOpPos != newOpPos) {
+        oldOpPos = oldOpPos - 0.005;
+        emptyAnimateFunction(oldOpPos);
+    }
+    
     // Break out of render loop if we receive a new model to render
     if(model_initialized) {
         requestAnimationFrame(render_loop);
@@ -439,8 +507,8 @@ function init_model(level) {
     } else {
         const ctx = canvas.getContext("2d");
         structure = null;
-        console.log("rendering model of level:")
-        console.log(level)
+        //console.log("rendering model of level:")
+        //console.log(level)
         switch(level) {
             case 1:
                 structure = easy_model;
@@ -483,23 +551,26 @@ function init_model(level) {
         significant_ow = is_significant(output_weights, 0.3)
 
         // Determine appropriate base size for a neuron based on minimum allowable padding for a specific layer
-        console.log('MIN_PADDING is:')
-        console.log(MIN_PADDING);
+        //console.log('MIN_PADDING is:')
+        //console.log(MIN_PADDING);
         // console.log('hidden_biases.length is:')
         // console.log(hidden_biases.length);
         console.log('canvas_height is:')
         console.log(canvas_height);
         NEURON_SIZE = (canvas_height - (hidden_biases.length * MIN_PADDING)) / (hidden_biases.length)
-
+        NEURON_SIZE = 0.8;
         // Render neuron nodes, saving calculated positions for weight rendering
         hidden_pos = render_layer(ctx, render_rescale(hidden_biases, 1), 0,
-            canvas_width, HIDDEN_LAYER_Y * canvas_height , NEURON_SIZE)
+            canvas_width, (img_y - (0.2*img_h)) - (VERTICAL_SPREAD), NEURON_SIZE)
+
+        // render_layer(ctx, render_rescale(hidden_biases, 1), 0,
+        //     canvas_width, (img_y - (0.2*img_h)) - (VERTICAL_SPREAD), NEURON_SIZE, hl_activations)
 
         out_pos = render_layer(ctx, render_rescale(output_biases, 1), 0,
             canvas_width, OUTPUT_LAYER_Y * canvas_height, NEURON_SIZE, null, OUTPUT_LABELS)
 
         model_initialized = true;
-        console.log("inside init model about to do requestAnimationFrame(render_loop)")
+        //console.log("inside init model about to do requestAnimationFrame(render_loop)")
         requestAnimationFrame(render_loop);
     }
 }
@@ -531,29 +602,41 @@ function init() {
 
     // Size canvas to full screen
     //canvas.width = 10;
-    canvas.width = document.body.clientWidth/(6/2.5); //document.body.clientWidth;
-    canvas.height = document.body.clientHeight*(.9);// /2.2;//document.body.clientHeight; // LW
-    canvas.y = 50
-    canvas.x = 0 // does nothing
-    canvas.style.left = (15) + (60) + 'px';//(document.body.clientWidth/6)+'px'; // LW
-    canvas.style.top = (15) + 'px';
+    
+    canvas.width = document.body.clientWidth*(.6) -(document.body.clientWidth/60); //document.body.clientWidth;
+    canvas.height = document.body.clientHeight - 2*(document.body.clientHeight/60);// /2.2;//document.body.clientHeight; // LW
+    // canvas.y = 50
+    // canvas.x = 0 // does nothing
+    canvas.style.left = (document.body.clientWidth/60)+'px'; // LW
+    canvas.style.top = (document.body.clientWidth/120) + 'px';
     canvas.style.position = 'absolute';
     console.log("canvas.left is ")
     console.log(canvas.left)
 
-    d_canvas.width = document.body.clientWidth/(1); //document.body.clientWidth;
-    d_canvas.height = canvas.height//document.body.clientHeight /2.5;//document.body.clientHeight; // LW
-    d_canvas.style.left = (0)+'px'; // LW
-    d_canvas.style.top = (15) + 'px';
+    image_upscale = canvas.width / 225
+    img_w = frame_width * image_upscale;
+    img_h = frame_height * image_upscale;
+    console.log("image_upscale:")
+    console.log(image_upscale);
+
+
+    VERTICAL_SPREAD = (document.body.clientHeight/8)
+    console.log("VERTICAL_SPREAD:")
+    console.log(VERTICAL_SPREAD);
+
+    d_canvas.width = canvas.width; //document.body.clientWidth/(1); //document.body.clientWidth;
+    d_canvas.height = canvas.height; //document.body.clientHeight /2.5;//document.body.clientHeight; // LW
+    d_canvas.style.left = canvas.style.left; //(0)+'px'; // LW
+    d_canvas.style.top = canvas.style.top; //(document.body.clientWidth/60) + 'px';
     d_canvas.style.position = 'absolute';
 
     d_canvas_width = d_canvas.width
     d_canvas_height = d_canvas.height
     
-    infoCanvas.width = document.body.clientWidth/(6/3); //document.body.clientWidth;
-    infoCanvas.height = document.body.clientHeight /1;//document.body.clientHeight; // LW
-    infoCanvas.style.left = (document.body.clientWidth/(7/3.5))+'px'; // LW
-    infoCanvas.style.top = (45) + 'px';//(document.body.clientHeight/(7/1.5)) + 'px';
+    infoCanvas.width = document.body.clientHeight - 2*(document.body.clientHeight/60); //document.body.clientWidth;
+    infoCanvas.height = document.body.clientHeight - 2*(document.body.clientHeight/60);//document.body.clientHeight; // LW
+    infoCanvas.style.left = canvas.style.left
+    infoCanvas.style.top = canvas.style.top;
     infoCanvas.style.position = 'absolute';
 
     infoCanvas_width = infoCanvas.width
@@ -565,20 +648,96 @@ function init() {
     //canvas_height = 10; //
     canvas_height = canvas.height;//document.body.clientHeight /2; // LW
 
-    img_x = (canvas_width - img_w)/2 -(canvas_width/4);
+    //img_x = img_w / 10; // (canvas_width - img_w)/2 -(canvas_width/4) + (img_w /10);
+    img_x = (canvas_width * 3/4) - (img_w/2) - (img_w/10);
     //img_x = (canvas_width - img_w)/2; // LW
-    img_y = canvas_height - (img_h);// + (canvas_height / 10)); // LW
+    img_y = canvas_height - (img_h) - (img_h/10);// + (canvas_height / 10)); // LW
     
     // We will update this with game state pixels and embed it on the visualizer canvas
     frameCanvas = document.createElement('canvas');
     // This one will hold a model weight image overlay to see what the network is picking up on
     weightImageCanvas = document.createElement('canvas');
 
+    window.addEventListener('resize', onWindowResizeV, false);
+
     initialized = true;
 }
  
+
+function onWindowResizeV() {
+    console.log("ON WINDOW RESIZE")
+    canvas.width = document.body.clientWidth*(.6) -(document.body.clientWidth/60); //document.body.clientWidth;
+    canvas.height = document.body.clientHeight - 2*(document.body.clientHeight/60);// /2.2;//document.body.clientHeight; // LW
+    
+    canvas_width = canvas.width;
+    canvas_height = canvas.height;
+
+    canvas.style.left = (document.body.clientWidth/60)+'px'; // LW
+    canvas.style.top = (document.body.clientWidth/120) + 'px';
+    
+    image_upscale = canvas.width / 225
+    img_w = frame_width * image_upscale;
+    img_h = frame_height * image_upscale;
+    img_x = (canvas_width * 3/4) - (img_w/2) - (img_w/10);
+    img_y = canvas_height - (img_h) - (img_h/10);
+    
+    d_canvas.width = canvas.width; //document.body.clientWidth/(1); //document.body.clientWidth;
+    d_canvas.height = canvas.height; //document.body.clientHeight /2.5;//document.body.clientHeight; // LW
+    d_canvas.style.left = canvas.style.left; //(0)+'px'; // LW
+    d_canvas.style.top = canvas.style.top;
+    
+    d_canvas_width = d_canvas.width
+    d_canvas_height = d_canvas.height
+
+    VERTICAL_SPREAD = (document.body.clientHeight/8)
+    
+    infoCanvas.width = document.body.clientHeight - 2*(document.body.clientHeight/60); //document.body.clientWidth;
+    infoCanvas.height = document.body.clientHeight - 2*(document.body.clientHeight/60);//document.body.clientHeight; // LW
+    infoCanvas.style.left = canvas.style.left
+    infoCanvas.style.top = canvas.style.top;
+    infoCanvas.style.position = 'absolute';
+
+    infoCanvas_width = infoCanvas.width
+    infoCanvas_height = infoCanvas.height
+    
+}
+
+// function resiseVisual(width) {
+//     console.log("RESIZE")
+//     // default .6
+//     canvas.width = document.body.clientWidth*(width) -(document.body.clientWidth/60); //document.body.clientWidth;
+//     canvas.height = document.body.clientHeight - 2*(document.body.clientHeight/60);// /2.2;//document.body.clientHeight; // LW
+    
+//     canvas_width = canvas.width;
+//     canvas_height = canvas.height;
+
+//     canvas.style.left = (document.body.clientWidth/60)+'px'; // LW
+//     canvas.style.top = (document.body.clientWidth/120) + 'px';
+    
+//     image_upscale = canvas.width / 225
+//     img_w = frame_width * image_upscale;
+//     img_h = frame_height * image_upscale;
+//     img_x = (canvas_width * 3/4) - (img_w/2) - (img_w/10);
+//     img_y = canvas_height - (img_h) - (img_h/10);
+    
+//     d_canvas.width = canvas.width; //document.body.clientWidth/(1); //document.body.clientWidth;
+//     d_canvas.height = canvas.height; //document.body.clientHeight /2.5;//document.body.clientHeight; // LW
+//     d_canvas.style.left = canvas.style.left; //(0)+'px'; // LW
+//     d_canvas.style.top = canvas.style.top;
+    
+//     d_canvas_width = d_canvas.width
+//     d_canvas_height = d_canvas.height
+
+//     VERTICAL_SPREAD = (document.body.clientHeight/8)
+    
+// }
+
 function morphOp(value){
     console.log("empty morphOp function")};
+
+
+function emptyAnimateFunction(value){
+    console.log("empty emptyAnimateFunction function")};
 
 
 
@@ -614,14 +773,14 @@ var rescaled_hw = null;
 // Rendering config
 var NEURON_SIZE = null;
 var MIN_PADDING = 3.8; // LW was 3. Used at line 212
-var HIDDEN_LAYER_Y = 0.475; // LQ was 0.35
-var OUTPUT_LAYER_Y = 0.12; // LW was 0.1
+var HIDDEN_LAYER_Y = 0.475; // LQ was 0.35 // no longer used
+var OUTPUT_LAYER_Y = 0.08; // LW was 0.1
 var OUTPUT_LABELS = ["LEFT", "RIGHT", "NONE"]
 //var INFO_TEXT = ["Can you beat the AI? \nStep in to play...\n \nArtificial Intelligence does more than just play games! \nAI can be used for:\n    Self-Driving cars        Medical Diagnosis\n    Language Translation    Virtual Assistants", 
 // "Hello human, I am an Artificial Intelligence. \nMy brain is a 'Neural Network' that learns by playing. \n \nMove your body side to side to control your paddle.\nSee if you can beat me!\n \nArtificial Intelligence does more than just play games! \nAI can be used for:\n    Self-Driving cars        Medical Diagnosis\n    Language Translation    Virtual Assistants", 
 // "This is what I see and my Neural Network. Each circle \nis like a neuron in a human brain. The neurons that \nlight up choose if I move my paddle left or right.\n \nI made it easy for you that round... \nCan you beat a model that was trained for more time?\nArtificial Intelligence does more than just play games! \nAI can be used for:\n    Self-Driving cars        Medical Diagnosis\n    Language Translation    Virtual Assistants", 
 // "When I was learning to play this game, I got rewards \nthat told me what actions were good and bad. I changed \nmy Neural Network to improve a little each time.\nThis is called Reinforcement Learning.\n \nCan you beat my hardest model? I've trained thousands of times \nto perfect this Neural Network.\nArtificial Intelligence does more than just play games! \nAI can be used for:\n    Self-Driving cars        Medical Diagnosis\n    Language Translation    Virtual Assistants"];
-var image_upscale = 4;//4
+var image_upscale = 4;//4;
 var frame_width = 192 / 2; // Base state dimension, scaled down by two
 var frame_height = 160 / 2; // LW was /2
 var img_w = frame_width * image_upscale;
@@ -651,7 +810,14 @@ var player_score = 0;
 
 var labelChosen = 0;
 
+var oldOpPos = -0.7;
+var opPosArr = [0.0, 0.7, -0.75, -0.75]
+var newOpPos = -0.7;
 
+var oldVisW = 0.6;
+var visWArr = [0.3, 0.6, 0.6, 0.6]
+var newVisW = 0.6;
+var visResizeCounter = 1;
 
 var depthFeedStr = "";
 
