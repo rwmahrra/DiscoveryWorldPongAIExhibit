@@ -7,7 +7,7 @@ import time
 
 # event, values = sg.Window('List Comprehensions', layout, no_titlebar=True, alpha_channel=0.7).read(close=True)
 import os
-import game.game_driver
+import exhibit.game.game_driver
 
 
 def openMqttShell():
@@ -18,15 +18,17 @@ def closeMosquittoShell():
     os.system(signal.SIGINT)
 
 def startGameDriver():
-    game_driver.main()
+    z = threading.Thread(target=game_driver.main, args=(window,), name='gameThread', daemon=True)
+    z.start()
 
 def long_function_thread(window):
     time.sleep(3)
     window.write_event_value('-THREAD DONE-', '')
 
 def long_function():
-    threading.Thread(target=long_function_thread, args=(window,), daemon=True).start()
-
+    y = threading.Thread(target=long_function_thread, args=(window,), name='testThread', daemon=True)
+    y.start()
+    #time.sleep(1)
 mqttActive = False
 
 
