@@ -207,8 +207,7 @@ def check_for_still_player(pipeline, decimation_filter, crop_percentage_w, crop_
             return (m/(np.size(cutoffImage,1)) * 1) # -0.2 # return value
         return -5.0 # failed to get camera image, return bas value
 
-if __name__ == "__main__":
-
+def main(in_q):
     print("from gameDriver, about to init GameSubscriber")
     subscriber = GameSubscriber()
     #opponent = BotPlayer(right=True)
@@ -259,7 +258,11 @@ if __name__ == "__main__":
 
         #time.sleep(1)
         start = time.time()
-        
+        # print(f'in_q is {in_q.get()}')
+        if str(in_q.get()) == "endThreads":
+            print('thread quitting')
+            break
+
         #wait until human detected, if no human after a few seconds, back to zero
 
         if level == 0: # if the game hasn't started yet and the next level would be level 1
@@ -322,6 +325,8 @@ if __name__ == "__main__":
             time.sleep(1) # wait 1 second so person has time to leave and next person can come in
 
 
+if __name__ == "__main__":
+    main("")
 
 
 
