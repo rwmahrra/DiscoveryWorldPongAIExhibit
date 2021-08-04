@@ -261,6 +261,7 @@ def main(in_q):
         # print(f'in_q is {in_q.get()}')
         if str(in_q.get()) == "endThreads":
             print('thread quitting')
+            subscriber.client.disconnect()
             break
 
         #wait until human detected, if no human after a few seconds, back to zero
@@ -323,7 +324,7 @@ def main(in_q):
             print(f'            Game reset to level {level} (zero).')
             subscriber.emit_level(level)
             time.sleep(1) # wait 1 second so person has time to leave and next person can come in
-
+        print('looping back')
 
 if __name__ == "__main__":
     main("")

@@ -17,14 +17,14 @@ killObject = "endThreads"
 q = Queue()
 
 def openMqttShell():
-    fileLoc = "cd C:\\'Program Files'\\Mosquitto\\" #cd C:\'Program Files'\Mosquitto\
-    commandM = "mosquitto -v -c ./mosquitto.conf"
+    fileLoc = 'cd C:\\"Program Files"\\Mosquitto\\' #cd C:\'Program Files'\Mosquitto\
+    commandM = 'C:\\"Program Files"\\Mosquitto\\mosquitto -v -c ./mosquitto.conf'
     #"C:\Users\lawood\OneDrive - Rockwell Automation, Inc\Desktop\windowsPongScriptMosquitto.bat"
-    os.system(fileLoc)
-    os.system(commandM)
-    #os.system("start " + fileName)
-def closeMosquittoShell():
-    os.system(signal.SIGINT)
+    os.system('start C:\\users\\"DW Pong"\\windowsPongScriptMosquitto.bat')
+    #os.system(commandM)
+#     #os.system("start " + fileName)
+# def closeMosquittoShell():
+#     os.system(str(signal.SIGINT))
 
 
 def long_function_thread(window):
@@ -70,12 +70,12 @@ while True:
         # close down everything
         break
     elif event == 'mqtt server':
-        if mqttActive:
+        if False: #mqttActive:
             print('shuting down mqtt server')
             mqttActive = False
             mqttButton.update(button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
 
-        else:
+        elif mqttActive == False:
             mqttActive = True
             print('starting up mqtt server')
             openMqttShell()
