@@ -8,7 +8,9 @@ from queue import Queue
 
 # event, values = sg.Window('List Comprehensions', layout, no_titlebar=True, alpha_channel=0.7).read(close=True)
 import os
-import exhibit.game.game_driver as gd
+import exhibit.game
+from exhibit.game import game_driver as gd
+import importlib
 
 
 killObject = "endThreads"
@@ -44,6 +46,11 @@ Emulate3DButton = sg.Button('Emulate3D',button_color=(sg.theme_element_text_colo
 # All the stuff inside your window.
 
 def startGameDriver():
+    #import exhibit.game.game_driver as gd
+    # reload(exhibit.game.game_driver)  
+    # exhibit.game.game_driver.reload(gd)
+    importlib.reload(gd)
+    # functionT = gd.main
     threading.Thread(target=gd.main, args=(q,), name='gameThread', daemon=True).start()
 
 layout = [  [sg.Text('Some text on Row 1')],
@@ -52,7 +59,7 @@ layout = [  [sg.Text('Some text on Row 1')],
             [mqttButton, gameButton, visualizationButton, Emulate3DButton] ]
 
 # Create the Window
-window = sg.Window('Pong Controller', layout, no_titlebar=True, alpha_channel=0.9)
+window = sg.Window('Pong Controller', layout, no_titlebar=True, alpha_channel=0.9, keep_on_top=True)
 # Event Loop to process "events" and get the "values" of the inputs
 #z = threading.Thread(target=gd.main, args=(q,), name='gameThread', daemon=True)
 y = threading.Thread(target=long_function_thread, args=(window,), name='testThread', daemon=True)
@@ -87,7 +94,6 @@ while True:
         else:
             gameActive = True
             print('starting up game driver')
-            import exhibit.game.game_driver as gd
             q.put("don't endThreads")
             startGameDriver()
             gameButton.update(button_color=(sg.theme_background_color() +' on '+ sg.theme_element_text_color()))

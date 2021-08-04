@@ -244,7 +244,7 @@ def main(in_q):
     # filter out far away so we only have a person
     clipping_distance_in_meters = 1.6 #2 meter
     clipping_distance = clipping_distance_in_meters / depth_scale
-    print(f'clipping distance is : {clipping_distance}')
+    print(f'the Clipping Distance is : {clipping_distance}')
 
     level = 0
     # start at level 0, our start state when nobody is playing
