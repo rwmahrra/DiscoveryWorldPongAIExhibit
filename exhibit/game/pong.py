@@ -87,7 +87,11 @@ class Pong:
     def get_human_x():
         #try to get the frame 50 times
         for i in range(50): 
-            frames = Pong.pipeline.wait_for_frames()
+            try:
+                frames = Pong.pipeline.wait_for_frames()
+            except Exception:
+                continue
+
             depth = frames.get_depth_frame()
             #color = frames.get_color_frame()
             if not depth: continue
@@ -748,6 +752,7 @@ class Pong:
         """
         l, r = self.get_score()
         to_render = cv2.resize(screen, (int(Pong.WIDTH * scale), int(Pong.HEIGHT * scale)))
+        print('show()')
         cv2.imshow(f"Pong", to_render/255)
         cv2.waitKey(duration)
 
@@ -785,7 +790,7 @@ class Pong:
         """
         screen = np.zeros((Pong.HEIGHT, Pong.WIDTH, 3), dtype=np.float32)
         screen[:, :] = (140, 60, 0) # BGR for a deep blue
-
+        #print('rendering Pong game screen')
         # Draw middle grid line
         # Note: subtract 1 from game width because pixels index starting from 0, and we want this to be symmetrical
         self.draw_rect(screen, round((Pong.WIDTH)/2 - 1), 0, 2, round(Pong.HEIGHT), 255)

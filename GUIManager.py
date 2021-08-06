@@ -52,6 +52,7 @@ def startGameDriver():
     importlib.reload(gd)
     # functionT = gd.main
     threading.Thread(target=gd.main, args=(q,), name='gameThread', daemon=True).start()
+    time.sleep(0.5)
 
 layout = [  [sg.Text('Some text on Row 1')],
             [sg.Text('Enter something on Row 2'), sg.InputText()],
@@ -87,14 +88,19 @@ while True:
         if gameActive:
             gameActive = False
             print('shutting down game driver')
-            q.put("endThreads")
+            if q.empty():
+                q.put("endThreads")
             #z.join()
             gameButton.update(button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
+            time.sleep(0.5)
 
         else:
             gameActive = True
             print('starting up game driver')
-            q.put("don't endThreads")
+            
+            while not q.empty():
+                q.get()
+            #q.put("don't endThreads")
             startGameDriver()
             gameButton.update(button_color=(sg.theme_background_color() +' on '+ sg.theme_element_text_color()))
 

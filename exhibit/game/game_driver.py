@@ -1,12 +1,16 @@
+import sys
 from exhibit.game.game_subscriber import GameSubscriber
 import numpy as np
 from exhibit.game.player import BotPlayer, AIPlayer, HumanPlayer, CameraPlayer
 import time
 
 import pyrealsense2 as rs
+import cv2
 
 from exhibit.shared.config import Config
 from exhibit.game.pong import Pong
+import threading
+import time
 
 """
 This file is the driver for the game component.
@@ -146,8 +150,14 @@ def check_for_player(pipeline, decimation_filter, crop_percentage_w, crop_percen
 # checks if there is a player and returns their position from 0 to 1 so that we can tell if theyre walking through or still to play
 def check_for_still_player(pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance):
         #try to get the frame 50 times
-        for i in range(50): 
-            frames = pipeline.wait_for_frames()
+        for i in range(20): 
+            try:
+                print('trying wait_for_frames')
+                frames = pipeline.wait_for_frames()
+            except Exception as ed:
+                print(ed)
+                continue
+
             depth = frames.get_depth_frame()
             #color = frames.get_color_frame()
             if not depth: continue
@@ -259,13 +269,21 @@ def main(in_q):
         print('looping start')
         #time.sleep(1)
         start = time.time()
-        #print(f'in_q is {in_q.get()}')
-        if not in_q.empty() and str(in_q.get()) == "endThreads":
-            print('thread quitting')
-            subscriber.client.disconnect()
-            break
-        else :
-            print('not quittinng thread')    
+        if not in_q.empty():
+            dataQ = in_q.get()
+            if dataQ == "endThreads":
+                print('thread quitting')
+                subscriber.client.disconnect()
+                print(f'in_q is {dataQ} and in_q.empty() is {in_q.empty()}')
+                while not in_q.empty:
+                    dataQ = in_q.get()
+                cv2.destroyAllWindows()
+                sys.exit()
+                print('the sys exit didnt work')
+                break
+            else :
+                print(f'in_q is {dataQ}')
+        print('not quittinng thread')    
         #wait until human detected, if no human after a few seconds, back to zero
 
         if level == 0: # if the game hasn't started yet and the next level would be level 1
@@ -306,7 +324,7 @@ def main(in_q):
                 if check_for_player(pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance):
                     # there is still a large enough player blob present, move on to next level
                     level = level + 1
-                    print(f'          Human detected, beginning level {level}. ')
+                    print(f'    !      Human detected, beginning level {level}. ')
                     subscriber.emit_level(level)
                     instance.run(level) # RUN LEVEL (2 or 3)
                     break
@@ -327,6 +345,7 @@ def main(in_q):
             subscriber.emit_level(level)
             time.sleep(1) # wait 1 second so person has time to leave and next person can come in
         print('looping back')
+    sys.exit()
 
 if __name__ == "__main__":
     main("")
