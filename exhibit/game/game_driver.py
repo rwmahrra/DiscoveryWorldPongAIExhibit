@@ -256,14 +256,16 @@ def main(in_q):
 
     while True: # play the exhibit on loop forever
 
+        print('looping start')
         #time.sleep(1)
         start = time.time()
-        # print(f'in_q is {in_q.get()}')
-        if str(in_q.get()) == "endThreads":
+        #print(f'in_q is {in_q.get()}')
+        if not in_q.empty() and str(in_q.get()) == "endThreads":
             print('thread quitting')
             subscriber.client.disconnect()
             break
-
+        else :
+            print('not quittinng thread')    
         #wait until human detected, if no human after a few seconds, back to zero
 
         if level == 0: # if the game hasn't started yet and the next level would be level 1
