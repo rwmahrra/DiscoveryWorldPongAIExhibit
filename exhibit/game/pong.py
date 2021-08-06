@@ -752,7 +752,7 @@ class Pong:
         """
         l, r = self.get_score()
         to_render = cv2.resize(screen, (int(Pong.WIDTH * scale), int(Pong.HEIGHT * scale)))
-        print('show()')
+        # print('show()')
         cv2.imshow(f"Pong", to_render/255)
         cv2.waitKey(duration)
 
