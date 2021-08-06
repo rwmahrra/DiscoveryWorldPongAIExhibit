@@ -9,10 +9,13 @@ import cv2
 
 
 class AIDriver:
-    #MODEL = 'validation/canstop_randomstart_6850.h5'#'../../validation/newhit_10k.h5'
-    MODEL_1 = f'./validation/canstop_randomstart_3k.h5'
-    MODEL_2 = f'./validation/canstop_randomstart_6850.h5'
-    MODEL_3 = f'./validation/canstop_randomstart_10k.h5'
+    # #MODEL = 'validation/canstop_randomstart_6850.h5'#'../../validation/newhit_10k.h5'
+    # MODEL_1 = f'./validation/canstop_randomstart_3k.h5'
+    # MODEL_2 = f'./validation/canstop_randomstart_6850.h5'
+    # MODEL_3 = f'./validation/canstop_randomstart_10k.h5'
+    MODEL_1 = f'./validation/level1_4500.h5'
+    MODEL_2 = f'./validation/level2_7500.h5'
+    MODEL_3 = f'./validation/level3_10000.h5'
     level = 1
     def publish_inference(self):
 
