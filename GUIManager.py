@@ -15,7 +15,7 @@ import importlib
 
 killObject = "endThreads"
 q = Queue()
-
+q.put('noneActive')
 def openMqttShell():
     fileLoc = 'cd C:\\"Program Files"\\Mosquitto\\' #cd C:\'Program Files'\Mosquitto\
     commandM = 'C:\\"Program Files"\\Mosquitto\\mosquitto -v -c ./mosquitto.conf'
@@ -66,7 +66,13 @@ window = sg.Window('Pong Controller', layout, no_titlebar=True, alpha_channel=0.
 y = threading.Thread(target=long_function_thread, args=(window,), name='testThread', daemon=True)
 
 while True:
-    event, values = window.read()
+    event, values = window.read(timeout=250)
+    if not q.empty():
+        tempQ2 = q.get()
+        q.put(tempQ2)
+        if tempQ2 == 'noneActive':
+            gameActive = False
+            gameButton.update(button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
     if event == sg.WIN_CLOSED or event == 'Close': # if user closes window or clicks cancel
         # close down everything
         break
@@ -86,23 +92,30 @@ while True:
 
     elif event == 'game':
         if gameActive:
-            gameActive = False
-            print('shutting down game driver')
+            
             if q.empty():
+                print('shutting down game driver')
                 q.put("endThreads")
-            #z.join()
-            gameButton.update(button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
-            time.sleep(0.5)
+                #z.join()                
+                
+                # gameActive = False
+                # gameButton.update(button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
+            else:
+                print('no game thread active')
 
         else:
-            gameActive = True
-            print('starting up game driver')
             
-            while not q.empty():
-                q.get()
-            #q.put("don't endThreads")
-            startGameDriver()
-            gameButton.update(button_color=(sg.theme_background_color() +' on '+ sg.theme_element_text_color()))
+            if not q.empty():
+                tempQ = q.get()
+                if tempQ == 'noneActive':
+                    while not q.empty(): # clear the queue
+                        q.get()
+                    print('starting up game driver')
+                    gameActive = True
+                    startGameDriver()
+                    gameButton.update(button_color=(sg.theme_background_color() +' on '+ sg.theme_element_text_color()))
+                else:
+                    print('old game thread is not exited yet')
 
     elif event == 'visualization':
         print('starting up visualization')
@@ -115,8 +128,8 @@ while True:
         print('Long function has returned from starting')
     elif event == '-THREAD DONE-':
         print('Your long operation completed')
-    else:
-        print(event, values)
+    #else:
+    #    print(event, values)
 q.put("endThreads")
 # if z.is_alive:
 #     z.join()

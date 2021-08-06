@@ -278,6 +278,7 @@ def main(in_q):
                 while not in_q.empty:
                     dataQ = in_q.get()
                 cv2.destroyAllWindows()
+                in_q.put('noneActive')
                 sys.exit()
                 print('the sys exit didnt work')
                 break
