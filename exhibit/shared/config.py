@@ -6,7 +6,7 @@ class Config:
     HEIGHT = 192  # Game window height (px)
     SPEEDUP = 1  # Flat multiplier to game movement speeds
     ACTIONS = ["UP", "DOWN", "NONE", "DEPTH"]
-    GAME_FPS = 80 # 60
+    GAME_FPS = 60 # 60
     AI_FRAME_INTERVAL = 5  # AI will publish inference every n frames
     BALL_MARKER_SIZE = 4  # Pixel height and width of experimental position markers
     CUSTOM = 0

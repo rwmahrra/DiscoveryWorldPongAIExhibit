@@ -1,7 +1,8 @@
 import http.server
 import socketserver
-
-if __name__ == "__main__":
+def main(in_q):
+    
+    print('placeholder')
     PORT = 8000
     DIRECTORY = "visualizer"
     #DIRECTORY = "exhibit\visualization"
@@ -25,3 +26,6 @@ if __name__ == "__main__":
     with socketserver.TCPServer(("", PORT), Handler) as httpd:
         print("serving at port", PORT)
         httpd.serve_forever()
+
+if __name__ == "__main__":
+    main("")
