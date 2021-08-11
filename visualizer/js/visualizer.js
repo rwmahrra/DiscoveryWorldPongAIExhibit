@@ -278,9 +278,9 @@ function render_game(ctx, frame, image_upscale = 2) {
         // console.log("frame[i]  is:")
         // console.log(frame[i])
         //if (frame[i] !== 0) {console.log("frame has nonzero value")} 
-        frameData[idx] = 220-frame[i]; // Red
-        frameData[idx+1] = 220-frame[i]; // Green
-        frameData[idx+2] = 220-frame[i]; // Blue
+        frameData[idx] = 200-frame[i]; // Red
+        frameData[idx+1] = 200-frame[i]; // Green
+        frameData[idx+2] = 200-frame[i]; // Blue
         frameData[idx+3] = 255; // Alpha
     }
 
@@ -775,11 +775,9 @@ var NEURON_SIZE = null;
 var MIN_PADDING = 3.8; // LW was 3. Used at line 212
 var HIDDEN_LAYER_Y = 0.475; // LQ was 0.35 // no longer used
 var OUTPUT_LAYER_Y = 0.08; // LW was 0.1
-var OUTPUT_LABELS = ["LEFT", "RIGHT", "NONE"]
-//var INFO_TEXT = ["Can you beat the AI? \nStep in to play...\n \nArtificial Intelligence does more than just play games! \nAI can be used for:\n    Self-Driving cars        Medical Diagnosis\n    Language Translation    Virtual Assistants", 
-// "Hello human, I am an Artificial Intelligence. \nMy brain is a 'Neural Network' that learns by playing. \n \nMove your body side to side to control your paddle.\nSee if you can beat me!\n \nArtificial Intelligence does more than just play games! \nAI can be used for:\n    Self-Driving cars        Medical Diagnosis\n    Language Translation    Virtual Assistants", 
-// "This is what I see and my Neural Network. Each circle \nis like a neuron in a human brain. The neurons that \nlight up choose if I move my paddle left or right.\n \nI made it easy for you that round... \nCan you beat a model that was trained for more time?\nArtificial Intelligence does more than just play games! \nAI can be used for:\n    Self-Driving cars        Medical Diagnosis\n    Language Translation    Virtual Assistants", 
-// "When I was learning to play this game, I got rewards \nthat told me what actions were good and bad. I changed \nmy Neural Network to improve a little each time.\nThis is called Reinforcement Learning.\n \nCan you beat my hardest model? I've trained thousands of times \nto perfect this Neural Network.\nArtificial Intelligence does more than just play games! \nAI can be used for:\n    Self-Driving cars        Medical Diagnosis\n    Language Translation    Virtual Assistants"];
+var OUTPUT_LABELS = ["LEFT", "RIGHT", "NONE"] // the 3 options for the AI, labeled at the top of the 
+var MAIN_INFO = ["what the AI sees", "the AI's neural netwrok 'thinking'", "the AI deciding to go left, right, or stay still"]
+var ADDITIONAL_INFO = ["The AI sees a flat version of the game\nThe pixels in this image activate the AI's Neural Network", "Each circle is a node in the Neural Network\nThey are like neurons in the human brain\nThe blue lit nodes are activated", "Which nodes are activated determines which action is chosen\nIf many nodes with strong connections to 'Left' are activated, the AI goes left"]
 var image_upscale = 4;//4;
 var frame_width = 192 / 2; // Base state dimension, scaled down by two
 var frame_height = 160 / 2; // LW was /2

@@ -321,7 +321,7 @@ class Pong:
         DIAMETER = Config.BALL_DIAMETER
         SPEED = 2
         BOUNCE_ANGLES = [0, 60, 45, 30, -30, -45, -60]  # True to original Atari Pong
-        START_ANGLES = [0, 40, 30, 20, 15, 10, 5, -5, -10, -15, -20, -30, -40]#[0]
+        START_ANGLES = [0, 30, 20, 15, 10, 5, -5, -10, -15, -20, -30]#[0]
 
         def spawn_hit_practice(self):
             """

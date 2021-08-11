@@ -12,6 +12,7 @@ import exhibit.game
 from exhibit.game import game_driver as gd
 import exhibit.visualization
 from exhibit.visualization import visualization_driver as vd
+import webbrowser
 import importlib
 
 
@@ -74,7 +75,8 @@ def startGameDriver():
 def startVisualizationDriver():
     threading.Thread(target=vd.main, args=('',), name='visualizationThread', daemon=True).start()
 def openVisualizationBrowser():
-    os.system('start C:\\Users\\"DW Pong"\\Downloads\\DiscoveryWorldPongAIExhibit-master\\DiscoveryWorldPongAIExhibit-master\\visualizer\\index.html')
+    webbrowser.open("http://localhost:8000/")
+    #os.system('start C:\\Users\\"DW Pong"\\Downloads\\DiscoveryWorldPongAIExhibit-master\\DiscoveryWorldPongAIExhibit-master\\visualizer\\index.html')
 
 layout = [  [sg.Text('Some text on Row 1')],
             [sg.Text('Change Points per Level:'), sg.InputText()],
