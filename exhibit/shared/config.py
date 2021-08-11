@@ -21,7 +21,7 @@ class Config:
     RIGHT_PADDLE_X = WIDTH - PADDING
     ENV_TYPE = CUSTOM
     DEBUG = True
-    ENABLE_AUDIO = True
+    ENABLE_AUDIO = False
     VOLLEY_SPEEDUP = 0.2  # Multiplier to ball speed after each paddle hit
     #AUDIO_DIR = "C:\\dev\\DiscoveryWorld\\exhibit\\game\\resources\\"
     AUDIO_DIR = "C:\\Users\\DW Pong\\Downloads\\DiscoveryWorldPongAIExhibit-master\\DiscoveryWorldPongAIExhibit-master\\exhibit\\game\\resources\\"

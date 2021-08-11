@@ -22,7 +22,7 @@ It polls the agents for actions and advances frames and game state at a steady r
 class GameDriver:
     def run(self, level):
 
-        env = Pong(level = level, pipeline = self.pipeline, decimation_filter = self.decimation_filter, crop_percentage_w = self.crop_percentage_w, crop_percentage_h = self.crop_percentage_h, clipping_distance = self.clipping_distance)
+        env = Pong(level = level, pipeline = self.pipeline, decimation_filter = self.decimation_filter, crop_percentage_w = self.crop_percentage_w, crop_percentage_h = self.crop_percentage_h, clipping_distance = self.clipping_distance, max_score = self.max_score)
         currentFPS = 60#(level * 40) + 40#Config.GAME_FPS 
 
         if type(self.left_agent) == BotPlayer: self.left_agent.attach_env(env)
@@ -96,7 +96,7 @@ class GameDriver:
             #print(f"Behind frames: {np.mean(frame_skips)} mean, {np.std(frame_skips)} stdev, "
                   #f"{np.max(frame_skips)} max, {np.unique(frame_skips, return_counts=True)}")
 
-    def __init__(self, subscriber, left_agent, right_agent, pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance):
+    def __init__(self, subscriber, left_agent, right_agent, pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance, max_score):
         self.subscriber = subscriber
         self.left_agent = left_agent
         self.right_agent = right_agent
@@ -105,6 +105,7 @@ class GameDriver:
         self.crop_percentage_w = crop_percentage_w
         self.crop_percentage_h = crop_percentage_h
         self.clipping_distance = clipping_distance
+        self.max_score = max_score
 
 # checks if theres a big enough player sized blob
 def check_for_player(pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance):
@@ -217,8 +218,9 @@ def check_for_still_player(pipeline, decimation_filter, crop_percentage_w, crop_
             return (m/(np.size(cutoffImage,1)) * 1) # -0.2 # return value
         return -5.0 # failed to get camera image, return bas value
 
-def main(in_q):
+def main(in_q, MAX_SCORE=3):
     print("from gameDriver, about to init GameSubscriber")
+    print(f'The current MAX_SCORE is set to {MAX_SCORE}')
     subscriber = GameSubscriber()
     #opponent = BotPlayer(right=True)
     opponent = CameraPlayer()
@@ -262,7 +264,7 @@ def main(in_q):
     subscriber.emit_level(level) 
 
     # was orginally in the loop
-    instance = GameDriver(subscriber, opponent, agent, pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance)
+    instance = GameDriver(subscriber, opponent, agent, pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance, MAX_SCORE)
 
     while True: # play the exhibit on loop forever
 
@@ -349,7 +351,7 @@ def main(in_q):
     sys.exit()
 
 if __name__ == "__main__":
-    main("")
+    main("", 9)
 
 
 

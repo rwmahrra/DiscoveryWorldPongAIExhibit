@@ -15,9 +15,15 @@ from exhibit.visualization import visualization_driver as vd
 import importlib
 
 
+mqttActive = False
+gameActive = False
+visualizationActive = False
+emulate3DActive = False
+max_score = 2
 killObject = "endThreads"
 q = Queue()
 q.put('noneActive')
+
 def openMqttShell():
     fileLoc = 'cd C:\\"Program Files"\\Mosquitto\\' #cd C:\'Program Files'\Mosquitto\
     commandM = 'C:\\"Program Files"\\Mosquitto\\mosquitto -v -c ./mosquitto.conf'
@@ -27,6 +33,9 @@ def openMqttShell():
 #     #os.system("start " + fileName)
 # def closeMosquittoShell():
 #     os.system(str(signal.SIGINT))
+def closeMosquitto():
+    os.system("taskkill/im mosquitto.exe")
+
 def openEmulate3DShell():
     # fileLoc = 'cd C:\\Users\\"DW Pong"\\Downloads\\DiscoveryWorldPongAIExhibit-master\\DiscoveryWorldPongAIExhibit-master\\' 
     # commandM = 'C:\\"Program Files"\\Mosquitto\\mosquitto -v -c ./mosquitto.conf'
@@ -40,16 +49,13 @@ def long_function_thread(window):
     time.sleep(3)
     window.write_event_value('-THREAD DONE-', '')
 
-def long_function():
-    y.start()
+def long_function(new_value):
+    max_score = new_value
+    print(f'max_score is now {max_score}...')
     #time.sleep(1)
 
-mqttActive = False
-gameActive = False
-visualizationActive = False
-emulate3DActive = False
 
-sg.theme('DarkAmber')   #
+sg.theme('DarkGrey')   #
 mqttButton = sg.Button('mqtt server',button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
 gameButton = sg.Button('game',button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
 visualizationButton = sg.Button('visualization',button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
@@ -62,7 +68,7 @@ def startGameDriver():
     # exhibit.game.game_driver.reload(gd)
     importlib.reload(gd)
     # functionT = gd.main
-    threading.Thread(target=gd.main, args=(q,), name='gameThread', daemon=True).start()
+    threading.Thread(target=gd.main, args=(q,max_score), name='gameThread', daemon=True).start()
     time.sleep(0.5)
 
 def startVisualizationDriver():
@@ -71,15 +77,15 @@ def openVisualizationBrowser():
     os.system('start C:\\Users\\"DW Pong"\\Downloads\\DiscoveryWorldPongAIExhibit-master\\DiscoveryWorldPongAIExhibit-master\\visualizer\\index.html')
 
 layout = [  [sg.Text('Some text on Row 1')],
-            [sg.Text('Enter something on Row 2'), sg.InputText()],
-            [sg.Button('Ok'), sg.Button('Close')],
+            [sg.Text('Change Points per Level:'), sg.InputText()],
+            [sg.Button('Accept'), sg.Button('Close')],
             [mqttButton, gameButton, visualizationButton, Emulate3DButton] ]
 
 # Create the Window
-window = sg.Window('Pong Controller', layout, no_titlebar=True, alpha_channel=0.9, keep_on_top=True)
+window = sg.Window('Pong Controller', layout, no_titlebar=False, alpha_channel=0.9, keep_on_top=False)
 # Event Loop to process "events" and get the "values" of the inputs
 #z = threading.Thread(target=gd.main, args=(q,), name='gameThread', daemon=True)
-y = threading.Thread(target=long_function_thread, args=(window,), name='testThread', daemon=True)
+#y = threading.Thread(target=long_function_thread, args=(window,), name='testThread', daemon=True)
 
 while True:
 
@@ -96,18 +102,18 @@ while True:
         # close down everything
         break
     elif event == 'mqtt server':
-        if False: #mqttActive:
+        if mqttActive: #mqttActive:
             print('shuting down mqtt server')
+            closeMosquitto()
             mqttActive = False
             mqttButton.update(button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
 
-        elif mqttActive == False:
+        else: # if mqttActive == False:
             mqttActive = True
             print('starting up mqtt server')
             openMqttShell()
-            #mqttButton.button_text = "ehh"
             #mqttButton.ButtonColor = sg.theme_background_color()            
-            mqttButton.update(button_color=(sg.theme_background_color() +' on '+ sg.theme_element_text_color()))
+            mqttButton.update(button_color=(sg.theme_element_text_color() +' on '+ sg.theme_button_color()[1]))
 
     elif event == 'game':
         if gameActive:
@@ -132,7 +138,7 @@ while True:
                     print('starting up game driver')
                     gameActive = True
                     startGameDriver()
-                    gameButton.update(button_color=(sg.theme_background_color() +' on '+ sg.theme_element_text_color()))
+                    gameButton.update(button_color=(sg.theme_element_text_color() +' on '+ sg.theme_button_color()[1]))
                 else:
                     print('old game thread is not exited yet')
 
@@ -141,7 +147,7 @@ while True:
             startVisualizationDriver()
             openVisualizationBrowser()
             visualizationActive = True
-            visualizationButton.update(button_color=(sg.theme_background_color() +' on '+ sg.theme_element_text_color()))
+            visualizationButton.update(button_color=(sg.theme_element_text_color() +' on '+ sg.theme_button_color()[1]))
             print('starting up visualization')
 
     elif event == 'Emulate3D':
@@ -153,13 +159,15 @@ while True:
         else:
             print('starting up Emulate3D')
             openEmulate3DShell()                    
-            Emulate3DButton.update(button_color=(sg.theme_background_color() +' on '+ sg.theme_element_text_color()))
+            Emulate3DButton.update(button_color=(sg.theme_element_text_color() +' on '+ sg.theme_button_color()[1]))
             emulate3DActive = True
 
-    elif event == 'Ok':
-        print('You entered ', values[0])
-        long_function()
-        print('Long function has returned from starting')
+    elif event == 'Accept':
+        print('Changing points per level to ', values[0])
+        max_score += (int(values[0]) - max_score)
+        print(f'max_score is now {max_score}...')
+        #long_function(values[0])
+        print('Restart game_driver for new max score to take effect.')
 
     elif event == '-THREAD DONE-':
         print('Your long operation completed')

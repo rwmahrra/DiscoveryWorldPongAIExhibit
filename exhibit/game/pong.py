@@ -486,14 +486,14 @@ class Pong:
                 self.y = 0
                 self.bounce(y=True)
 
-    def __init__(self, hit_practice=False, level = 1, pipeline = None, decimation_filter = None, crop_percentage_w = None, crop_percentage_h = None, clipping_distance = None):
+    def __init__(self, hit_practice=False, level = 1, pipeline = None, decimation_filter = None, crop_percentage_w = None, crop_percentage_h = None, clipping_distance = None, max_score = Config.MAX_SCORE):
 
         if pipeline == None:
             print('pipeline equal to None')
         
-        Pong.SPEEDUP = 1 + 0.4 # (0.4*level) # uncomment this to make it faster each level
+        Pong.SPEEDUP = 1 #+ 0.4 # (0.4*level) # uncomment this to make it faster each level
         print(f'Pong environment init level {level} and SPEEDUP is {Pong.SPEEDUP}')
-        
+        Pong.MAX_SCORE = max_score
         """
         Initialize basic game state
         :param hit_practice: Trigger training mode with a single paddle and randomly spawned balls
@@ -672,6 +672,7 @@ class Pong:
                 self.right.update()
                 done = False
                 if Pong.score_right >= Pong.MAX_SCORE or Pong.score_left >= Pong.MAX_SCORE:
+                    print(f'The scores have hit the max_score of {Pong.MAX_SCORE} with AI: {Pong.score_right} and Human: {Pong.score_left}')
                     done = True
         screen = self.render()
         #self.show(self.render(), 3)
