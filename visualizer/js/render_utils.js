@@ -2,8 +2,8 @@
 This class is a relatively straightforward set of utilities used in the inference visualization proof-of-concept.
 */
 const TITLE_FONT = "30px Arial";
-const INFO_FONT = "30px monospace";
-const INFO_FONT0 = "50px monospace";
+const INFO_FONT = "20px monospace";
+const INFO_FONT0 = "50px monospace bold";
 const WEIGHT_COLOR = "#222222"
 const WEIGHT_COLOR_ACTIVE = "#9be5dc"//"#1100FF"//"#BB6666"
 const UNCHOSEN_OUT_WEIGHT_COLOR = "#666666"
@@ -316,14 +316,15 @@ function get_weight_map(weights, neuron) {
     return weight_map;
 }
 // LW function to render info text
-function render_info(canvas, index, info_text) {
-    //console.log("rendering info text")
+function render_info(canvas, index, main_text, additional_text) {
+    
     canvas.clearRect(0, 0, infoCanvas_width, infoCanvas_height)
-    text_spacing = 40;
+    text_spacing = 20;
     canvas.font = INFO_FONT;
     if (index == 0) {
-        canvas.font = INFO_FONT0;
-        text_spacing = 65
+        return 0
+        // canvas.font = INFO_FONT0;
+        // text_spacing = 65
     }
     canvas.fillStyle = "#333333"
     canvas.textAlign = "left";
@@ -334,19 +335,21 @@ function render_info(canvas, index, info_text) {
     gradient.addColorStop("0.5", "blue");
     gradient.addColorStop("1.0", "darkviolet");
 
-
+    VERTICAL_OFFS = [-0.5, 0.8, 0.5, 0.1]
     //console.log(info_text[index])
-
-    texts = info_text[index].split('\n');
+    console.log(additional_text[index-1])
+    texts = additional_text[index-1].split('\n');
+    canvas.fillStyle = gradient;//"#2ab50a"
+    text_spacing = 40;
+    canvas.font = INFO_FONT;
+    added = 40
     for (var i = 0; i < texts.length; i++){
-        if (i > texts.length - 5) {
-            canvas.fillStyle = gradient;//"#2ab50a"
-            text_spacing = 40;
-            canvas.font = INFO_FONT;
-            added = 40
-        }
-        canvas.fillText(texts[i], 0, 35 + added +(i*text_spacing));
+        canvas.fillText(texts[i], 20, VERTICAL_OFFS[index]*canvas_height +(i*text_spacing));
     }
+    canvas.font = INFO_FONT0;
+    canvas.fillStyle = "#333333"
+    canvas.fillText(main_text[index-1], 10, VERTICAL_OFFS[index]*canvas_height - text_spacing);
+
 }
 
 function render_layer(canvas, neurons, left_x, right_x, y, neuron_size, activations=null, labels=null, activation_intensities=null) {

@@ -59,7 +59,7 @@ function myMethod(message) {
                 //levelg = 1
                 //console.log('level 0. level set to:')
                 //console.log(level)
-                //render_info(info_ctx, 0, INFO_TEXT)
+                render_info(info_ctx, 0, MAIN_INFO, ADDITIONAL_INFO)
                 
                 init_model(level);
                 break;
@@ -76,7 +76,7 @@ function myMethod(message) {
                 // leftInterval1 = setInterval(left10, 2750)
                 // leftInterval0 = setInterval(leftZero, 3550)
 
-                //render_info(info_ctx, 1, INFO_TEXT)
+                render_info(info_ctx, 1, MAIN_INFO, ADDITIONAL_INFO)
                 init_model(level);
 
                 break;
@@ -95,7 +95,7 @@ function myMethod(message) {
                 setTimeout(leftZero, 700)
                 setTimeout(left10, 2000)
 
-                //render_info(info_ctx, 2, INFO_TEXT)
+                render_info(info_ctx, 2, MAIN_INFO, ADDITIONAL_INFO)
                 
                 init_model(level);
                 break;
@@ -116,7 +116,7 @@ function myMethod(message) {
                 setTimeout(left10, 2500)
                 setTimeout(leftZero, 3500)
                 setTimeout(right10, 4000)
-                //render_info(info_ctx, 3, INFO_TEXT)
+                render_info(info_ctx, 3, MAIN_INFO, ADDITIONAL_INFO)
                 init_model(level);
                 break;
         }
@@ -304,8 +304,6 @@ function render_depth_feed(ctx, image_upscale = 3.6) {
         // the left edge of yellow box / this image width
         image_upscale = (img_x - (0.1*img_w)) /image.width;
 
-        // console.log('drawing image ***')
-        // console.log(image_upscale)
         //ctx.drawImage(image, (d_canvas_width/3) - (image.width/2), d_canvas_height -(image.height*image_upscale), image.width * image_upscale, image.height * image_upscale)
         //ctx.drawImage(image, 0, d_canvas_height -(image.height*image_upscale), image.width * image_upscale, image.height * image_upscale)
         ctx.drawImage(image, 0, (img_y + (.5 * img_h)) -( 0.5 * image.height*image_upscale), image.width * image_upscale, image.height * image_upscale)
@@ -469,7 +467,7 @@ function render_loop() {
     if (last_activations && last_activations != last_rendered_activations) {
         const ctx = canvas.getContext("2d");
         const d_ctx = d_canvas.getContext("2d");
-        //const info_ctx = infoCanvas.getContext("2d");
+        const info_ctx = infoCanvas.getContext("2d");
 
         const [state_frame, hl_activations, ol_activations] = JSON.parse(last_activations);
         render_tick(ctx, state_frame, state_frame, hl_activations, ol_activations, d_ctx);
@@ -555,8 +553,8 @@ function init_model(level) {
         //console.log(MIN_PADDING);
         // console.log('hidden_biases.length is:')
         // console.log(hidden_biases.length);
-        console.log('canvas_height is:')
-        console.log(canvas_height);
+        //console.log('canvas_height is:')
+        //console.log(canvas_height);
         NEURON_SIZE = (canvas_height - (hidden_biases.length * MIN_PADDING)) / (hidden_biases.length)
         NEURON_SIZE = 0.8;
         // Render neuron nodes, saving calculated positions for weight rendering
@@ -633,9 +631,14 @@ function init() {
     d_canvas_width = d_canvas.width
     d_canvas_height = d_canvas.height
     
-    infoCanvas.width = document.body.clientHeight - 2*(document.body.clientHeight/60); //document.body.clientWidth;
-    infoCanvas.height = document.body.clientHeight - 2*(document.body.clientHeight/60);//document.body.clientHeight; // LW
-    infoCanvas.style.left = canvas.style.left
+    infoCanvas.width = document.body.clientWidth - canvas.width;//((document.body.clientWidth) - ((canvas.width) + (canvas.style.left))) +'px';
+    infoCanvas.height = canvas.height;
+    
+    console.log('The infoCanvas.width is:')
+    console.log(infoCanvas.width)
+    // infoCanvas.width = document.body.clientHeight - 2*(document.body.clientHeight/60); //document.body.clientWidth;
+    // infoCanvas.height = document.body.clientHeight - 2*(document.body.clientHeight/60);//document.body.clientHeight; // LW
+    infoCanvas.style.left = (document.body.clientWidth/60) + canvas.width + 'px'// str(int(canvas_width) + int(canvas.style.left)) + 'px';
     infoCanvas.style.top = canvas.style.top;
     infoCanvas.style.position = 'absolute';
 
@@ -691,9 +694,14 @@ function onWindowResizeV() {
 
     VERTICAL_SPREAD = (document.body.clientHeight/8)
     
-    infoCanvas.width = document.body.clientHeight - 2*(document.body.clientHeight/60); //document.body.clientWidth;
-    infoCanvas.height = document.body.clientHeight - 2*(document.body.clientHeight/60);//document.body.clientHeight; // LW
-    infoCanvas.style.left = canvas.style.left
+    infoCanvas.width = document.body.clientWidth - canvas.width;//((document.body.clientWidth) - ((canvas.width) + (canvas.style.left))) +'px';
+    infoCanvas.height = canvas.height;
+    
+    console.log('The infoCanvas.width is:')
+    console.log(infoCanvas.width)
+    // infoCanvas.width = document.body.clientHeight - 2*(document.body.clientHeight/60); //document.body.clientWidth;
+    // infoCanvas.height = document.body.clientHeight - 2*(document.body.clientHeight/60);//document.body.clientHeight; // LW
+    infoCanvas.style.left = (document.body.clientWidth/60) + canvas.width + 'px'// str(int(canvas_width) + int(canvas.style.left)) + 'px';
     infoCanvas.style.top = canvas.style.top;
     infoCanvas.style.position = 'absolute';
 
@@ -777,7 +785,7 @@ var HIDDEN_LAYER_Y = 0.475; // LQ was 0.35 // no longer used
 var OUTPUT_LAYER_Y = 0.08; // LW was 0.1
 var OUTPUT_LABELS = ["LEFT", "RIGHT", "NONE"] // the 3 options for the AI, labeled at the top of the 
 var MAIN_INFO = ["what the AI sees", "the AI's neural netwrok 'thinking'", "the AI deciding to go left, right, or stay still"]
-var ADDITIONAL_INFO = ["The AI sees a flat version of the game\nThe pixels in this image activate the AI's Neural Network", "Each circle is a node in the Neural Network\nThey are like neurons in the human brain\nThe blue lit nodes are activated", "Which nodes are activated determines which action is chosen\nIf many nodes with strong connections to 'Left' are activated, the AI goes left"]
+var ADDITIONAL_INFO = ["The AI sees a flat version of the game\nThe pixels in this image activate\nthe AI's Neural Network", "Each circle is a node in the Neural Network\nThey are like neurons in the human brain\nThe blue lit nodes are activated", "Which nodes are activated determines \nwhich action is chosen\nIf many nodes with strong connections \nto 'Left' are activated, the AI goes left"]
 var image_upscale = 4;//4;
 var frame_width = 192 / 2; // Base state dimension, scaled down by two
 var frame_height = 160 / 2; // LW was /2
