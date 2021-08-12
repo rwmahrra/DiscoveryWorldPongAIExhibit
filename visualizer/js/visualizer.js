@@ -312,12 +312,15 @@ function render_depth_feed(ctx, image_upscale = 3.6) {
         //ctx.drawImage(image, (d_canvas_width/3) - (image.width/2), d_canvas_height -(image.height*image_upscale), image.width * image_upscale, image.height * image_upscale)
         //ctx.drawImage(image, 0, d_canvas_height -(image.height*image_upscale), image.width * image_upscale, image.height * image_upscale)
         ctx.drawImage(image, 0, (img_y + (.5 * img_h)) -( 0.5 * image.height*image_upscale), image.width * image_upscale, image.height * image_upscale)
+        ctx.textAlign = "center";
+        ctx.font = FEED_LABELS_FONT;
+        ctx.fillStyle = "#333333"
+        // console.log(" half the image width is : ")
+        // console.log(image.width * image_upscale * 0.5)
+        ctx.fillText("^ YOU ^", image.width * image_upscale * 0.5, img_y + (1.1*img_h));// img_x/3.3, img_y + (1.1*img_h)); // + (0.5 * image.width * image_upscale), ctx.height * 0.9);
+        ctx.fillText("^ AI INPUT ^", img_x + 0.5*img_w, img_y + (1.1*img_h));
     }
-    ctx.textAlign = "left";
-    ctx.font = FEED_LABELS_FONT;
-    ctx.fillStyle = "#333333"
-    ctx.fillText("^ YOU ^", img_x/3.4, img_y + (1.1*img_h)); // + (0.5 * image.width * image_upscale), ctx.height * 0.9);
-    ctx.fillText("^ AI INPUT ^", img_x + 0.2*img_w, img_y + (1.1*img_h));
+    
 
 }
 
