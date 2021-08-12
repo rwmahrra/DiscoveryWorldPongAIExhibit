@@ -498,8 +498,7 @@ function init_model(level) {
     } else {
         const ctx = canvas.getContext("2d");
         structure = null;
-        //console.log("rendering model of level:")
-        //console.log(level)
+        // Switch between the three models (1 per level)
         switch(level) {
             case 1:
                 structure = easy_model;
@@ -542,26 +541,17 @@ function init_model(level) {
         significant_ow = is_significant(output_weights, 0.3)
 
         // Determine appropriate base size for a neuron based on minimum allowable padding for a specific layer
-        //console.log('MIN_PADDING is:')
-        //console.log(MIN_PADDING);
-        // console.log('hidden_biases.length is:')
-        // console.log(hidden_biases.length);
-        //console.log('canvas_height is:')
-        //console.log(canvas_height);
         NEURON_SIZE = (canvas_height - (hidden_biases.length * MIN_PADDING)) / (hidden_biases.length)
         NEURON_SIZE = 0.8;
+
         // Render neuron nodes, saving calculated positions for weight rendering
         hidden_pos = render_layer(ctx, render_rescale(hidden_biases, 1), 0,
             canvas_width, (img_y - (0.2*img_h)) - (VERTICAL_SPREAD), NEURON_SIZE)
-
-        // render_layer(ctx, render_rescale(hidden_biases, 1), 0,
-        //     canvas_width, (img_y - (0.2*img_h)) - (VERTICAL_SPREAD), NEURON_SIZE, hl_activations)
 
         out_pos = render_layer(ctx, render_rescale(output_biases, 1), 0,
             canvas_width, OUTPUT_LAYER_Y * canvas_height, NEURON_SIZE, null, OUTPUT_LABELS)
 
         model_initialized = true;
-        //console.log("inside init model about to do requestAnimationFrame(render_loop)")
         requestAnimationFrame(render_loop);
     }
 }
@@ -581,24 +571,23 @@ function init() {
     // connect the client
     client.connect({onSuccess:onConnect});
 
+    // Canvas for the nodes and output of neural network
     canvas = document.getElementById("visualizer");
     const ctx = canvas.getContext("2d");
 
-    
+    // canvas for our depth camera image
     d_canvas = document.getElementById("depth");
     const d_ctx = d_canvas.getContext("2d");
 
+    // canvas for our info labels for highlighted section
     infoCanvas = document.getElementById("info");
     const info_ctx = infoCanvas.getContext("2d");
-
-    // Size canvas to full screen
-    //canvas.width = 10;
     
-    canvas.width = document.body.clientWidth*(.6) -(document.body.clientWidth/60); //document.body.clientWidth;
-    canvas.height = document.body.clientHeight - 2*(document.body.clientHeight/60);// /2.2;//document.body.clientHeight; // LW
-    // canvas.y = 50
-    // canvas.x = 0 // does nothing
-    canvas.style.left = (document.body.clientWidth/60)+'px'; // LW
+    // Positioning the canvases
+    canvas.width = document.body.clientWidth*(.6) -(document.body.clientWidth/60); 
+    canvas.height = document.body.clientHeight - 2*(document.body.clientHeight/60);
+    
+    canvas.style.left = (document.body.clientWidth/60)+'px';
     canvas.style.top = (document.body.clientWidth/120) + 'px';
     canvas.style.position = 'absolute';
     console.log("canvas.left is ")
@@ -610,28 +599,26 @@ function init() {
     console.log("image_upscale:")
     console.log(image_upscale);
 
-
+    // a factor for spreading the nodes of the neural network
     VERTICAL_SPREAD = (document.body.clientHeight/8)
     console.log("VERTICAL_SPREAD:")
     console.log(VERTICAL_SPREAD);
 
-    d_canvas.width = canvas.width; //document.body.clientWidth/(1); //document.body.clientWidth;
-    d_canvas.height = canvas.height; //document.body.clientHeight /2.5;//document.body.clientHeight; // LW
-    d_canvas.style.left = canvas.style.left; //(0)+'px'; // LW
-    d_canvas.style.top = canvas.style.top; //(document.body.clientWidth/60) + 'px';
+    // Positioning the depth image canvas
+    d_canvas.width = canvas.width; 
+    d_canvas.height = canvas.height; 
+    d_canvas.style.left = canvas.style.left;
+    d_canvas.style.top = canvas.style.top; 
     d_canvas.style.position = 'absolute';
 
     d_canvas_width = d_canvas.width
     d_canvas_height = d_canvas.height
     
-    infoCanvas.width = document.body.clientWidth - canvas.width;//((document.body.clientWidth) - ((canvas.width) + (canvas.style.left))) +'px';
+    // Positioning the depth image canvas
+    infoCanvas.width = document.body.clientWidth - canvas.width;
     infoCanvas.height = canvas.height;
     
-    console.log('The infoCanvas.width is:')
-    console.log(infoCanvas.width)
-    // infoCanvas.width = document.body.clientHeight - 2*(document.body.clientHeight/60); //document.body.clientWidth;
-    // infoCanvas.height = document.body.clientHeight - 2*(document.body.clientHeight/60);//document.body.clientHeight; // LW
-    infoCanvas.style.left = (document.body.clientWidth/60) + canvas.width + 'px'// str(int(canvas_width) + int(canvas.style.left)) + 'px';
+    infoCanvas.style.left = (document.body.clientWidth/60) + canvas.width + 'px';
     infoCanvas.style.top = canvas.style.top;
     infoCanvas.style.position = 'absolute';
 
@@ -639,21 +626,18 @@ function init() {
     infoCanvas_height = infoCanvas.height
 
     // Save canvas dimensions
-    //canvas_width = 10;//
-    canvas_width = canvas.width;//document.body.clientWidth/2; // LW
-    //canvas_height = 10; //
-    canvas_height = canvas.height;//document.body.clientHeight /2; // LW
+    canvas_width = canvas.width;
+    canvas_height = canvas.height;
 
-    //img_x = img_w / 10; // (canvas_width - img_w)/2 -(canvas_width/4) + (img_w /10);
     img_x = (canvas_width * 3/4) - (img_w/2) - (img_w/10);
-    //img_x = (canvas_width - img_w)/2; // LW
-    img_y = canvas_height - (img_h) - (img_h/10);// + (canvas_height / 10)); // LW
+    img_y = canvas_height - (img_h) - (img_h/10);
     
     // We will update this with game state pixels and embed it on the visualizer canvas
     frameCanvas = document.createElement('canvas');
     // This one will hold a model weight image overlay to see what the network is picking up on
     weightImageCanvas = document.createElement('canvas');
 
+    // A listener to appropriately resize our canvases when the window size changes
     window.addEventListener('resize', onWindowResizeV, false);
 
     initialized = true;
@@ -661,14 +645,17 @@ function init() {
  
 
 function onWindowResizeV() {
+    // Function to resize our canvases when the window resizes. 
+    // This is also triggered when you go full screen, as that changes the size a little
+
     console.log("ON WINDOW RESIZE")
-    canvas.width = document.body.clientWidth*(.6) -(document.body.clientWidth/60); //document.body.clientWidth;
-    canvas.height = document.body.clientHeight - 2*(document.body.clientHeight/60);// /2.2;//document.body.clientHeight; // LW
+    canvas.width = document.body.clientWidth*(.6) -(document.body.clientWidth/60); 
+    canvas.height = document.body.clientHeight - 2*(document.body.clientHeight/60);
     
     canvas_width = canvas.width;
     canvas_height = canvas.height;
 
-    canvas.style.left = (document.body.clientWidth/60)+'px'; // LW
+    canvas.style.left = (document.body.clientWidth/60)+'px'; 
     canvas.style.top = (document.body.clientWidth/120) + 'px';
     
     image_upscale = canvas.width / 225
@@ -677,9 +664,9 @@ function onWindowResizeV() {
     img_x = (canvas_width * 3/4) - (img_w/2) - (img_w/10);
     img_y = canvas_height - (img_h) - (img_h/10);
     
-    d_canvas.width = canvas.width; //document.body.clientWidth/(1); //document.body.clientWidth;
-    d_canvas.height = canvas.height; //document.body.clientHeight /2.5;//document.body.clientHeight; // LW
-    d_canvas.style.left = canvas.style.left; //(0)+'px'; // LW
+    d_canvas.width = canvas.width;
+    d_canvas.height = canvas.height;
+    d_canvas.style.left = canvas.style.left;
     d_canvas.style.top = canvas.style.top;
     
     d_canvas_width = d_canvas.width
@@ -687,14 +674,10 @@ function onWindowResizeV() {
 
     VERTICAL_SPREAD = (document.body.clientHeight/8)
     
-    infoCanvas.width = document.body.clientWidth - canvas.width;//((document.body.clientWidth) - ((canvas.width) + (canvas.style.left))) +'px';
+    infoCanvas.width = document.body.clientWidth - canvas.width;
     infoCanvas.height = canvas.height;
     
-    console.log('The infoCanvas.width is:')
-    console.log(infoCanvas.width)
-    // infoCanvas.width = document.body.clientHeight - 2*(document.body.clientHeight/60); //document.body.clientWidth;
-    // infoCanvas.height = document.body.clientHeight - 2*(document.body.clientHeight/60);//document.body.clientHeight; // LW
-    infoCanvas.style.left = (document.body.clientWidth/60) + canvas.width + 'px'// str(int(canvas_width) + int(canvas.style.left)) + 'px';
+    infoCanvas.style.left = (document.body.clientWidth/60) + canvas.width + 'px'
     infoCanvas.style.top = canvas.style.top;
     infoCanvas.style.position = 'absolute';
 
@@ -703,44 +686,14 @@ function onWindowResizeV() {
     
 }
 
-// function resiseVisual(width) {
-//     console.log("RESIZE")
-//     // default .6
-//     canvas.width = document.body.clientWidth*(width) -(document.body.clientWidth/60); //document.body.clientWidth;
-//     canvas.height = document.body.clientHeight - 2*(document.body.clientHeight/60);// /2.2;//document.body.clientHeight; // LW
-    
-//     canvas_width = canvas.width;
-//     canvas_height = canvas.height;
-
-//     canvas.style.left = (document.body.clientWidth/60)+'px'; // LW
-//     canvas.style.top = (document.body.clientWidth/120) + 'px';
-    
-//     image_upscale = canvas.width / 225
-//     img_w = frame_width * image_upscale;
-//     img_h = frame_height * image_upscale;
-//     img_x = (canvas_width * 3/4) - (img_w/2) - (img_w/10);
-//     img_y = canvas_height - (img_h) - (img_h/10);
-    
-//     d_canvas.width = canvas.width; //document.body.clientWidth/(1); //document.body.clientWidth;
-//     d_canvas.height = canvas.height; //document.body.clientHeight /2.5;//document.body.clientHeight; // LW
-//     d_canvas.style.left = canvas.style.left; //(0)+'px'; // LW
-//     d_canvas.style.top = canvas.style.top;
-    
-//     d_canvas_width = d_canvas.width
-//     d_canvas_height = d_canvas.height
-
-//     VERTICAL_SPREAD = (document.body.clientHeight/8)
-    
-// }
-
+// This function gets set from opponent.js
+// We have to do this since opponent.js is a module, visualizer.js is not. 
 function morphOp(value){
     console.log("empty morphOp function")};
 
-
+// This function gets set from opponent.js
 function emptyAnimateFunction(value){
     console.log("empty emptyAnimateFunction function")};
-
-
 
 // Intentionally global. Canvas is for base drawing. Frame canvas holds game frame images.
 var canvas = null;
@@ -773,18 +726,21 @@ var rescaled_hw = null;
 
 // Rendering config
 var NEURON_SIZE = null;
-var MIN_PADDING = 3.8; // LW was 3. Used at line 212
-var HIDDEN_LAYER_Y = 0.475; // LQ was 0.35 // no longer used
-var OUTPUT_LAYER_Y = 0.08; // LW was 0.1
-var OUTPUT_LABELS = ["LEFT", "RIGHT", "NONE"] // the 3 options for the AI, labeled at the top of the 
+var MIN_PADDING = 3.8; // was 3. Used at line 212
+var HIDDEN_LAYER_Y = 0.475; // no longer used
+var OUTPUT_LAYER_Y = 0.08; // was 0.1
+var OUTPUT_LABELS = ["LEFT", "RIGHT", "NONE"] // the 3 options for the AI, labeled at the top of the canvas
+
+// The text of the informational labels. A heading big label and some extra details
 var MAIN_INFO = ["<- what the AI sees", "<- the AI's neural netwrok\n'thinking'", "<- the AI deciding to go\nleft, right, or stay still"]
 var ADDITIONAL_INFO = ["The AI sees a flat version of the game\nThe pixels in this image activate the AI's\nNeural Network", "Each circle is a node in the Neural Network\nThey are like neurons in the human brain\nThe blue lit nodes are activated", "Which nodes are activated determines the chosen action\nIf many nodes with strong connections to 'Left'\nare activated, the AI goes left"]
-var image_upscale = 4;//4;
+
+var image_upscale = 4;
 var frame_width = 192 / 2; // Base state dimension, scaled down by two
-var frame_height = 160 / 2; // LW was /2
+var frame_height = 160 / 2;
 var img_w = frame_width * image_upscale;
 var img_h = frame_height * image_upscale;
-var img_x = null; // These need to be computed based on canvas dimensions
+var img_x = null; // These are computed elsewhere based on canvas dimensions
 var img_y = null;
 var canvas_width = null;
 var canvas_height = null;
@@ -809,15 +765,16 @@ var player_score = 0;
 
 var labelChosen = 0;
 
+// Stored positions that the opponent face goes to as levels change
 var oldOpPos = -0.7;
 var opPosArr = [0.1, 0.1, -0.71, -0.71]
 var newOpPos = -0.7;
-
 var oldVisW = 0.6;
 var visWArr = [0.3, 0.6, 0.6, 0.6]
 var newVisW = 0.6;
 var visResizeCounter = 1;
 
+// A value that we use for moving the info labels in
 var info_step = 40;
 
 var depthFeedStr = "";

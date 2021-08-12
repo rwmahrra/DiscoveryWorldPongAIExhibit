@@ -2,9 +2,9 @@
 This class is a relatively straightforward set of utilities used in the inference visualization proof-of-concept.
 */
 const TITLE_FONT = "30px Arial";
-const INFO_FONT = "20px monospace";
-const INFO_FONT0 = "40px monospace";
-const FEED_LABELS_FONT = "30px monospace";
+const INFO_FONT = "20px monospace"; // Font of the info details
+const INFO_FONT0 = "40px monospace"; // Font of the info heading
+const FEED_LABELS_FONT = "30px monospace"; // Font of the labels of the two image feeds (bottom of screen)
 const WEIGHT_COLOR = "#222222"
 const WEIGHT_COLOR_ACTIVE = "#9be5dc"//"#1100FF"//"#BB6666"
 const UNCHOSEN_OUT_WEIGHT_COLOR = "#666666"
@@ -13,7 +13,7 @@ const NEURON_COLOR = "#222222" // 000000
 const NEURON_COLOR_ACTIVE = "#22ffff"//"#DD2222"
 const ACTIVE_WEIGHT_THRESHOLD = 1
 
-const SPREAD_VALUE = 9855
+const SPREAD_VALUE = 9855 // Values for visually spreading out the nodes
 var VERTICAL_SPREAD = 120
 
 // For benchmarking
@@ -23,7 +23,7 @@ var timer = function(name) {
         stop: function() {
             var end  = new Date();
             var time = end.getTime() - start.getTime();
-            //console.log('Timer:', name, 'finished in', time, 'ms'); // LW commented out
+            //console.log('Timer:', name, 'finished in', time, 'ms'); 
         }
     }
 };
@@ -298,8 +298,9 @@ function get_intensity(val) {
     if(redVal.length == 1) {
         redVal = "0" + redVal;
     }
-    //color = "#" + redVal + "2222" // LW
-    color = "#22" + redVal + redVal + "" // LW
+    // This gives activations a color based on their intensity
+    // color = "#" + redVal + "2222" 
+    color = "#22" + redVal + redVal + "" 
     return color
 }
 
@@ -316,7 +317,7 @@ function get_weight_map(weights, neuron) {
     }
     return weight_map;
 }
-// LW function to render info text
+// Function to render info text
 function render_info(canvas, index, main_text, additional_text, info_step) {
     
     canvas.clearRect(0, 0, infoCanvas_width, infoCanvas_height)
@@ -324,8 +325,6 @@ function render_info(canvas, index, main_text, additional_text, info_step) {
     canvas.font = INFO_FONT;
     if (index == 0) {
         return 0
-        // canvas.font = INFO_FONT0;
-        // text_spacing = 65
     }
     canvas.fillStyle = "#333333"
     canvas.textAlign = "left";
@@ -336,22 +335,26 @@ function render_info(canvas, index, main_text, additional_text, info_step) {
     gradient.addColorStop("0.5", "blue");
     gradient.addColorStop("1.0", "darkviolet");
 
-    VERTICAL_OFFS = [-0.5, 0.8, 0.4, 0.15]
-    //console.log(info_text[index])
-    //console.log(additional_text[index-1])
-    texts = additional_text[index-1].split('\n');
+    // Stored positions of where the text will be vertically (out of 1 so we can scale to canvas)
+    // 0 is top, 1 is bottom
+    VERTICAL_OFFS = [-0.5, 0.8, 0.47, 0.15]
+
+    // Render the detail info
+    texts = additional_text[index-1].split('\n'); // splits for multiline
     canvas.fillStyle = gradient;//"#2ab50a"
     text_spacing = 40;
     canvas.font = INFO_FONT;
     added = 40
-    for (var i = 0; i < texts.length; i++){
+    for (var i = 0; i < texts.length; i++){ // loop through for multi-line
         canvas.fillText(texts[i], 40 + (info_step), VERTICAL_OFFS[index]*canvas_height +(i*text_spacing));
     }
+
+    // Render the big heading
     canvas.font = INFO_FONT0;
     text_spacing = 50;
     canvas.fillStyle = "#333333"
-    texts = main_text[index-1].split('\n');
-    for (var i = texts.length -1; i >= 0; i--){
+    texts = main_text[index-1].split('\n'); // splits for multiline
+    for (var i = texts.length -1; i >= 0; i--){ // loop through for multi-line
         canvas.fillText(texts[i], 10 + info_step, VERTICAL_OFFS[index]*canvas_height - ((texts.length-i)*text_spacing));
     }
 }
@@ -377,11 +380,7 @@ function render_layer(canvas, neurons, left_x, right_x, y, neuron_size, activati
         }
         b = neurons[i];
 
-        //console.log("Neuron size is: ");
-        //console.log(neuron_size);
-        //console.log("b is: ");
-        //console.log(b);
-        // LW
+        // If we are doing the outputs, then we have to give them the text labels
         if (labels) {
             q = i;
             if (q == 1) {q = 2;} // swap right and none labels so none is middle
@@ -391,7 +390,7 @@ function render_layer(canvas, neurons, left_x, right_x, y, neuron_size, activati
             canvas.font = TITLE_FONT;
             canvas.textAlign = "center";
             
-            canvas.fillText(labels[i], x, y/2); // y-18
+            canvas.fillText(labels[i], x, y/2); 
         } else {        
             x = left_x + (i * neuron_size) + ((i+1) * padding) + (neuron_size / 2);
             create_circle(x, y + (Math.sin(x/canvas_width*SPREAD_VALUE)*VERTICAL_SPREAD), (neuron_size / 2) * b * 2.5, canvas, color = fill);
@@ -437,15 +436,6 @@ function is_weight_active(w, l1, array) {
             // If a neuron is active, set all the weights connected to it to active
             for(let i = 0; i < array[l1_index].length; i++) {
                 array[l1_index][i] = 0;
-
-                //LW
-                // canvas.lineWidth = weight;
-                // canvas.strokeStyle = fill;
-                // canvas.beginPath();
-                // canvas.moveTo(l1_pos[0], l1_pos[1] + (Math.sin(l1_pos[0])*10));
-                // canvas.lineTo(l2_pos[0], l2_pos[1]);
-                // canvas.stroke();
-                // canvas.lineWidth = 1;
             }
         }
     }
@@ -497,14 +487,8 @@ function render_weights(canvas, l1_positions, l2_positions, w, render_filter=nul
 
     t = timer("rendering");
 
-    //console.log("should_render.length is:");
-    // console.log(should_render.length);
-    // console.log("value1 layer is:")
-    // console.log(value1)
-
     switch (value1) {
         case 1: // l2 spread
-            //console.log("case 1");
             for (let i = 0; i < should_render.length; i++) {
                 const [l1, l2] = should_render[i];
                 l2_pos = l2_positions[l2]
@@ -528,13 +512,9 @@ function render_weights(canvas, l1_positions, l2_positions, w, render_filter=nul
             }
             break;
         case 2: // l1 spread
-            //console.log("case 2");
-            // temp1 = out_pos[1]; // temp store position of middle
-            // out_pos[1] = out_pos[2]; // swaps right to be on the right
-            // out_pos[2] = temp1; // swaps none to be in the middle
             for (let i = 0; i < should_render.length; i++) {
                 const [l1, l2] = should_render[i];
-                // if (l2 !== labelChosen) {continue;} // LW only do lines to the chosen direction
+                // if (l2 !== labelChosen) {continue;} // only render lines to the chosen action
                 l2_pos = l2_positions[l2]
                 l1_pos = l1_positions[l1]
                 let weight = w[l1][l2]
@@ -557,21 +537,9 @@ function render_weights(canvas, l1_positions, l2_positions, w, render_filter=nul
             }
             break;
         case 3: // l2 and l1 spread
-            // console.log("case 3");
-        
-            // console.log("should_render.length is:");
-            // console.log(should_render.length);
-            // console.log(should_render)
-            
-            // console.log("l1_positions.length is:");
-            // console.log(l1_positions.length);
 
             for (let i = 0; i < should_render.length; i++) {
                 const [l1, l2] = should_render[i];
-                
-                // console.log("const l1 and l2 are:")
-                // console.log(l1)
-                // console.log(l2)
 
                 l2_pos = l2_positions[l2]
                 l1_pos = l1_positions[l1]
@@ -583,14 +551,11 @@ function render_weights(canvas, l1_positions, l2_positions, w, render_filter=nul
                 if (render_filter) {
                     active = render_filter[l1, l2]
                     if (active) fill = WEIGHT_COLOR_ACTIVE2
-                    // if (active) console.log("active")
                 }
-                canvas.lineWidth = weight * 5; // LW
+                canvas.lineWidth = weight * 5; 
                 canvas.strokeStyle = fill;
                 canvas.beginPath();
                 if (typeof l1_pos !== 'undefined') {
-                    // console.log("l1_pos[0] is")
-                    // console.log(l1_pos[0])
                     canvas.moveTo(l1_pos[0], l1_pos[1] + (Math.sin(l1_pos[0]/canvas_width * SPREAD_VALUE) * VERTICAL_SPREAD));
                     canvas.lineTo(l2_pos[0], l2_pos[1]+ (Math.sin(l2_pos[0]/canvas_width * SPREAD_VALUE) * VERTICAL_SPREAD));
                     canvas.stroke();
