@@ -22,14 +22,13 @@ It polls the agents for actions and advances frames and game state at a steady r
 class GameDriver:
     def run(self, level):
 
+        # The Pong environment
         env = Pong(level = level, pipeline = self.pipeline, decimation_filter = self.decimation_filter, crop_percentage_w = self.crop_percentage_w, crop_percentage_h = self.crop_percentage_h, clipping_distance = self.clipping_distance, max_score = self.max_score)
-        currentFPS = 60#(level * 40) + 40#Config.GAME_FPS 
+        currentFPS = 60 #(level * 40) + 40#Config.GAME_FPS 
 
+        # if one of our players is Bot
         if type(self.left_agent) == BotPlayer: self.left_agent.attach_env(env)
         if type(self.right_agent) == BotPlayer: self.right_agent.attach_env(env)
-
-            
-        
         
         # Housekeeping
         score_l = 0
@@ -39,17 +38,11 @@ class GameDriver:
         self.subscriber.emit_state(env.get_packet_info(), request_action=True)
         last_frame_time = time.time()
 
-        # LW send depth camera feed over MQTT
-        #self.subscriber.emit_depth_feed()
-
         # Track skipped frame statistics
         frame_skips = []
 
         i = 0
         done = False
-
-        #env.change_speed(level)
-        
         last_frame_time = time.time()
         while not done:
             acted_frame = self.subscriber.paddle2_frame
@@ -65,7 +58,7 @@ class GameDriver:
                 if type(self.left_agent) == HumanPlayer or type(self.left_agent) == CameraPlayer:
                     action_l, depth_l, prob_l = self.left_agent.act()
 
-                next_frame_time = last_frame_time + (1 / currentFPS)#Config.GAME_FPS)
+                next_frame_time = last_frame_time + (1 / currentFPS) #Config.GAME_FPS)
                 #print(f'Depth is {depth_l}')
                 state, reward, done = env.step(Config.ACTIONS[action_l], Config.ACTIONS[action_r], frames=1, depth=depth_l)
                 reward_l, reward_r = reward
@@ -268,27 +261,25 @@ def main(in_q, MAX_SCORE=3):
 
     while True: # play the exhibit on loop forever
 
-        print('looping start')
         #time.sleep(1)
         start = time.time()
-        if not in_q.empty():
-            dataQ = in_q.get()
+        if not in_q.empty(): # if there's something in the queue to read
+            dataQ = in_q.get() # remember that .get() removes the item from the queue
             if dataQ == "endThreads":
                 print('thread quitting')
                 subscriber.client.disconnect()
                 print(f'in_q is {dataQ} and in_q.empty() is {in_q.empty()}')
-                while not in_q.empty:
+                while not in_q.empty: # clear out the q
                     dataQ = in_q.get()
-                cv2.destroyAllWindows()
-                in_q.put('noneActive')
-                sys.exit()
+                cv2.destroyAllWindows() # close the Pong game window
+                in_q.put('noneActive') # a message back to GUI/main thread to signal that game_driver is ended
+                sys.exit() # kill the thread
                 print('the sys exit didnt work')
                 break
             else :
                 print(f'in_q is {dataQ}')
-        print('not quittinng thread')    
-        #wait until human detected, if no human after a few seconds, back to zero
-
+                
+        #wait until human detected, if no human after a few seconds, back to zero:
         if level == 0: # if the game hasn't started yet and the next level would be level 1
             print("          Waiting for user interaction to begin game . . . ")
             # checking if theres a large enough human blob to track
@@ -320,6 +311,7 @@ def main(in_q, MAX_SCORE=3):
             time.sleep(6)
             # right here would be where you would add time.sleep(0.9) to add a delay for some start graphic in emulate 3d
             instance.run(level) # RUN LEVEL (1)
+
         elif level == 1 or level == 2: # if we just played level 1 or 2 and now have to play level 3
             print("          Waiting for user interaction to advance level . . . ")
             counter = 0
@@ -347,11 +339,11 @@ def main(in_q, MAX_SCORE=3):
             print(f'            Game reset to level {level} (zero).')
             subscriber.emit_level(level)
             time.sleep(1) # wait 1 second so person has time to leave and next person can come in
-        print('looping back')
+
     sys.exit()
 
 if __name__ == "__main__":
-    main("", 9)
+    main("", 2)
 
 
 

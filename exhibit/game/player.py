@@ -48,14 +48,12 @@ class CameraPlayer:
 
     def act(self, state=None):
         """
-        Listen to key
-        :param state: Unused, preserves interface
-        :return: (action id, confidence)
+        Player controlled via the depth camera
         """
         return self.move(), Pong.get_human_x(), 1 # Pong.get_depth(), 1 #
 
     def move(self):
-        return 3
+        return 3 # the code for moving based on depth value, which is different than fixed speed movement
 
 class RandomPlayer:
     """
