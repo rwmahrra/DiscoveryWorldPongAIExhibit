@@ -10,6 +10,8 @@ from queue import Queue
 import os
 import exhibit.game
 from exhibit.game import game_driver as gd
+import exhibit.ai
+from exhibit.ai import ai_driver
 import exhibit.visualization
 from exhibit.visualization import visualization_driver as vd
 import webbrowser
@@ -18,12 +20,15 @@ import importlib
 
 mqttActive = False
 gameActive = False
+aiActive = False
 visualizationActive = False
 emulate3DActive = False
 max_score = 2
 killObject = "endThreads"
 q = Queue()
 q.put('noneActive')
+q_ai = Queue()
+q_ai.put('noneActive')
 
 def openMqttShell():
     fileLoc = 'cd C:\\"Program Files"\\Mosquitto\\' #cd C:\'Program Files'\Mosquitto\
@@ -61,16 +66,24 @@ mqttButton = sg.Button('mqtt server',button_color=(sg.theme_element_text_color()
 gameButton = sg.Button('game',button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
 visualizationButton = sg.Button('visualization',button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
 Emulate3DButton = sg.Button('Emulate3D',button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
-# All the stuff inside your window.
+aiButton = sg.Button('AI - only if single pc',button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
+emptyString = '                                                     '
+updateWhenStr = 'Change will take effect after restarting game        '
+varText = sg.Text(emptyString)
+# All the stuff inside window.
 
 def startGameDriver():
     #import exhibit.game.game_driver as gd
     # reload(exhibit.game.game_driver)  
     # exhibit.game.game_driver.reload(gd)
+    varText.update(value=emptyString)
     importlib.reload(gd)
     # functionT = gd.main
     threading.Thread(target=gd.main, args=(q,max_score), name='gameThread', daemon=True).start()
     time.sleep(0.5)
+
+def startAIDriver():
+    threading.Thread(target=ai_driver.main, args=(q_ai,), name='ai_thread', daemon=True).start()
 
 def startVisualizationDriver():
     threading.Thread(target=vd.main, args=('',), name='visualizationThread', daemon=True).start()
@@ -78,10 +91,10 @@ def openVisualizationBrowser():
     webbrowser.open("http://localhost:8000/")
     #os.system('start C:\\Users\\"DW Pong"\\Downloads\\DiscoveryWorldPongAIExhibit-master\\DiscoveryWorldPongAIExhibit-master\\visualizer\\index.html')
 
-layout = [  [sg.Text('Some text on Row 1')],
-            [sg.Text('Change Points per Level:'), sg.InputText()],
-            [sg.Button('Accept'), sg.Button('Close')],
-            [mqttButton, gameButton, visualizationButton, Emulate3DButton] ]
+layout = [  [sg.Text('Pong Placeholder Text')], 
+            [mqttButton, gameButton, visualizationButton, Emulate3DButton, aiButton],
+            [sg.Text('Change Points per Level:'), sg.InputText(size=(10, 1)), sg.Button('Accept')],
+            [varText, sg.Button('Close')] ]
 
 # Create the Window
 window = sg.Window('Pong Controller', layout, no_titlebar=False, alpha_channel=0.9, keep_on_top=False)
@@ -99,6 +112,13 @@ while True:
         if tempQ2 == 'noneActive':
             gameActive = False
             gameButton.update(button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
+
+    if not q_ai.empty():
+        tempQ2 = q_ai.get()
+        q_ai.put(tempQ2)
+        if tempQ2 == 'noneActive':
+            aiActive = False
+            aiButton.update(button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
 
     if event == sg.WIN_CLOSED or event == 'Close': # if user closes window or clicks cancel
         # close down everything
@@ -170,12 +190,41 @@ while True:
         print(f'max_score is now {max_score}...')
         #long_function(values[0])
         print('Restart game_driver for new max score to take effect.')
+        varText.update(value=updateWhenStr)
+    
+    elif event == 'AI - only if single pc':
+        if aiActive:
+            
+            if q_ai.empty():
+                print('shutting down ai driver')
+                q_ai.put("endThreads")
+                #z.join()                
+                
+                # gameActive = False
+                # gameButton.update(button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
+            else:
+                print('no ai thread active')
+
+        else:
+            
+            if not q_ai.empty():
+                tempQ = q_ai.get()
+                if tempQ == 'noneActive':
+                    while not q_ai.empty(): # clear the queue
+                        q_ai.get()
+                    print('starting up game driver')
+                    aiActive = True
+                    startAIDriver()
+                    aiButton.update(button_color=(sg.theme_element_text_color() +' on '+ sg.theme_button_color()[1]))
+                else:
+                    print('old ai thread is not exited yet')
 
     elif event == '-THREAD DONE-':
         print('Your long operation completed')
     #else:
     #    print(event, values)
 q.put("endThreads")
+q_ai.put("endThreads")
 closeEmulate3D()
 # if z.is_alive:
 #     z.join()

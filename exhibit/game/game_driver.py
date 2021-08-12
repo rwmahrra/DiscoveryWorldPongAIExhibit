@@ -153,7 +153,7 @@ def check_for_still_player(pipeline, decimation_filter, crop_percentage_w, crop_
         #try to get the frame 50 times
         for i in range(20): 
             try:
-                print('trying wait_for_frames')
+                # print('trying wait_for_frames')
                 frames = pipeline.wait_for_frames()
             except Exception as ed:
                 print(ed)
@@ -317,7 +317,7 @@ def main(in_q, MAX_SCORE=3):
             level = 1
             print(f'          Still human detected, beginning level {level}. ')
             subscriber.emit_level(level) 
-            time.sleep(5)
+            time.sleep(6)
             # right here would be where you would add time.sleep(0.9) to add a delay for some start graphic in emulate 3d
             instance.run(level) # RUN LEVEL (1)
         elif level == 1 or level == 2: # if we just played level 1 or 2 and now have to play level 3

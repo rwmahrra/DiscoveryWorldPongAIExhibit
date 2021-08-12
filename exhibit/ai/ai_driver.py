@@ -1,3 +1,4 @@
+import sys
 from exhibit.ai.model import PGAgent
 from exhibit.shared.config import Config
 from exhibit.game.game_subscriber import GameSubscriber
@@ -6,6 +7,8 @@ import time
 from exhibit.ai.ai_subscriber import AISubscriber
 import numpy as np
 import cv2
+
+from queue import Queue
 
 
 class AIDriver:
@@ -21,6 +24,17 @@ class AIDriver:
 
         #print("testing*** check if level changed")
         if (AIDriver.level != self.state.game_level):
+            # check if a kill message has been sent via the queue
+            if not self.q.empty():
+                dataQ = self.q.get()
+                if dataQ == "endThreads":
+                    print('ai thread quitting')
+                    while not self.q.empty:
+                        dataQ = self.q.get()
+                    self.q.put('noneActive')
+                    sys.exit()
+                    print('the sys exit didnt work')
+
             temp = AIDriver.level
             AIDriver.level = self.state.game_level
             print(f'level changed to {AIDriver.level}')
@@ -63,7 +77,9 @@ class AIDriver:
                 f"Frame distribution: mean {np.mean(self.frame_diffs)}, stdev {np.std(self.frame_diffs)} counts {np.unique(self.frame_diffs, return_counts=True)}")
             self.frame_diffs = []
 
-    def __init__(self, paddle1=True):
+    def __init__(self, paddle1=True, in_q = Queue()):
+        
+        self.q = in_q
         self.paddle1 = paddle1
         self.paddle2 = not self.paddle1
         self.agent1 = PGAgent(Config.CUSTOM_STATE_SIZE, Config.CUSTOM_ACTION_SIZE)
@@ -81,6 +97,9 @@ class AIDriver:
         
         #self.level=1
 
+def main(in_q):
+    instance = AIDriver(in_q = in_q)
 
 if __name__ == "__main__":
-    instance = AIDriver()
+    main("")
+
