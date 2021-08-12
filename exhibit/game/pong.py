@@ -38,11 +38,6 @@ class Pong:
 
     depth_feed = ""
 
-    #def __init__(self, speedUp = 1):
-        #self.SPEEDUP  = speedUp
-
-    
-
     @staticmethod
     def read_key(up, down):
         """
@@ -57,15 +52,20 @@ class Pong:
             return 1
         else:
             return 2
+
+    # get_depth() is not the currently used method
+    # get_depth() gets the distance the center of the image is from the camera. 
     def get_depth():
         for i in range(50):
+            # try 50 times. the intel realsense d435 can be finicky
             frames = Pong.pipeline.wait_for_frames()
             depth = frames.get_depth_frame()
-            if not depth: continue
+            if not depth: continue # if it didn't work, try again
 
             depth_filtered = Pong.decimation_filter.process(depth)
             depth_image = np.asanyarray(depth_filtered.get_data())
             
+            # get dimensions of image after filtering (it usually shrinks)
             w,h = depth_image.shape
             ws, we = int(w/2 - (w * Pong.crop_percentage_w)), int(w/2 + (w * Pong.crop_percentage_w))
             hs, he = int(h/2 - (h * Pong.crop_percentage_h)), int(h/2 + (h * Pong.crop_percentage_h))
@@ -80,10 +80,12 @@ class Pong:
                 print(ex)
                 mean = 0.5
             
-            
-            return mean/2000
+            return mean/2000 # This is where the range of values and how we scale that distance is set
         return 0.5 # middle value for when no player found
-        
+    
+    # This is the currently used method.
+    # This finds the "biggest blob"/island and gets the x coordinate of their center of mass
+    # It filters out everything below a certain height
     def get_human_x():
         #try to get the frame 50 times
         for i in range(50): 
@@ -182,9 +184,10 @@ class Pong:
             Pong.depth_feed = base64.b64encode(buffer).decode()
 
             # *****************************************************************************************
-
+            # we multiply by 1.4 and subtract -0.2 so that the player can reach the edges of the Pong game.
+            # In other words, we shrunk the frame so that the edges of the pong game can be reached without leaving the camera frame
             return (m/(np.size(cutoffImage,1)) * 1.4) -0.2
-        return 0.5
+        return 0.5 # dummy value if we can't successfully get a good one
 
     @staticmethod
     def random_action():
@@ -273,16 +276,12 @@ class Pong:
             """
             self.velocity[1] += self.speed
             
+        # we need this method because controlling from the depth camera is not fixed speed
         def depthMove(self, depth):
             #print(f'depthMove with value = {depth}')
             desiredPos = depth * Pong.HEIGHT #((depth-500)/2000) * Pong.HEIGHT
             distance = desiredPos - self.y
-            #print("desiredPos = " + str(desiredPos))
             vel = (self.speed * (distance/Pong.HEIGHT) * 25)
-            #if vel > 0.3:
-            #    vel += 1
-            #elif vel < -0.3:
-            #    vel -= 1
             self.velocity[1] += vel
         
         
@@ -346,9 +345,9 @@ class Pong:
             self.hit_practice = hit_practice
             if self.hit_practice:
                 self.spawn_hit_practice()
-            else:
-                #self.x = round((Pong.WIDTH / 2) - 1)
-                self.x = round((Pong.WIDTH / 6)*5) # LW start the ball not in the center
+            else:                
+                # start the ball not in the center to give more reaction time
+                self.x = round((Pong.WIDTH / 6)*5) 
 
                 self.y = round((Pong.HEIGHT / 2) - 1)
                 self.speed = self.SPEED * Pong.SPEEDUP
@@ -442,40 +441,20 @@ class Pong:
 
                 self.angle = choice(Pong.Ball.START_ANGLES)
                 
-                #if randint(0, 1) == 1 and self.delay_counter == 0:
                 if Pong.score_left + Pong.score_right == 1 and self.delay_counter == 0:
                     # change to your side
-                    self.x = round(Pong.WIDTH / 6) # if flipping which is first also change line 347
+                    self.x = round(Pong.WIDTH / 6) # if flipping which is first also change line 347ish
                     self.right = True
                 elif self.delay_counter == 0:
                     self.x = round((Pong.WIDTH / 6)*5)
                     self.right = False
                     
-                if self.delay_counter <= 15: # was 40
-                    self.delay_counter += 1 #give a delay before the ball starts off again
+                if self.delay_counter <= 15: # a delay so that players can see the ball there before it launches
+                    self.delay_counter += 1 # give a delay before the ball starts off again
                     #print(f'delay count {self.delay_counter}')
                 else:
                     self.velocity = self.get_vector(self.angle, self.speed) if self.right else self.get_vector(self.angle + 180, self.speed)
                     #print(f'velocity set to to {self.velocity} using angle {self.angle}, self.right equals {self.right} (true is unchanged)')
-                                    
-                #self.angle = 0
-                #if self.delay_counter == 0:
-                #    self.angle = choice(Pong.Ball.START_ANGLES)
-                #    self.right = True
-                #    if randint(0, 1) == 1:
-                #        # change to your side
-                #        self.x = round((Pong.WIDTH / 6)*5)
-                #        self.angle += 180
-                #        print(f'angle switched to {self.angle}')
-                #        self.right = False
-                #    else: print(f'no switch, angle is {self.angle}')
-                #    
-                #if self.delay_counter <= 10:
-                #    self.delay_counter += 1 #give a delay before the ball starts off again
-                    #print(f'delay count {self.delay_counter}')
-                #else:
-                #    self.velocity = self.get_vector(self.angle, self.speed)
-                #    print(f'velocity set to to {self.velocity} using angle {self.angle}')
                 
             self.x += self.velocity[0]
             self.y += self.velocity[1]
@@ -512,37 +491,7 @@ class Pong:
         self.ball = Pong.Ball(hit_practice=hit_practice)
         self.frames = 0
 
-        # Pong.decimation_filter = rs.decimation_filter()
-        # Pong.decimation_filter.set_option(rs.option.filter_magnitude, 6)
-
-        # Pong.crop_percentage_w = 1.0
-        # Pong.crop_percentage_h = 1.0
-        
-
-        # print("starting with crop w at {}".format(Pong.crop_percentage_w * 100))
-        # print("starting with crop h at {}".format(Pong.crop_percentage_h * 100))
-    
-        # Pong.pipeline = rs.pipeline()
-
-        # Pong.config = rs.config()
-        # Pong.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-        # Pong.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
-    
-        # profile = Pong.pipeline.start(self.config)
-
-
-        # # Getting the depth sensor's depth scale (see rs-align example for explanation)
-        # depth_sensor = profile.get_device().first_depth_sensor()
-        # depth_scale = depth_sensor.get_depth_scale()
-        # print("Depth Scale is: " , depth_scale)
-
-        # # We will be removing the background of objects more than
-        # #  clipping_distance_in_meters meters away
-        # # filter out far away so we only have a person
-        # clipping_distance_in_meters = 1.8 #2 meter
-        # Pong.clipping_distance = clipping_distance_in_meters / depth_scale
-        # print(f'Pong.clipping distance is : {Pong.clipping_distance}');
-
+        # For managing our depth camera later
         Pong.decimation_filter = decimation_filter
         Pong.pipeline = pipeline
         Pong.crop_percentage_w = crop_percentage_w
@@ -731,6 +680,8 @@ class Pong:
                 self.ball.update()
                 done = False
                 #if Pong.score_right >= Pong.MAX_SCORE or Pong.score_left >= Pong.MAX_SCORE:
+                # changed this to make it consisten number of balls/playsfor exhibit
+                # switch to if statement above to change to the traditional "first to x points"
                 if Pong.score_right + Pong.score_left >= Pong.MAX_SCORE:
                     done = True
 
