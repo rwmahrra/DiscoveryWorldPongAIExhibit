@@ -40,7 +40,7 @@ def openMqttShell():
 # def closeMosquittoShell():
 #     os.system(str(signal.SIGINT))
 def closeMosquitto():
-    os.system("taskkill/im mosquitto.exe")
+    os.system("taskkill /f /im mosquitto.exe")
 
 def openEmulate3DShell():
     # fileLoc = 'cd C:\\Users\\"DW Pong"\\Downloads\\DiscoveryWorldPongAIExhibit-master\\DiscoveryWorldPongAIExhibit-master\\' 
@@ -67,9 +67,9 @@ gameButton = sg.Button('game',button_color=(sg.theme_element_text_color() +' on 
 visualizationButton = sg.Button('visualization',button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
 Emulate3DButton = sg.Button('Emulate3D',button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
 aiButton = sg.Button('AI - only if single pc',button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
-emptyString = '                                                     '
-updateWhenStr = 'Change will take effect after restarting game        '
-varText = sg.Text(emptyString)
+emptyString = '  '
+updateWhenStr = 'Change will take effect after restarting game'
+varText = sg.Text(emptyString, size=(48,1))
 # All the stuff inside window.
 
 def startGameDriver():
