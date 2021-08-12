@@ -314,9 +314,10 @@ function render_depth_feed(ctx, image_upscale = 3.6) {
         ctx.drawImage(image, 0, (img_y + (.5 * img_h)) -( 0.5 * image.height*image_upscale), image.width * image_upscale, image.height * image_upscale)
     }
     ctx.textAlign = "left";
-    ctx.font = INFO_FONT0;
+    ctx.font = FEED_LABELS_FONT;
     ctx.fillStyle = "#333333"
-    ctx.fillText("^ YOU ^", img_x/3.5, img_y + (1.1*img_h)); // + (0.5 * image.width * image_upscale), ctx.height * 0.9);
+    ctx.fillText("^ YOU ^", img_x/3.4, img_y + (1.1*img_h)); // + (0.5 * image.width * image_upscale), ctx.height * 0.9);
+    ctx.fillText("^ AI INPUT ^", img_x + 0.2*img_w, img_y + (1.1*img_h));
 
 }
 

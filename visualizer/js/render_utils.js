@@ -4,6 +4,7 @@ This class is a relatively straightforward set of utilities used in the inferenc
 const TITLE_FONT = "30px Arial";
 const INFO_FONT = "20px monospace";
 const INFO_FONT0 = "40px monospace";
+const FEED_LABELS_FONT = "30px monospace";
 const WEIGHT_COLOR = "#222222"
 const WEIGHT_COLOR_ACTIVE = "#9be5dc"//"#1100FF"//"#BB6666"
 const UNCHOSEN_OUT_WEIGHT_COLOR = "#666666"
