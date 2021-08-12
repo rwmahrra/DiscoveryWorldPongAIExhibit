@@ -29,9 +29,10 @@ class AIDriver:
                 dataQ = self.q.get()
                 if dataQ == "endThreads":
                     print('ai thread quitting')
-                    while not self.q.empty:
+                    while not self.q.empty: # empty the rest of the q
                         dataQ = self.q.get()
-                    self.q.put('noneActive')
+                    self.q.put('noneActive') 
+                    # a message that goes back to the main program to tell it that the ai_driver has stopped
                     sys.exit()
                     print('the sys exit didnt work')
 
