@@ -337,7 +337,7 @@ function render_info(canvas, index, main_text, additional_text, info_step) {
 
     // Stored positions of where the text will be vertically (out of 1 so we can scale to canvas)
     // 0 is top, 1 is bottom
-    VERTICAL_OFFS = [-0.5, 0.8, 0.47, 0.15]
+    VERTICAL_OFFS = [-0.5, 0.8, 0.40, 0.15]
 
     // Render the detail info
     texts = additional_text[index-1].split('\n'); // splits for multiline

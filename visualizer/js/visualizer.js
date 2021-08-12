@@ -306,6 +306,9 @@ function render_depth_feed(ctx, image_upscale = 3.6) {
         ctx.fillStyle = "#333333"
         ctx.fillText("^ YOU ^", image.width * image_upscale * 0.5, img_y + (1.1*img_h));
         ctx.fillText("^ AI INPUT ^", img_x + 0.5*img_w, img_y + (1.1*img_h));
+        ctx.font = "22px monospace";
+        ctx.fillText("^ NEURAL NETWORK - AI 'THINKING' ^", 0.5*canvas_width, img_y - (0.08*img_h));
+        ctx.fillText("^ AI DECISION ^", 0.5*canvas_width, OUTPUT_LAYER_Y * canvas_height * 1.7);
     }
     
 
