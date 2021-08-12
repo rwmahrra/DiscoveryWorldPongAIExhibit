@@ -98,7 +98,7 @@ async function loadOpponent(scene) {
 
     console.log("current opponent position:")
     console.log(opponent.position);
-    opponent.position.x = 1.67;
+    opponent.position.x = 1.65;
     opponent.position.y = -0.7;
     opponent.position.z = 0;
     console.log("current opponent position:")
@@ -148,6 +148,7 @@ function morph(mesh, target, value) {
 }
 
 function onWindowResize() {
+    
     camera.aspect = document.body.clientWidth / document.body.clientHeight; // window.innerWidth / (window.innerHeight);
     camera.updateProjectionMatrix();
     renderer.setSize(document.body.clientWidth, document.body.clientHeight); //renderer.setSize(window.innerWidth, window.innerHeight);

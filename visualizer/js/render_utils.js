@@ -316,7 +316,7 @@ function get_weight_map(weights, neuron) {
     return weight_map;
 }
 // LW function to render info text
-function render_info(canvas, index, main_text, additional_text) {
+function render_info(canvas, index, main_text, additional_text, info_step) {
     
     canvas.clearRect(0, 0, infoCanvas_width, infoCanvas_height)
     text_spacing = 20;
@@ -337,21 +337,21 @@ function render_info(canvas, index, main_text, additional_text) {
 
     VERTICAL_OFFS = [-0.5, 0.8, 0.4, 0.15]
     //console.log(info_text[index])
-    console.log(additional_text[index-1])
+    //console.log(additional_text[index-1])
     texts = additional_text[index-1].split('\n');
     canvas.fillStyle = gradient;//"#2ab50a"
     text_spacing = 40;
     canvas.font = INFO_FONT;
     added = 40
     for (var i = 0; i < texts.length; i++){
-        canvas.fillText(texts[i], 40, VERTICAL_OFFS[index]*canvas_height +(i*text_spacing));
+        canvas.fillText(texts[i], 40 + (info_step), VERTICAL_OFFS[index]*canvas_height +(i*text_spacing));
     }
     canvas.font = INFO_FONT0;
     text_spacing = 50;
     canvas.fillStyle = "#333333"
     texts = main_text[index-1].split('\n');
     for (var i = texts.length -1; i >= 0; i--){
-        canvas.fillText(texts[i], 10, VERTICAL_OFFS[index]*canvas_height - ((texts.length-i)*text_spacing));
+        canvas.fillText(texts[i], 10 + info_step, VERTICAL_OFFS[index]*canvas_height - ((texts.length-i)*text_spacing));
     }
 }
 

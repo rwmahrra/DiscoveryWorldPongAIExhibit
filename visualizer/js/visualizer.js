@@ -59,7 +59,8 @@ function myMethod(message) {
                 //levelg = 1
                 //console.log('level 0. level set to:')
                 //console.log(level)
-                render_info(info_ctx, 0, MAIN_INFO, ADDITIONAL_INFO)
+                info_step = 40;
+                // render_info(info_ctx, 0, MAIN_INFO, ADDITIONAL_INFO)
                 
                 init_model(level);
                 break;
@@ -76,7 +77,8 @@ function myMethod(message) {
                 // leftInterval1 = setInterval(left10, 2750)
                 // leftInterval0 = setInterval(leftZero, 3550)
 
-                render_info(info_ctx, 1, MAIN_INFO, ADDITIONAL_INFO)
+                info_step = 200;
+                // render_info(info_ctx, 1, MAIN_INFO, ADDITIONAL_INFO)
                 init_model(level);
 
                 break;
@@ -95,6 +97,7 @@ function myMethod(message) {
                 setTimeout(leftZero, 700)
                 setTimeout(left10, 2000)
 
+                info_step = 200;
                 render_info(info_ctx, 2, MAIN_INFO, ADDITIONAL_INFO)
                 
                 init_model(level);
@@ -116,7 +119,9 @@ function myMethod(message) {
                 setTimeout(left10, 2500)
                 setTimeout(leftZero, 3500)
                 setTimeout(right10, 4000)
-                render_info(info_ctx, 3, MAIN_INFO, ADDITIONAL_INFO)
+
+                info_step = 200;
+                // render_info(info_ctx, 3, MAIN_INFO, ADDITIONAL_INFO)
                 init_model(level);
                 break;
         }
@@ -308,6 +313,11 @@ function render_depth_feed(ctx, image_upscale = 3.6) {
         //ctx.drawImage(image, 0, d_canvas_height -(image.height*image_upscale), image.width * image_upscale, image.height * image_upscale)
         ctx.drawImage(image, 0, (img_y + (.5 * img_h)) -( 0.5 * image.height*image_upscale), image.width * image_upscale, image.height * image_upscale)
     }
+    ctx.textAlign = "left";
+    ctx.font = INFO_FONT0;
+    ctx.fillStyle = "#333333"
+    ctx.fillText("^ YOU ^", img_x/3.5, img_y + (1.1*img_h)); // + (0.5 * image.width * image_upscale), ctx.height * 0.9);
+
 }
 
 function render_weight_image(ctx, hl_activations, image_upscale = 5) {
@@ -464,14 +474,20 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
 }
 function render_loop() {
     //console.log("render_loop()")
+    const info_ctx = infoCanvas.getContext("2d");
     if (last_activations && last_activations != last_rendered_activations) {
         const ctx = canvas.getContext("2d");
         const d_ctx = d_canvas.getContext("2d");
-        const info_ctx = infoCanvas.getContext("2d");
 
         const [state_frame, hl_activations, ol_activations] = JSON.parse(last_activations);
         render_tick(ctx, state_frame, state_frame, hl_activations, ol_activations, d_ctx);
         last_rendered_activations = last_activations;
+    }
+
+    if (info_step > 0) {
+        info_ctx.globalAlpha = 1 - (info_step / 200)
+        render_info(info_ctx, levelg, MAIN_INFO, ADDITIONAL_INFO, info_step/2)
+        info_step = info_step - 1;
     }
 
     newOpPos = opPosArr[levelg];
@@ -785,7 +801,7 @@ var HIDDEN_LAYER_Y = 0.475; // LQ was 0.35 // no longer used
 var OUTPUT_LAYER_Y = 0.08; // LW was 0.1
 var OUTPUT_LABELS = ["LEFT", "RIGHT", "NONE"] // the 3 options for the AI, labeled at the top of the 
 var MAIN_INFO = ["<- what the AI sees", "<- the AI's neural netwrok\n'thinking'", "<- the AI deciding to go\nleft, right, or stay still"]
-var ADDITIONAL_INFO = ["The AI sees a flat version of the game\nThe pixels in this image activate the AI's\nNeural Network", "Each circle is a node in the Neural Network\nThey are like neurons in the human brain\nThe blue lit nodes are activated", "Which nodes are activated determines the chosen action\nIf many nodes with strong connections \nto 'Left' are activated, the AI goes left"]
+var ADDITIONAL_INFO = ["The AI sees a flat version of the game\nThe pixels in this image activate the AI's\nNeural Network", "Each circle is a node in the Neural Network\nThey are like neurons in the human brain\nThe blue lit nodes are activated", "Which nodes are activated determines the chosen action\nIf many nodes with strong connections to 'Left'\nare activated, the AI goes left"]
 var image_upscale = 4;//4;
 var frame_width = 192 / 2; // Base state dimension, scaled down by two
 var frame_height = 160 / 2; // LW was /2
@@ -817,13 +833,15 @@ var player_score = 0;
 var labelChosen = 0;
 
 var oldOpPos = -0.7;
-var opPosArr = [0.0, 0.7, -0.75, -0.75]
+var opPosArr = [0.1, 0.1, -0.71, -0.71]
 var newOpPos = -0.7;
 
 var oldVisW = 0.6;
 var visWArr = [0.3, 0.6, 0.6, 0.6]
 var newVisW = 0.6;
 var visResizeCounter = 1;
+
+var info_step = 40;
 
 var depthFeedStr = "";
 
