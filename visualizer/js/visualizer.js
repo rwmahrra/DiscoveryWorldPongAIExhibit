@@ -262,62 +262,49 @@ function leftZero() {
 
 
 function render_game(ctx, frame, image_upscale = 2) {
-    frame = scale(frame, 255);
+    // For rendering the image of the Pong game environment
 
+    frame = scale(frame, 255);
     image_upscale = canvas.width / 225
     frameCanvas.width = frame_width
     frameCanvas.height = frame_height
-    //console.log(frameCanvas.x_pos)
-    //frameCanvas.x_pos = 50;
-    //console.log(frameCanvas.x_pos)
 
+    // Get the canvas
     const frame_ctx = frameCanvas.getContext("2d");
     const imageData = frame_ctx.getImageData(0, 0, frame_width, frame_height);
     const frameData = imageData.data;
-    // frameData = imageData.data.map(function(element) {
-    //     return element;
-    // });
-    //console.log(Math.max(frame))
+    
     for(let i = 0; i < frame.length; i++) {
         idx = i * 4;
-        // console.log("frame[i]  is:")
-        // console.log(frame[i])
-        //if (frame[i] !== 0) {console.log("frame has nonzero value")} 
+        // convert our -1, 0 and 1 values into a full RGB image
         frameData[idx] = 200-frame[i]; // Red
         frameData[idx+1] = 200-frame[i]; // Green
         frameData[idx+2] = 200-frame[i]; // Blue
         frameData[idx+3] = 255; // Alpha
     }
 
-    // img_w = frame_width * image_upscale;
-    // img_h = frame_height * image_upscale;
-
-
+    // Draw the image
     frame_ctx.putImageData(imageData, 0, 0);
-    ctx.drawImage(frameCanvas, img_x, img_y, img_w, img_h); // LW
+    ctx.drawImage(frameCanvas, img_x, img_y, img_w, img_h); 
 
 }
 function render_depth_feed(ctx, image_upscale = 3.6) {
     var image = new Image();
-    image.src = 'data:image/jpg;base64,' + depthFeedStr //canvas.toDataURL(depthFeedStr, 1)
-    
-    
+    image.src = 'data:image/jpg;base64,' + depthFeedStr 
+    // We received the image from the depth camera via MQTT
 
-    //depth_ctx.drawImage(image, 0, 0)
+    // You have to use image.onload so that you dont try to use the image before it exists
     image.onload = function() {
         // scale image_upscale to fit to the left of the pong screen
         // the left edge of yellow box / this image width
         image_upscale = (img_x - (0.1*img_w)) /image.width;
-
-        //ctx.drawImage(image, (d_canvas_width/3) - (image.width/2), d_canvas_height -(image.height*image_upscale), image.width * image_upscale, image.height * image_upscale)
-        //ctx.drawImage(image, 0, d_canvas_height -(image.height*image_upscale), image.width * image_upscale, image.height * image_upscale)
         ctx.drawImage(image, 0, (img_y + (.5 * img_h)) -( 0.5 * image.height*image_upscale), image.width * image_upscale, image.height * image_upscale)
+
+        // Text of labels that say "YOU" and 'AI INPUT" below the depth image and Pong image
         ctx.textAlign = "center";
         ctx.font = FEED_LABELS_FONT;
         ctx.fillStyle = "#333333"
-        // console.log(" half the image width is : ")
-        // console.log(image.width * image_upscale * 0.5)
-        ctx.fillText("^ YOU ^", image.width * image_upscale * 0.5, img_y + (1.1*img_h));// img_x/3.3, img_y + (1.1*img_h)); // + (0.5 * image.width * image_upscale), ctx.height * 0.9);
+        ctx.fillText("^ YOU ^", image.width * image_upscale * 0.5, img_y + (1.1*img_h));
         ctx.fillText("^ AI INPUT ^", img_x + 0.5*img_w, img_y + (1.1*img_h));
     }
     
@@ -334,8 +321,8 @@ function render_weight_image(ctx, hl_activations, image_upscale = 5) {
     frame = scale(frame, 127/max_weight);
     frame = add(frame, 127)
     //Render game frame
-    const frame_width = 192; // Base state dimension, scaled down by two
-    const frame_height = 160; // LW was /2
+    const frame_width = 192; // Base state dimension
+    const frame_height = 160; 
 
     weightImageCanvas.width = frame_width
     weightImageCanvas.height = frame_height
@@ -356,13 +343,9 @@ function render_weight_image(ctx, hl_activations, image_upscale = 5) {
     img_w = frame_width * image_upscale;
     img_h = frame_height * image_upscale;
     img_x = (canvas_width * 3/4) - (img_w/2) - (img_w/10);
-    //img_x = img_w / 10; // (canvas_width - img_w)/2 -(canvas_width/4) + (img_w /10);
-    //img_x = (canvas_width - img_w)/2; // LW
     img_y = canvas_height - (img_h) - (img_h/10);
-    // img_x = document.body.clientWidth/2//(canvas_width - img_w)/2;
-    // img_y = canvas_height - (img_h);//+ (canvas_height / 10)); // LW
 
-    ctx.drawImage(weightImageCanvas, img_x, img_y, img_w, img_h); // x was x2
+    ctx.drawImage(weightImageCanvas, img_x, img_y, img_w, img_h); 
 }
 
 function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activations, d_ctx) {
@@ -381,29 +364,24 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
 
 
     if (levelg == 1) {
-        //console.log("draiwng yellow rectangle around game view")
+        // Draws a yellow rectangle to highlight the game view camera
         ctx.beginPath();
         ctx.strokeStyle = "yellow";
         ctx.lineWidth = 15;
         ctx.fillStyle = "yellow";
         ctx.strokeRect(img_x - (0.05 * img_w), img_y - (0.05 * img_h), 1.1 * img_w, 1.1 * img_h);
-        //ctx.strokeRect(img_x - (0.1*img_w), img_y - (0.1*img_h), 1.2*img_w, 1.2*img_h);
-        //frame_ctx.stroke();
-        //ctx.fill();
     } else if (levelg == 2) {
-        //console.log("draiwng yellow rectangle around nodes")
+        // Draws a yellow rectangle to highlight the nodes of the neural network
         ctx.beginPath();
         ctx.strokeStyle = "yellow";
         ctx.lineWidth = 15;
         ctx.strokeRect(0, (img_y - (0.2 * img_h)) - (VERTICAL_SPREAD) - (VERTICAL_SPREAD * 1.1), canvas_width, 2 * VERTICAL_SPREAD * 1.1);
     } else if (levelg == 3) {
-        //console.log("draiwng yellow rectangle around labels")
+        // Draws a yellow rectangle to highlight the output of the neural network
         ctx.beginPath();
         ctx.strokeStyle = "yellow";
         ctx.lineWidth = 15;
         ctx.strokeRect(canvas_width * (1/5), OUTPUT_LAYER_Y * canvas_height /6, canvas_width * (3/5), canvas_height * OUTPUT_LAYER_Y * 1.2);
-        //frame_ctx.stroke();
-        //ctx.stroke();
     }
     let t = timer("render_game");
     // Render game frame
@@ -412,12 +390,8 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
     render_game(ctx, render_frame);
     t.stop()
 
-    // render_layer(ctx, render_rescale(hidden_biases, 1), 0.1*canvas_width,
-        //canvas_width - (0.1*canvas_width), (img_y - (0.2*img_h)) - (VERTICAL_SPREAD), NEURON_SIZE, hl_activations)
-
     t = timer("render_weight_image");
     // Render game frame
-    //render_weight_image(ctx, hl_activations);
     t.stop()
     /*************************** */
     // Render image weights
@@ -427,7 +401,6 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
     t.stop()
 
     t = timer("render_hidden_weights");
-    //testVar = 1;
     render_weights(ctx, pixel_pos, hidden_pos, rescaled_hw, hw_activations, 1)
     t.stop()
     /******************************************** */
@@ -440,9 +413,7 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
     t = timer("render_output_weights");
     render_weights(ctx, hidden_pos, out_pos, render_rescale(output_weights), ow_activations, 2)
     t.stop()
-// t
     /********************************************* */
-    //console.log('about to do the new activations')
     // Re-compute middle activations for rendering
     t = timer("il_activations");
     iw_activations = is_weight_active(hidden_weights, hl_activations, copy(significant_hw))
@@ -454,14 +425,10 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
     t.stop()
     /************************************************** */
 
-    
     t = timer("render_layers");
      // render node circles
     render_layer(ctx, render_rescale(hidden_biases, 1), 0,
          canvas_width, (img_y - (0.2*img_h)) - (VERTICAL_SPREAD), NEURON_SIZE, hl_activations)
-    // render_layer(ctx, render_rescale(hidden_biases, 1), (VERTICAL_SPREAD*0.1),
-    //     canvas_width - (VERTICAL_SPREAD*0.1), (img_y - (0.2*img_h)) - (VERTICAL_SPREAD), NEURON_SIZE, hl_activations)
-        //canvas_width, HIDDEN_LAYER_Y * canvas_height, NEURON_SIZE, hl_activations)
     render_layer(ctx, render_rescale(output_biases, 1), 0,
         canvas_width, OUTPUT_LAYER_Y * canvas_height, NEURON_SIZE, null, OUTPUT_LABELS, ol_activations)
     t.stop()
@@ -472,12 +439,14 @@ function render_tick(ctx, render_frame, state_frame, hl_activations, ol_activati
     none_pos = out_pos[2]
     ctx.font = TITLE_FONT;
     ctx.textAlign = "center";
+    
+    // These lines show the actual probability value of the output.
+    // This was too busy for exhibit and didn't add value.
     // ctx.fillText(up_prob, up_pos[0], up_pos[1]-40);
     // ctx.fillText(down_prob, down_pos[0], down_pos[1]-40);
     // ctx.fillText(none_prob, none_pos[0], none_pos[1]-40);
 }
 function render_loop() {
-    //console.log("render_loop()")
     const info_ctx = infoCanvas.getContext("2d");
     if (last_activations && last_activations != last_rendered_activations) {
         const ctx = canvas.getContext("2d");
@@ -488,12 +457,17 @@ function render_loop() {
         last_rendered_activations = last_activations;
     }
 
+    // Slide and fade in the info label for our highlighted section. 
+    // A new section gets highlighted per level.
     if (info_step > 0) {
         info_ctx.globalAlpha = 1 - (info_step / 200)
         render_info(info_ctx, levelg, MAIN_INFO, ADDITIONAL_INFO, info_step/2)
         info_step = info_step - 1;
     }
 
+    // This moves the opponent face to make room for info labels
+    // It gradually moves the face instead of jumping. The movement
+    // will hopefully help draw eyes to the info.
     newOpPos = opPosArr[levelg];
     if (Math.abs(oldOpPos - newOpPos) <= 0.01) {
         oldOpPos = newOpPos;
@@ -501,7 +475,6 @@ function render_loop() {
     } else if (oldOpPos != newOpPos && newOpPos > oldOpPos) {
         oldOpPos = oldOpPos + 0.005;
         emptyAnimateFunction(oldOpPos);
-        //oldOpPos = newOpPos;
     } else if (oldOpPos != newOpPos) {
         oldOpPos = oldOpPos - 0.005;
         emptyAnimateFunction(oldOpPos);

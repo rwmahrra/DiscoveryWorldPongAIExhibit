@@ -16,15 +16,17 @@ class AIDriver:
     # MODEL_1 = f'./validation/canstop_randomstart_3k.h5'
     # MODEL_2 = f'./validation/canstop_randomstart_6850.h5'
     # MODEL_3 = f'./validation/canstop_randomstart_10k.h5'
+
+    # The locations of the three models used. 1 for each level.
     MODEL_1 = f'./validation/level1_4500.h5'
     MODEL_2 = f'./validation/level2_7500.h5'
     MODEL_3 = f'./validation/level3_10000.h5'
     level = 1
     def publish_inference(self):
-
-        #print("testing*** check if level changed")
+        
+        # Check if the level has changed. If so, we need to load a new model
         if (AIDriver.level != self.state.game_level):
-            # check if a kill message has been sent via the queue
+            # check if a kill/quit message has been sent via the queue
             if not self.q.empty():
                 dataQ = self.q.get()
                 if dataQ == "endThreads":
@@ -83,6 +85,8 @@ class AIDriver:
         self.q = in_q
         self.paddle1 = paddle1
         self.paddle2 = not self.paddle1
+
+        # We have all 3 agents already loaded instead of loading between levels. Saves a lot of time and prevents freezing
         self.agent1 = PGAgent(Config.CUSTOM_STATE_SIZE, Config.CUSTOM_ACTION_SIZE)
         self.agent1.load(AIDriver.MODEL_1)
         self.agent = self.agent1
@@ -95,10 +99,9 @@ class AIDriver:
         self.last_tick = time.time()
         self.frame_diffs = []
         self.state.start()
-        
-        #self.level=1
 
 def main(in_q):
+    # main is separated out so that we can call it and pass in the queue from GUI
     instance = AIDriver(in_q = in_q)
 
 if __name__ == "__main__":
