@@ -3,7 +3,7 @@ This class is a relatively straightforward set of utilities used in the inferenc
 */
 const TITLE_FONT = "30px Arial";
 const INFO_FONT = "20px monospace";
-const INFO_FONT0 = "50px monospace bold";
+const INFO_FONT0 = "40px monospace";
 const WEIGHT_COLOR = "#222222"
 const WEIGHT_COLOR_ACTIVE = "#9be5dc"//"#1100FF"//"#BB6666"
 const UNCHOSEN_OUT_WEIGHT_COLOR = "#666666"
@@ -335,7 +335,7 @@ function render_info(canvas, index, main_text, additional_text) {
     gradient.addColorStop("0.5", "blue");
     gradient.addColorStop("1.0", "darkviolet");
 
-    VERTICAL_OFFS = [-0.5, 0.8, 0.5, 0.1]
+    VERTICAL_OFFS = [-0.5, 0.8, 0.4, 0.15]
     //console.log(info_text[index])
     console.log(additional_text[index-1])
     texts = additional_text[index-1].split('\n');
@@ -344,12 +344,15 @@ function render_info(canvas, index, main_text, additional_text) {
     canvas.font = INFO_FONT;
     added = 40
     for (var i = 0; i < texts.length; i++){
-        canvas.fillText(texts[i], 20, VERTICAL_OFFS[index]*canvas_height +(i*text_spacing));
+        canvas.fillText(texts[i], 40, VERTICAL_OFFS[index]*canvas_height +(i*text_spacing));
     }
     canvas.font = INFO_FONT0;
+    text_spacing = 50;
     canvas.fillStyle = "#333333"
-    canvas.fillText(main_text[index-1], 10, VERTICAL_OFFS[index]*canvas_height - text_spacing);
-
+    texts = main_text[index-1].split('\n');
+    for (var i = texts.length -1; i >= 0; i--){
+        canvas.fillText(texts[i], 10, VERTICAL_OFFS[index]*canvas_height - ((texts.length-i)*text_spacing));
+    }
 }
 
 function render_layer(canvas, neurons, left_x, right_x, y, neuron_size, activations=null, labels=null, activation_intensities=null) {
