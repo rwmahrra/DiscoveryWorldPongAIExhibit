@@ -735,7 +735,7 @@ var OUTPUT_LAYER_Y = 0.08; // was 0.1
 var OUTPUT_LABELS = ["LEFT", "RIGHT", "NONE"] // the 3 options for the AI, labeled at the top of the canvas
 
 // The text of the informational labels. A heading big label and some extra details
-var MAIN_INFO = ["<- what the AI sees", "<- the AI's neural netwrok\n'thinking'", "<- the AI deciding to go\nleft, right, or stay still"]
+var MAIN_INFO = ["<- what the AI sees", "<- the AI's neural network\n'thinking'", "<- the AI deciding to go\nleft, right, or stay still"]
 var ADDITIONAL_INFO = ["The AI sees a flat version of the game\nThe pixels in this image activate the AI's\nNeural Network", "Each circle is a node in the Neural Network\nThey are like neurons in the human brain\nThe blue lit nodes are activated", "Which nodes are activated determines the chosen action\nIf many nodes with strong connections to 'Left'\nare activated, the AI goes left"]
 
 var image_upscale = 4;
