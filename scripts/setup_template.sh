@@ -15,7 +15,7 @@ cd {{ID}} || exit
 git checkout {{BRANCH}}
 
 # Schedule with SLURM
-sbatch run.sh
+sbatch singularity shell --nv /data/containers/msoe-tensorflow-20.07-tf2-py3.sif sh run.sh
 
 # Give slurm time to create outfile
 sleep 15
