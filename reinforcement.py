@@ -88,8 +88,8 @@ if __name__ == "__main__":
             save_video(render_states, f'./analytics/{episode}.mp4')
             plot_loss(f'./analytics/plots/loss_{episode}.png', include_left=False)
             plot_score(f'./analytics/plots/score_{episode}.png')
-            if bottom_is_model: agent_bottom.save(f'./models/l/{episode}.h5')
-            if top_is_model: agent_top.save(f'./models/r/{episode}.h5')
+            if bottom_is_model: agent_bottom.save(f'./models/bottom/{episode}.h5')
+            if top_is_model: agent_top.save(f'./models/top/{episode}.h5')
         if episode == 10000:
             if top_is_model: save_video(neuron_states, f'./analytics/{episode}_weights0.mp4', fps=60)
             exit(0)
