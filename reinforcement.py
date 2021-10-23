@@ -19,7 +19,7 @@ convenient monitoring and graphing of the training process.
 """
 
 GAME_BATCH = 10
-MODE = Config.instance().CUSTOM
+MODE = Config.instance().HIT_PRACTICE  # Config.instance().CUSTOM
 LEARNING_RATE = 0.001
 DENSE_STRUCTURE = (200,)
 ALWAYS_FOLLOW = False
@@ -47,23 +47,26 @@ if __name__ == "__main__":
     # agent_l = HumanPlayer(up='w', down='s')
 
     # Init agent
-    agent_l = PGAgent(state_size, action_size, name="agent_l", learning_rate=LEARNING_RATE, structure=DENSE_STRUCTURE)
-    agent_r = PGAgent(state_size, action_size, name="agent_r", learning_rate=LEARNING_RATE, structure=DENSE_STRUCTURE)
+    if MODE == config.HIT_PRACTICE:
+        agent_bottom = None
+    else:
+        agent_bottom = PGAgent(state_size, action_size, name="agent_bottom", learning_rate=LEARNING_RATE, structure=DENSE_STRUCTURE)
+        agent_bottom.load("./validation/hitstop_5frame.h5")
 
-    agent_l.load("./validation/hitstop_5frame.h5")
-    agent_r.load("./validation/hitstop_5frame.h5")
+    agent_top = PGAgent(state_size, action_size, name="agent_top", learning_rate=LEARNING_RATE, structure=DENSE_STRUCTURE)
+    agent_top.load("./validation/hitstop_5frame.h5")
 
     # Type checks for convenience later
-    r_is_model = type(agent_r) == PGAgent
-    l_is_model = type(agent_l) == PGAgent
+    top_is_model = type(agent_top) == PGAgent
+    bottom_is_model = type(agent_bottom) == PGAgent
 
     episode = 0
 
     # Optional checkpoint loading
     if start_index is not None:
         episode = start_index
-        if l_is_model: agent_l.load(f'./models/l/{start_index}.h5')
-        agent_r.load(f'./models/r/{start_index}.h5')
+        if bottom_is_model: agent_bottom.load(f'./models/l/{start_index}.h5')
+        agent_top.load(f'./models/r/{start_index}.h5')
 
     # Store neuron images for fun
     neuron_states = []
@@ -71,21 +74,22 @@ if __name__ == "__main__":
     # Train loop
     while True:
         episode += 1
-        states, left, right, meta = simulator.simulate_game(config, env_type=MODE, left=agent_l, right=agent_r, batch=GAME_BATCH)
+        states, left, right, meta = simulator.simulate_game(config, env_type=MODE, left=agent_bottom, right=agent_top, batch=GAME_BATCH)
         render_states, model_states, (score_l, score_r) = meta
         actions, probs, rewards = right
 
-        if r_is_model: agent_r.train(states, *right)
-        states_rev = [np.flip(state, axis=1) for state in states]
-        if l_is_model: agent_l.train(states_rev, *left)
+        if top_is_model: agent_top.train(states, *right)
+        if bottom_is_model:
+            states_rev = [np.flip(state, axis=1) for state in states]
+            agent_bottom.train(states_rev, *left)
 
-        neuron_states.append(get_weight_image(agent_r.model, size=state_shape))
+        neuron_states.append(get_weight_image(agent_top.model, size=state_shape))
         if episode == 1 or episode % 50 == 0:
             save_video(render_states, f'./analytics/{episode}.mp4')
             plot_loss(f'./analytics/plots/loss_{episode}.png', include_left=False)
             plot_score(f'./analytics/plots/score_{episode}.png')
-            if l_is_model: agent_l.save(f'./models/l/{episode}.h5')
-            if r_is_model: agent_r.save(f'./models/r/{episode}.h5')
+            if bottom_is_model: agent_bottom.save(f'./models/l/{episode}.h5')
+            if top_is_model: agent_top.save(f'./models/r/{episode}.h5')
         if episode == 10000:
-            if r_is_model: save_video(neuron_states, f'./analytics/{episode}_weights0.mp4', fps=60)
+            if top_is_model: save_video(neuron_states, f'./analytics/{episode}_weights0.mp4', fps=60)
             exit(0)

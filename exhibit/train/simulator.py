@@ -11,7 +11,7 @@ against both environments
 """
 
 
-def simulate_game(config, env_type=Config.CUSTOM, left=None, right=None, batch=1, visualizer=None):
+def simulate_game(config, env_type=Config.instance().CUSTOM, left=None, right=None, batch=1, visualizer=None):
     env = None
     state_size = None
     games_remaining = batch

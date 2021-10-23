@@ -154,9 +154,9 @@ class Pong:
             trajectories without coupling to an opponent strategy.
             """
             self.x = randint(0, self.config.WIDTH)
-            self.y = 5
+            self.y = self.config.HEIGHT - 5
             self.speed = self.config.BALL_SPEED * self.config.SPEEDUP
-            self.velocity = self.get_vector(self.config.BALL_SPEED + (self.config.VOLLEY_SPEEDUP * choice(list(range(12)))), choice(self.config.BALL_BOUNCE_ANGLES))
+            self.velocity = self.get_vector(choice(self.config.BALL_BOUNCE_ANGLES), self.config.BALL_SPEED + (self.config.VOLLEY_SPEEDUP * choice(list(range(12)))))
             self.w = self.config.BALL_DIAMETER
             self.up = True
             self.h = self.config.BALL_DIAMETER
@@ -401,7 +401,6 @@ class Pong:
                 if self.score_top >= self.config.MAX_SCORE or self.score_bottom >= self.config.MAX_SCORE:
                     done = True
         screen = self.render()
-        #self.show(self.render(), 3)
         return screen, (reward_l, reward_r), done
 
     def step(self, bottom_action, top_action, frames=3):
@@ -464,12 +463,12 @@ class Pong:
             self.last_frame_time = time.time()
 
         self.last_screen = screen
-        self.show(self.render(), 3)
+        # self.show(self.render(), 3)
 
         self.frames += 1
         return screen, (reward_l, reward_r), done
 
-    def show(self, screen, scale=1,  duration=1):
+    def show(self, screen, scale=1,  duration=100):
         """
         Render last game frame through OpenCV
         :param scale: Multiplier to scale up/scale down rendered frame

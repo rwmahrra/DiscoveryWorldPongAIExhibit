@@ -1,6 +1,7 @@
 from exhibit.game.pong import Pong
 import numpy as np
 from exhibit.game import player
+from exhibit.shared.config import Config
 from exhibit.shared.utils import encode_action
 from initial_experiments.ai import DQN
 import matplotlib.pyplot as plt
@@ -67,7 +68,7 @@ def plot_scores(path='./tmp/', show=False, average_of=100):
     plt.cla()
 
 
-def get_weight_image(model, neuron=0, layer=0, size=(Pong.HEIGHT // 2, Pong.WIDTH // 2)):
+def get_weight_image(model, neuron=0, layer=0, size=(Config.instance().HEIGHT // 2, Config.instance().WIDTH // 2)):
     weights = model.get_weights()[layer][:, neuron]
     # Normalize and scale weights to pixel values
     weights /= np.max(weights)

@@ -69,7 +69,7 @@ class PGAgent:
         prob = self.model.predict(state, batch_size=1).flatten()
         self.last_output = prob
         action = np.random.choice(self.action_size, 1, p=prob)[0]
-        state_ravel = state.reshape(Config.CUSTOM_STATE_SHAPE)
+        state_ravel = state.reshape(Config.instance().CUSTOM_STATE_SHAPE)
         self.last_state = np.rot90(state_ravel, axes=(0,1), k=1).flatten()
 
         return action, prob
