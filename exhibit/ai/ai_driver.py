@@ -32,12 +32,13 @@ class AIDriver:
                 f"Frame distribution: mean {np.mean(self.frame_diffs)}, stdev {np.std(self.frame_diffs)} counts {np.unique(self.frame_diffs, return_counts=True)}")
             self.frame_diffs = []
 
-    def __init__(self, paddle1=True):
+    def __init__(self, config, paddle1=True):
+        self.config = config
         self.paddle1 = paddle1
         self.paddle2 = not self.paddle1
-        self.agent = PGAgent(Config.CUSTOM_STATE_SIZE, Config.CUSTOM_ACTION_SIZE)
+        self.agent = PGAgent(self.config.CUSTOM_STATE_SIZE, self.config.CUSTOM_ACTION_SIZE)
         self.agent.load(AIDriver.MODEL)
-        self.state = AISubscriber(trigger_event=lambda: self.publish_inference())
+        self.state = AISubscriber(self.config, trigger_event=lambda: self.publish_inference())
         self.last_frame_id = self.state.frame
         self.last_tick = time.time()
         self.frame_diffs = []
@@ -45,4 +46,5 @@ class AIDriver:
 
 
 if __name__ == "__main__":
-    instance = AIDriver()
+    config = Config.instance()
+    instance = AIDriver(config)

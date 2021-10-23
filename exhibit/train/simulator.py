@@ -11,22 +11,22 @@ against both environments
 """
 
 
-def simulate_game(env_type=Config.CUSTOM, left=None, right=None, batch=1, visualizer=None):
+def simulate_game(config, env_type=Config.CUSTOM, left=None, right=None, batch=1, visualizer=None):
     env = None
     state_size = None
     games_remaining = batch
-    state_shape = Config.CUSTOM_STATE_SHAPE
+    state_shape = config.CUSTOM_STATE_SHAPE
 
-    if env_type == Config.CUSTOM:
+    if env_type == config.CUSTOM:
         env = Pong()
-        state_size = Config.CUSTOM_STATE_SIZE
-        state_shape = Config.CUSTOM_STATE_SHAPE
+        state_size = config.CUSTOM_STATE_SIZE
+        state_shape = config.CUSTOM_STATE_SHAPE
         if type(left) == BotPlayer: left.attach_env(env)
         if type(right) == BotPlayer: right.attach_env(env)
-    elif env_type == Config.HIT_PRACTICE:
+    elif env_type == config.HIT_PRACTICE:
         env = Pong(hit_practice=True)
-        state_size = Config.CUSTOM_STATE_SIZE
-        state_shape = Config.CUSTOM_STATE_SHAPE
+        state_size = config.CUSTOM_STATE_SIZE
+        state_shape = config.CUSTOM_STATE_SHAPE
         if type(right) == BotPlayer: right.attach_env(env)
 
     # Training data
@@ -64,10 +64,10 @@ def simulate_game(env_type=Config.CUSTOM, left=None, right=None, batch=1, visual
         states.append(x)
 
         state, reward, done = None, None, None
-        if env_type == Config.HIT_PRACTICE:
-            state, reward, done = env.step(None, Config.ACTIONS[action_r], frames=Config.AI_FRAME_INTERVAL)
+        if env_type == config.HIT_PRACTICE:
+            state, reward, done = env.step(None, config.ACTIONS[action_r], frames=config.AI_FRAME_INTERVAL)
         else:
-            state, reward, done = env.step(Config.ACTIONS[action_l], Config.ACTIONS[action_r], frames=Config.AI_FRAME_INTERVAL)
+            state, reward, done = env.step(config.ACTIONS[action_l], config.ACTIONS[action_r], frames=config.AI_FRAME_INTERVAL)
 
         reward_l = float(reward[0])
         reward_r = float(reward[1])

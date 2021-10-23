@@ -1,10 +1,11 @@
 import paho.mqtt.client as mqtt
 import numpy as np
 import json
+import math
 
 from exhibit.shared import utils
-from exhibit.shared.config import Config
 import cv2
+
 
 class AISubscriber:
     """
@@ -51,7 +52,11 @@ class AISubscriber:
         :param color: RGB int tuple
         :return:
         """
-        screen[max(y,0):y+h, max(x,0):x+w] = color
+        # IMPORTANT: See notes in the cooresponding method in Pong.py
+        # This needs to be set up such that everything is drawn symmetrically
+        y = math.ceil(y)
+        x = math.ceil(x)
+        screen[max(y, 0):y+h, max(x, 0):x+w] = color
 
     def publish(self, topic, message, qos=0):
         """
@@ -63,19 +68,26 @@ class AISubscriber:
         p = json.dumps(message)
         self.client.publish(topic, payload=p, qos=qos)
 
-    def render_latest(self):
+    def render_latest(self, bottom=False):
         """
         Render the current game pixel state by hand in an ndarray
         :return: ndarray of RGB screen pixels
         """
-        screen = np.zeros((Config.HEIGHT, Config.WIDTH, 3), dtype=np.float32)
+        screen = np.zeros((self.config.HEIGHT, self.config.WIDTH, 3), dtype=np.float32)
         screen[:, :] = (0, 60, 140)
-        #self.draw_rect(screen, int(self.bottom_paddle_x - int(Config.PADDLE_WIDTH / 2)), int(Config.BOTTOM_PADDLE_Y - int(Config.PADDLE_HEIGHT / 2)),
-        #          Config.PADDLE_WIDTH, Config.PADDLE_HEIGHT, 255)
-        self.draw_rect(screen, round(self.top_paddle_x - round(Config.PADDLE_WIDTH / 2)), round(Config.TOP_PADDLE_Y - round(Config.PADDLE_HEIGHT / 2)),
-                 Config.PADDLE_WIDTH, Config.PADDLE_HEIGHT, 255)
-        self.draw_rect(screen, round(self.puck_x - round(Config.BALL_DIAMETER / 2)), round(self.puck_y - round(Config.BALL_DIAMETER / 2)),
-                  Config.BALL_DIAMETER, Config.BALL_DIAMETER, 255)
+        if bottom:
+            self.draw_rect(screen, self.bottom_paddle_x - self.config.PADDLE_WIDTH / 2, self.config.BOTTOM_PADDLE_Y - (self.config.PADDLE_HEIGHT / 2),
+                  self.config.PADDLE_WIDTH, self.config.PADDLE_HEIGHT, 255)
+        else:
+            self.draw_rect(screen, self.top_paddle_x - self.config.PADDLE_WIDTH / 2, self.config.TOP_PADDLE_Y - (self.config.PADDLE_HEIGHT / 2),
+                     self.config.PADDLE_WIDTH, self.config.PADDLE_HEIGHT, 255)
+        self.draw_rect(screen, self.puck_x - self.config.BALL_DIAMETER / 2, self.puck_y - (self.config.BALL_DIAMETER / 2),
+                  self.config.BALL_DIAMETER, self.config.BALL_DIAMETER, 255)
+
+        if bottom:  # Flip screen vertically because the model is trained as the top paddle
+            screen = np.flip(screen, axis=0)
+        appendix = "_flip" if bottom else ""
+        cv2.imwrite(f"frame{self.frame}{appendix}.png", screen)
         return np.rot90(screen, k=3, axes=(0, 1))  # Temporary hack because the model was trained on a horizontal game
 
     def render_latest_preprocessed(self):
@@ -108,10 +120,11 @@ class AISubscriber:
                and self.top_paddle_x is not None \
                and self.game_level is not None
 
-    def __init__(self, trigger_event=None):
+    def __init__(self, config, trigger_event=None):
         """
         :param trigger_event: Function to call each time a new state is received
         """
+        self.config = config
         self.trigger_event = trigger_event
         self.client = mqtt.Client(client_id="ai_module")
         self.client.on_connect = lambda client, userdata, flags, rc : self.on_connect(client, userdata, flags, rc)

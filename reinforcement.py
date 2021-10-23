@@ -2,7 +2,6 @@ import os
 from exhibit.train import simulator
 from exhibit.shared.utils import save_video, plot_loss, plot_score
 from exhibit.shared.config import Config
-from exhibit.game.player import BotPlayer
 from exhibit.ai.model import PGAgent
 from visualizer import get_weight_image
 import numpy as np
@@ -20,7 +19,7 @@ convenient monitoring and graphing of the training process.
 """
 
 GAME_BATCH = 10
-MODE = Config.CUSTOM
+MODE = Config.instance().CUSTOM
 LEARNING_RATE = 0.001
 DENSE_STRUCTURE = (200,)
 ALWAYS_FOLLOW = False
@@ -35,10 +34,12 @@ if __name__ == "__main__":
     # Initialize for checks & scope
     start_index = None
 
+    config = Config.instance()
+
     # Set constants for custom env
-    action_size = Config.CUSTOM_ACTION_SIZE
-    state_size = Config.CUSTOM_STATE_SIZE
-    state_shape = Config.CUSTOM_STATE_SHAPE
+    action_size = config.CUSTOM_ACTION_SIZE
+    state_size = config.CUSTOM_STATE_SIZE
+    state_shape = config.CUSTOM_STATE_SHAPE
     #agent_l = BotPlayer(left=True,
     #                    always_follow=ALWAYS_FOLLOW) if MODE == Config.CUSTOM else None  # Default to bot, override with model if needed
     # Switch out for interactive session (against human)
@@ -70,7 +71,7 @@ if __name__ == "__main__":
     # Train loop
     while True:
         episode += 1
-        states, left, right, meta = simulator.simulate_game(env_type=MODE, left=agent_l, right=agent_r, batch=GAME_BATCH)
+        states, left, right, meta = simulator.simulate_game(config, env_type=MODE, left=agent_l, right=agent_r, batch=GAME_BATCH)
         render_states, model_states, (score_l, score_r) = meta
         actions, probs, rewards = right
 

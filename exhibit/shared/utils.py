@@ -43,9 +43,9 @@ def discount_rewards(r, gamma=0.99):
 
 
 def preprocess(state):
-    if Config.ENV_TYPE == Config.CUSTOM or Config.ENV_TYPE == Config.HIT_PRACTICE:
+    if Config.instance().ENV_TYPE == Config.instance().CUSTOM or Config.instance().ENV_TYPE == Config.instance().HIT_PRACTICE:
         return preprocess_custom(state)
-    elif Config.ENV_TYPE == Config.ATARI:
+    elif Config.instance().ENV_TYPE == Config.instance().ATARI:
         return preprocess_gym(state)
     else:
         raise NotImplementedError

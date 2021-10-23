@@ -6,3 +6,5 @@ model_archive
 scripts/temp.sh
 analytics
 tmp
+models
+exhibit/train/models

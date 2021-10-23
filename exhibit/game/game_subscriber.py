@@ -42,9 +42,9 @@ class GameSubscriber:
         self.client.on_connect = lambda client, userdata, flags, rc : self.on_connect(client, userdata, flags, rc)
         self.client.on_message = lambda client, userdata, msg : self.on_message(client, userdata, msg)
         self.client.loop_start()
-        self.paddle1_action = 2 # ID for "NONE"
+        self.paddle1_action = 2  # ID for "NONE"
         self.paddle1_prob = np.array([0, 1])
         self.paddle1_frame = None
-        self.paddle2_action = 2 # ID for "NONE"
+        self.paddle2_action = 2  # ID for "NONE"
         self.paddle2_prob = np.array([0, 1])
         self.paddle2_frame = None

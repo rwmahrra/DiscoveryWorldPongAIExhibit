@@ -16,10 +16,10 @@ It polls the agents for actions and advances frames and game state at a steady r
 class GameDriver:
     def run(self):
 
-        env = Pong()
+        env = Pong(config=config)
 
-        if type(self.left_agent) == BotPlayer: self.left_agent.attach_env(env)
-        if type(self.right_agent) == BotPlayer: self.right_agent.attach_env(env)
+        if type(self.bottom_agent) == BotPlayer: self.bottom_agent.attach_env(env)
+        if type(self.top_agent) == BotPlayer: self.top_agent.attach_env(env)
 
         # Housekeeping
         score_l = 0
@@ -42,19 +42,19 @@ class GameDriver:
             if acted_frame is not None:
                 frames_behind = rendered_frame - acted_frame
                 frame_skips.append(frames_behind)
-            action_l, prob_l = self.left_agent.act()
+            action_l, prob_l = self.bottom_agent.act()
 
-            for i in range(Config.AI_FRAME_INTERVAL):
-                action_r, prob_r = self.right_agent.act()
-                if type(self.left_agent) == HumanPlayer:
-                    action_l, prob_l = self.left_agent.act()
+            for i in range(self.config.AI_FRAME_INTERVAL):
+                action_r, prob_r = self.top_agent.act()
+                if type(self.bottom_agent) == HumanPlayer:
+                    action_l, prob_l = self.bottom_agent.act()
 
-                next_frame_time = last_frame_time + (1 / Config.GAME_FPS)
-                state, reward, done = env.step(Config.ACTIONS[action_l], Config.ACTIONS[action_r], frames=1)
+                next_frame_time = last_frame_time + (1 / self.config.GAME_FPS)
+                state, reward, done = env.step(self.config.ACTIONS[action_l], self.config.ACTIONS[action_r], frames=1)
                 reward_l, reward_r = reward
                 if reward_r < 0: score_l -= reward_r
                 if reward_r > 0: score_r += reward_r
-                if i == Config.AI_FRAME_INTERVAL - 1:
+                if i == self.config.AI_FRAME_INTERVAL - 1:
                     self.subscriber.emit_state(env.get_packet_info(), request_action=True)
                 to_sleep = next_frame_time - time.time()
                 if to_sleep < 0:
@@ -69,32 +69,32 @@ class GameDriver:
             i += 1
 
         print('Score: %f - %f.' % (score_l, score_r))
-        if Config.DEBUG:
+        if self.config.DEBUG:
             print(f"Behind frames: {np.mean(frame_skips)} mean, {np.std(frame_skips)} stdev, "
                   f"{np.max(frame_skips)} max, {np.unique(frame_skips, return_counts=True)}")
 
-    def __init__(self, subscriber, left_agent, right_agent):
+    def __init__(self, subscriber, bottom_agent, top_agent, config):
+        self.config = config
         self.subscriber = subscriber
-        self.left_agent = left_agent
-        self.right_agent = right_agent
+        self.bottom_agent = bottom_agent
+        self.top_agent = top_agent
 
 
 if __name__ == "__main__":
     subscriber = GameSubscriber()
 
     opponent = HumanPlayer('a', 'd')
-    agent = AIPlayer(subscriber, right=True)
-
+    config = Config.instance()
     # Uncomment the following line (and comment the above) to control the left paddle
     #opponent = HumanPlayer('w', 's')
-    agent = AIPlayer(subscriber, left=True)
+    agent = HumanPlayer('a', 'd')#AIPlayer(subscriber, left=True)
 
     # Wait for AI agent to spin up
     for level in range(1,4):
         subscriber.emit_level(3)
         time.sleep(5)
         start = time.time()
-        instance = GameDriver(subscriber, opponent, agent)
+        instance = GameDriver(subscriber, opponent, agent, config)
         instance.run()
     print(f"Completed simulation in {time.time() - start}s")
 
