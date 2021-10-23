@@ -26,8 +26,8 @@ ALWAYS_FOLLOW = False
 
 if __name__ == "__main__":
     # Ensure directory safety
-    os.makedirs("models/l", exist_ok=True)
-    os.makedirs("models/r", exist_ok=True)
+    os.makedirs("models/bottom", exist_ok=True)
+    os.makedirs("models/top", exist_ok=True)
     os.makedirs("analytics", exist_ok=True)
     os.makedirs("analytics/plots", exist_ok=True)
 
@@ -51,10 +51,10 @@ if __name__ == "__main__":
         agent_bottom = None
     else:
         agent_bottom = PGAgent(state_size, action_size, name="agent_bottom", learning_rate=LEARNING_RATE, structure=DENSE_STRUCTURE)
-        agent_bottom.load("./validation/hitstop_5frame.h5")
+        #agent_bottom.load("./validation/hitstop_5frame.h5")
 
     agent_top = PGAgent(state_size, action_size, name="agent_top", learning_rate=LEARNING_RATE, structure=DENSE_STRUCTURE)
-    agent_top.load("./validation/hitstop_5frame.h5")
+    #agent_top.load("./validation/hitstop_5frame.h5")
 
     # Type checks for convenience later
     top_is_model = type(agent_top) == PGAgent
@@ -65,8 +65,8 @@ if __name__ == "__main__":
     # Optional checkpoint loading
     if start_index is not None:
         episode = start_index
-        if bottom_is_model: agent_bottom.load(f'./models/l/{start_index}.h5')
-        agent_top.load(f'./models/r/{start_index}.h5')
+        if bottom_is_model: agent_bottom.load(f'./models/bottom/{start_index}.h5')
+        agent_top.load(f'./models/top/{start_index}.h5')
 
     # Store neuron images for fun
     neuron_states = []
