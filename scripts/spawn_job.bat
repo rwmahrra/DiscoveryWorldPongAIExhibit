@@ -38,7 +38,7 @@ powershell -Command "(gc scripts\temp.sh) -replace '{{ID}}', '%ID%' | Out-File -
 powershell -Command "(gc scripts\temp.sh) -replace 'github.com', '%GITHUB_IP%' | Out-File -encoding ASCII scripts\temp.sh"
 
 :: Execute remote component
-putty.exe -ssh neuwirtha@dh-ood.hpc.msoe.edu -pw %ROSIE_ACCESS% -m scripts\temp.sh
+putty.exe -ssh neuwirtha@rosie.hpc.msoe.edu -pw %ROSIE_ACCESS% -m scripts\temp.sh
 
 :: Return to original branch
 git checkout %BRANCH%
