@@ -31,7 +31,7 @@ class Config:
         self.CUSTOM_STATE_SIZE = self.HEIGHT // 2 * self.WIDTH // 2
         self.RANDOMIZE_START = True
         self.BALL_DIAMETER = 6
-        self.PADDLE_HEIGHT = 2
+        self.PADDLE_HEIGHT = 4
         self.PADDLE_WIDTH = 20
 
         # The 0.5 offsets are a sad artifact of using pixel-centered instead of pixel grid aligned coordinates
