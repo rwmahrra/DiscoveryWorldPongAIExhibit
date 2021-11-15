@@ -1,3 +1,5 @@
+import warnings
+warnings.filterwarnings("ignore", message=r"Passing", category=FutureWarning)
 import os
 from exhibit.train import simulator
 from exhibit.shared.utils import save_video, plot_loss, plot_score
@@ -5,6 +7,8 @@ from exhibit.shared.config import Config
 from exhibit.ai.model import PGAgent
 from visualizer import get_weight_image
 import numpy as np
+from multiprocessing import Pool
+from tqdm import tqdm
 
 """
 This file is the driver for training a new DRL pong model.
@@ -70,26 +74,40 @@ if __name__ == "__main__":
 
     # Store neuron images for fun
     neuron_states = []
+    with Pool(10) as game_pool:
+        # Train loop
+        for episode in tqdm(range(10000)):
+            episode += 1
+            bottom_path = None
+            top_path = None
+            if bottom_is_model:
+                bottom_path = './models/bottom/latest.h5'
+                agent_bottom.save(bottom_path)
+            if top_is_model:
+                top_path = './models/top/latest.h5'
+                agent_top.save(top_path)
 
-    # Train loop
-    while True:
-        episode += 1
-        states, left, right, meta = simulator.simulate_game(config, env_type=MODE, left=agent_bottom, right=agent_top, batch=GAME_BATCH)
-        render_states, model_states, (score_l, score_r) = meta
-        actions, probs, rewards = right
+            states, left, right, meta = simulator.simulate_game_batch(
+                game_pool,
+                env_type=MODE, structure=DENSE_STRUCTURE,
+                bottom_path=bottom_path, top_path=top_path, batch=GAME_BATCH)
 
-        if top_is_model: agent_top.train(states, *right)
-        if bottom_is_model:
-            states_rev = [np.flip(state, axis=1) for state in states]
-            agent_bottom.train(states_rev, *left)
+            render_states, model_states, (score_l, score_r) = meta
+            actions, probs, rewards = right
 
-        neuron_states.append(get_weight_image(agent_top.model, size=state_shape))
-        if episode == 1 or episode % 50 == 0:
-            save_video(render_states, f'./analytics/{episode}.mp4')
-            plot_loss(f'./analytics/plots/loss_{episode}.png', include_left=False)
-            plot_score(f'./analytics/plots/score_{episode}.png')
-            if bottom_is_model: agent_bottom.save(f'./models/bottom/{episode}.h5')
-            if top_is_model: agent_top.save(f'./models/top/{episode}.h5')
-        if episode == 10000:
-            if top_is_model: save_video(neuron_states, f'./analytics/{episode}_weights0.mp4', fps=60)
-            exit(0)
+            if top_is_model:
+                agent_top.train(states, *right)
+            if bottom_is_model:
+                states_rev = [np.flip(state, axis=1) for state in states]
+                agent_bottom.train(states_rev, *left)
+
+            neuron_states.append(get_weight_image(agent_top.model, size=state_shape))
+            if episode == 1 or episode % 50 == 0:
+                save_video(render_states, f'./analytics/{episode}.mp4')
+                plot_loss(f'./analytics/plots/loss_{episode}.png', include_left=False)
+                plot_score(f'./analytics/plots/score_{episode}.png')
+                if bottom_is_model: agent_bottom.save(f'./models/bottom/{episode}.h5')
+                if top_is_model: agent_top.save(f'./models/top/{episode}.h5')
+            if episode == 10000:
+                if top_is_model: save_video(neuron_states, f'./analytics/{episode}_weights0.mp4', fps=60)
+                exit(0)
