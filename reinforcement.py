@@ -43,8 +43,8 @@ if __name__ == "__main__":
     #agent_l = BotPlayer(left=True,
     #                    always_follow=ALWAYS_FOLLOW) if MODE == Config.CUSTOM else None  # Default to bot, override with model if needed
     # Switch out for interactive session (against human)
-    # from player import HumanPlayer
-    # agent_l = HumanPlayer(up='w', down='s')
+    # from exhibit.game.player import HumanPlayer
+    # agent_top = HumanPlayer(up='w', down='s')
 
     # Init agent
     if MODE == config.HIT_PRACTICE:

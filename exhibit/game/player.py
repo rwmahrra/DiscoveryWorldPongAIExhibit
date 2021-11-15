@@ -32,7 +32,7 @@ class HumanPlayer:
         self.down = down
 
 
-    def act(self):
+    def act(self, state=None):
         """
         Listen to key
         :param state: Unused, preserves interface
