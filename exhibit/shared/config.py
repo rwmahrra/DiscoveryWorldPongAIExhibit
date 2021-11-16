@@ -30,13 +30,13 @@ class Config:
         self.CUSTOM_STATE_SHAPE = self.HEIGHT // 2, self.WIDTH // 2
         self.CUSTOM_STATE_SIZE = self.HEIGHT // 2 * self.WIDTH // 2
         self.RANDOMIZE_START = True
-        self.BALL_DIAMETER = 6
-        self.PADDLE_HEIGHT = 4
+        self.BALL_DIAMETER = 8
+        self.PADDLE_HEIGHT = 3
         self.PADDLE_WIDTH = 20
 
         # The 0.5 offsets are a sad artifact of using pixel-centered instead of pixel grid aligned coordinates
         self.BOTTOM_PADDLE_Y = self.HEIGHT - 0.5 - self.PADDING
-        self.TOP_PADDLE_Y = self.PADDING - 0.5
+        self.TOP_PADDLE_Y = self.PADDING + 0.5
 
         self.ENV_TYPE = self.CUSTOM
         self.DEBUG = True

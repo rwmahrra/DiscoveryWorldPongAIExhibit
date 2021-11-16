@@ -6,9 +6,8 @@ import numpy as np
 from exhibit.ai.model import PGAgent
 from exhibit.shared import utils
 from exhibit.game.pong import Pong
-from exhibit.game.player import BotPlayer
 from exhibit.shared.config import Config
-from multiprocessing import Pool
+from itertools import starmap
 import functools
 
 
@@ -108,7 +107,10 @@ def simulate_game(batch, env_type=Config.instance().CUSTOM, structure=(200,), bo
 def simulate_game_batch(pool, env_type=Config.instance().CUSTOM, structure=(200,), bottom_path=None, top_path=None, batch=1):
     job_args = (env_type, structure, bottom_path, top_path)
     job_definitions = [(job_index, *job_args) for job_index in range(batch)]
-    results = pool.starmap(simulate_game, job_definitions)
+    if pool is not None:
+        results = pool.starmap(simulate_game, job_definitions)
+    else:
+        results = starmap(simulate_game, job_definitions)
     results = functools.reduce(lambda a, b: (a[0]+b[0], (a[1][0]+b[1][0], a[1][1]+b[1][1], a[1][2]+b[1][2]),
                                              (a[2][0]+b[2][0], a[2][1]+b[2][1], a[2][2]+b[2][2]),
                                              (a[3][0]+b[3][0], a[3][1]+b[3][1],

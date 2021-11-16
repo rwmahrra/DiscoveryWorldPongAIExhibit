@@ -27,6 +27,7 @@ MODE = Config.instance().HIT_PRACTICE  # Config.instance().CUSTOM
 LEARNING_RATE = 0.001
 DENSE_STRUCTURE = (200,)
 ALWAYS_FOLLOW = False
+PARALLELIZE = False
 
 if __name__ == "__main__":
     # Ensure directory safety
@@ -74,7 +75,15 @@ if __name__ == "__main__":
 
     # Store neuron images for fun
     neuron_states = []
-    with Pool(10) as game_pool:
+    def get_pool():
+        if PARALLELIZE:
+            return Pool(10)
+        else:
+            class EmptyPool:
+                def __enter__(self): pass
+                def __exit__(self, exc_type, exc_val, exc_tb): pass
+            return EmptyPool()
+    with get_pool() as game_pool:
         # Train loop
         for episode in tqdm(range(10000)):
             episode += 1
@@ -87,10 +96,16 @@ if __name__ == "__main__":
                 top_path = './models/top/latest.h5'
                 agent_top.save(top_path)
 
-            states, left, right, meta = simulator.simulate_game_batch(
-                game_pool,
-                env_type=MODE, structure=DENSE_STRUCTURE,
-                bottom_path=bottom_path, top_path=top_path, batch=GAME_BATCH)
+            if PARALLELIZE:
+                states, left, right, meta = simulator.simulate_game_batch(
+                    game_pool,
+                    env_type=MODE, structure=DENSE_STRUCTURE,
+                    bottom_path=bottom_path, top_path=top_path, batch=GAME_BATCH)
+            else:
+                states, left, right, meta = simulator.simulate_game_batch(
+                    None,
+                    env_type=MODE, structure=DENSE_STRUCTURE,
+                    bottom_path=bottom_path, top_path=top_path, batch=GAME_BATCH)
 
             render_states, model_states, (score_l, score_r) = meta
             actions, probs, rewards = right
