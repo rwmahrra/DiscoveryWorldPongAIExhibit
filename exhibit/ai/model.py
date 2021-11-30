@@ -71,7 +71,7 @@ class PGAgent:
         self.last_output = prob
         action = np.random.choice(self.action_size, 1, p=prob)[0]
         state_ravel = state.reshape(Config.instance().CUSTOM_STATE_SHAPE)
-        self.last_state = np.rot90(state_ravel, axes=(0,1), k=1).flatten()
+        self.last_state = state_ravel.flatten()
 
         return action, None, prob
 
@@ -85,7 +85,7 @@ class PGAgent:
         for w in self.model.weights:
             l = None
             if i == 0: # Rotate first weight matrix as temporary solution for rotated
-                l = np.rot90(w.numpy().reshape(*Config.CUSTOM_STATE_SHAPE, -1), axes=(0,1), k=1)
+                l = w.numpy().reshape(*Config.CUSTOM_STATE_SHAPE, -1)
                 l = l.reshape(Config.CUSTOM_STATE_SIZE, 200).tolist()
             else:
                 l = w.numpy().tolist()

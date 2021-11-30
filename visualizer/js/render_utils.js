@@ -2,7 +2,6 @@
 This class is a relatively straightforward set of utilities used in the inference visualization proof-of-concept.
 */
 const TITLE_FONT = "30px Arial";
-<<<<<<< HEAD
 const INFO_FONT = "20px monospace"; // Font of the info details
 const INFO_FONT0 = "40px monospace"; // Font of the info heading
 const FEED_LABELS_FONT = "30px monospace"; // Font of the labels of the two image feeds (bottom of screen)
@@ -17,14 +16,6 @@ const ACTIVE_WEIGHT_THRESHOLD = 1
 const SPREAD_VALUE = 9855 // Values for visually spreading out the nodes
 var VERTICAL_SPREAD = 120
 
-=======
-const WEIGHT_COLOR = "#666666"
-const WEIGHT_COLOR_ACTIVE = "#BB6666"
-const NEURON_COLOR = "#000000"
-const NEURON_COLOR_ACTIVE = "#DD2222"
-const ACTIVE_WEIGHT_THRESHOLD = 1
-
->>>>>>> xander
 // For benchmarking
 var timer = function(name) {
     var start = new Date();
@@ -32,11 +23,7 @@ var timer = function(name) {
         stop: function() {
             var end  = new Date();
             var time = end.getTime() - start.getTime();
-<<<<<<< HEAD
             //console.log('Timer:', name, 'finished in', time, 'ms'); 
-=======
-            console.log('Timer:', name, 'finished in', time, 'ms');
->>>>>>> xander
         }
     }
 };
@@ -311,13 +298,9 @@ function get_intensity(val) {
     if(redVal.length == 1) {
         redVal = "0" + redVal;
     }
-<<<<<<< HEAD
     // This gives activations a color based on their intensity
     // color = "#" + redVal + "2222" 
     color = "#22" + redVal + redVal + "" 
-=======
-    color = "#" + redVal + "2222"
->>>>>>> xander
     return color
 }
 
@@ -334,7 +317,6 @@ function get_weight_map(weights, neuron) {
     }
     return weight_map;
 }
-<<<<<<< HEAD
 // Function to render info text
 function render_info(canvas, index, main_text, additional_text, info_step) {
     
@@ -376,21 +358,15 @@ function render_info(canvas, index, main_text, additional_text, info_step) {
         canvas.fillText(texts[i], 10 + info_step, VERTICAL_OFFS[index]*canvas_height - ((texts.length-i)*text_spacing));
     }
 }
-=======
-
->>>>>>> xander
 
 function render_layer(canvas, neurons, left_x, right_x, y, neuron_size, activations=null, labels=null, activation_intensities=null) {
     // Scale and normalize biases around 1 to represent useful node scale factors (ranging from ~0.3 - ~1.7)
     neurons = abs(scale(neurons, 10));
     neurons = add(neurons, 1); // Ensure no neurons are zero-sized
     coordinates = [];
-<<<<<<< HEAD
 
 
     if (neuron_size <= 0) {neuron_size = 0.72}
-=======
->>>>>>> xander
     padding = ((right_x - left_x) - (neurons.length * neuron_size)) / (neurons.length + 1);
     for(let i = 0; i < neurons.length; i++) {
         let fill = NEURON_COLOR;
@@ -403,7 +379,6 @@ function render_layer(canvas, neurons, left_x, right_x, y, neuron_size, activati
             }
         }
         b = neurons[i];
-<<<<<<< HEAD
 
         // If we are doing the outputs, then we have to give them the text labels
         if (labels) {
@@ -419,14 +394,6 @@ function render_layer(canvas, neurons, left_x, right_x, y, neuron_size, activati
         } else {        
             x = left_x + (i * neuron_size) + ((i+1) * padding) + (neuron_size / 2);
             create_circle(x, y + (Math.sin(x/canvas_width*SPREAD_VALUE)*VERTICAL_SPREAD), (neuron_size / 2) * b * 2.5, canvas, color = fill);
-=======
-        x = left_x + (i * neuron_size) + ((i+1) * padding) + (neuron_size / 2);
-        create_circle(x, y, (neuron_size / 2) * b, canvas, color=fill);
-        if (labels) {
-            canvas.font = TITLE_FONT;
-            canvas.textAlign = "center";
-            canvas.fillText(labels[i], x, y-10);
->>>>>>> xander
         }
         coordinates.push([x, y])
     }
@@ -459,14 +426,11 @@ function is_weight_active(w, l1, array) {
     l1: length x 1d array of neuron activations
     array: output array. turns off all zero pixels.
     */
-<<<<<<< HEAD
     let weight =10 // w[l1][l2]
     let fill = WEIGHT_COLOR
     weight = abs(weight) // LW
     
 
-=======
->>>>>>> xander
     for(let l1_index = 0; l1_index < l1.length; l1_index++) {
         if(!l1[l1_index]) {
             // If a neuron is active, set all the weights connected to it to active
@@ -506,11 +470,7 @@ function is_significant(w, threshold=0.2) {
 }
 
 
-<<<<<<< HEAD
 function render_weights(canvas, l1_positions, l2_positions, w, render_filter=null, value1) {
-=======
-function render_weights(canvas, l1_positions, l2_positions, w, render_filter=null) {
->>>>>>> xander
     // Set up filtering
     let t2 = timer("and")
 
@@ -526,7 +486,6 @@ function render_weights(canvas, l1_positions, l2_positions, w, render_filter=nul
     t.stop();
 
     t = timer("rendering");
-<<<<<<< HEAD
 
     switch (value1) {
         case 1: // l2 spread
@@ -608,28 +567,5 @@ function render_weights(canvas, l1_positions, l2_positions, w, render_filter=nul
             break;
     }
 
-=======
-    for(let i = 0; i < should_render.length; i++) {
-        const [l1, l2] = should_render[i];
-        l2_pos = l2_positions[l2]
-        l1_pos = l1_positions[l1]
-        let weight = w[l1][l2]
-        let fill = WEIGHT_COLOR
-        weight = abs(weight)
-
-        // Render activation if l1 activation values are supplied
-        if (render_filter) {
-            active = render_filter[l1, l2]
-            if (active) fill = WEIGHT_COLOR_ACTIVE
-        }
-        canvas.lineWidth = weight;
-        canvas.strokeStyle = fill;
-        canvas.beginPath();
-        canvas.moveTo(l1_pos[0], l1_pos[1]);
-        canvas.lineTo(l2_pos[0], l2_pos[1]);
-        canvas.stroke();
-        canvas.lineWidth = 1;
-    }
->>>>>>> xander
     t.stop();
 }

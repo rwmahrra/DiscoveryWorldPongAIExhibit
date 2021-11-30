@@ -74,7 +74,7 @@ class AISubscriber:
         :return: ndarray of RGB screen pixels
         """
         screen = np.zeros((self.config.HEIGHT, self.config.WIDTH, 3), dtype=np.float32)
-        screen[:, :] = (0, 60, 140)
+        screen[:, :] = (140, 60, 0)  # BGR for a deep blue
         if bottom:
             self.draw_rect(screen, self.bottom_paddle_x - self.config.PADDLE_WIDTH / 2, self.config.BOTTOM_PADDLE_Y - (self.config.PADDLE_HEIGHT / 2),
                   self.config.PADDLE_WIDTH, self.config.PADDLE_HEIGHT, 255)
@@ -86,9 +86,9 @@ class AISubscriber:
 
         if bottom:  # Flip screen vertically because the model is trained as the top paddle
             screen = np.flip(screen, axis=0)
-        appendix = "_flip" if bottom else ""
-        cv2.imwrite(f"frame{self.frame}{appendix}.png", screen)
-        return np.rot90(screen, k=3, axes=(0, 1))  # Temporary hack because the model was trained on a horizontal game
+        #appendix = "_flip" if bottom else ""
+        #cv2.imwrite(f"frame{self.frame}{appendix}.png", screen)
+        return screen
 
     def render_latest_preprocessed(self):
         """

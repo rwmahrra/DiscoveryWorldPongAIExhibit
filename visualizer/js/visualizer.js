@@ -324,8 +324,8 @@ function render_weight_image(ctx, hl_activations, image_upscale = 5) {
     frame = scale(frame, 127/max_weight);
     frame = add(frame, 127)
     //Render game frame
-    const frame_width = 192; // Base state dimension
-    const frame_height = 160; 
+    const frame_width = 160; // Base state dimension
+    const frame_height = 192; 
 
     weightImageCanvas.width = frame_width
     weightImageCanvas.height = frame_height

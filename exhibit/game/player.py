@@ -131,10 +131,10 @@ class AIPlayer:
     """
     Abstraction for MQTT networked AI Agent
     """
-    def __init__(self, subscriber, left=False, right=False):
-        self.left = left
-        self.right = right
-        if not self.right and not self.left:
+    def __init__(self, subscriber, top=False, bottom=False):
+        self.top = top
+        self.bottom = bottom
+        if not self.top and not self.bottom:
             raise ValueError("AI paddle must be specified as left or right with the cooresponding keyword argument")
         self.subscriber = subscriber
 
@@ -144,7 +144,7 @@ class AIPlayer:
         :param state: dictionary representing game state
         :return: (action id, confidence)
         """
-        if self.left:
+        if self.top:
             return self.subscriber.paddle1_action, None, self.subscriber.paddle1_prob
-        if self.right:
+        if self.bottom:
             return self.subscriber.paddle2_action, None, self.subscriber.paddle2_prob

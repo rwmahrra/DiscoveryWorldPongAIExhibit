@@ -71,7 +71,7 @@ class GameDriver:
                 self.subscriber.emit_depth_feed(env.depth_feed)
                 to_sleep = next_frame_time - time.time()
                 if to_sleep < 0:
-                    placeholder = 1
+                    #pass
                     print(f"Warning: render tick is lagging behind by {-int(to_sleep * 1000)} ms.")
                 else:
                     time.sleep(to_sleep)
@@ -83,9 +83,9 @@ class GameDriver:
             i += 1
 
         print('Score: %f - %f.' % (score_l, score_r))
-        #if Config.DEBUG:
-            #print(f"Behind frames: {np.mean(frame_skips)} mean, {np.std(frame_skips)} stdev, "
-                  #f"{np.max(frame_skips)} max, {np.unique(frame_skips, return_counts=True)}")
+        if self.config.DEBUG:
+            print(f"Behind frames: {np.mean(frame_skips)} mean, {np.std(frame_skips)} stdev, "
+                  f"{np.max(frame_skips)} max, {np.unique(frame_skips, return_counts=True)}")
 
     def __init__(self, config, subscriber, bottom_agent, top_agent, pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance, max_score):
         self.subscriber = subscriber
@@ -221,7 +221,7 @@ def main(in_q, MAX_SCORE=3):
     opponent = CameraPlayer()
     # Uncomment the following line (and comment the above) to control the left paddle
     #opponent = HumanPlayer('w', 's')
-    agent = AIPlayer(subscriber, left=True)
+    agent = AIPlayer(subscriber, top=True)
     #agent = HumanPlayer('o', 'l')
 
     decimation_filter = rs.decimation_filter()

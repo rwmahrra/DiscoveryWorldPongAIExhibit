@@ -5,6 +5,7 @@ from exhibit.game.game_subscriber import GameSubscriber
 import time
 from exhibit.ai.ai_subscriber import AISubscriber
 import numpy as np
+import cv2
 
 from queue import Queue
 
@@ -16,9 +17,9 @@ class AIDriver:
     # MODEL_3 = f'./validation/canstop_randomstart_10k.h5'
 
     # The locations of the three models used. 1 for each level.
-    MODEL_1 = f'./validation/level1_4500.h5'
-    MODEL_2 = f'./validation/level2_7500.h5'
-    MODEL_3 = f'./validation/level3_10000.h5'
+    MODEL_1 = "./validation/sym_large_nomp_10000.h5"#f'./validation/level1_4500.h5'
+    MODEL_2 = "./validation/sym_large_nomp_10000.h5" #f'./validation/level2_7500.h5'
+    MODEL_3 = "./validation/sym_large_nomp_10000.h5"#f'./validation/level3_10000.h5'
     level = 1
     def publish_inference(self):
         
@@ -60,7 +61,7 @@ class AIDriver:
         current_frame_id = self.state.frame
         # Infer on flattened state vector
         x = diff_state.ravel()
-        action, probs = self.agent.act(x)
+        action, _, probs = self.agent.act(x)
 
         # Publish prediction
         if self.paddle1:
@@ -86,14 +87,14 @@ class AIDriver:
         self.paddle2 = not self.paddle1
 
         # We have all 3 agents already loaded instead of loading between levels. Saves a lot of time and prevents freezing
-        self.agent1 = PGAgent(Config.CUSTOM_STATE_SIZE, Config.CUSTOM_ACTION_SIZE)
+        self.agent1 = PGAgent(self.config.CUSTOM_STATE_SIZE, self.config.CUSTOM_ACTION_SIZE)
         self.agent1.load(AIDriver.MODEL_1)
         self.agent = self.agent1
-        self.agent2 = PGAgent(Config.CUSTOM_STATE_SIZE, Config.CUSTOM_ACTION_SIZE)
+        self.agent2 = PGAgent(self.config.CUSTOM_STATE_SIZE, self.config.CUSTOM_ACTION_SIZE)
         self.agent2.load(AIDriver.MODEL_2)
-        self.agent3 = PGAgent(Config.CUSTOM_STATE_SIZE, Config.CUSTOM_ACTION_SIZE)
+        self.agent3 = PGAgent(self.config.CUSTOM_STATE_SIZE, self.config.CUSTOM_ACTION_SIZE)
         self.agent3.load(AIDriver.MODEL_3)
-        self.state = AISubscriber(trigger_event=lambda: self.publish_inference())
+        self.state = AISubscriber(self.config, trigger_event=lambda: self.publish_inference())
         self.last_frame_id = self.state.frame
         self.last_tick = time.time()
         self.frame_diffs = []
