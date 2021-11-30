@@ -72,7 +72,7 @@ class PGAgent:
         state_ravel = state.reshape(Config.CUSTOM_STATE_SHAPE)
         self.last_state = np.rot90(state_ravel, axes=(0,1), k=1).flatten()
 
-        return action, prob
+        return action, None, prob
 
     def get_structure_packet(self):
         """

@@ -624,7 +624,7 @@ class Pong:
                     print(f'The scores have hit the max_score of {Pong.MAX_SCORE} with AI: {Pong.score_right} and Human: {Pong.score_left}')
                     done = True
         screen = self.render()
-        #self.show(self.render(), 3)
+        self.show(screen, 3)
         return screen, (reward_l, reward_r), done
 
     def step(self, left_action, right_action, frames=3, depth=None):

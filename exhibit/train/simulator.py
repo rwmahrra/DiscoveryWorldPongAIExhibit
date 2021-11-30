@@ -3,6 +3,7 @@ import numpy as np
 from exhibit.game.pong import Pong
 from exhibit.game.player import BotPlayer
 from exhibit.shared.config import Config
+import cv2
 
 """
 Wraps both the OpenAI Gym Atari Pong environment and the custom
@@ -52,6 +53,7 @@ def simulate_game(env_type=Config.CUSTOM, left=None, right=None, batch=1, visual
     while True:
         render_states.append(state.astype(np.uint8))
         current_state = utils.preprocess_custom(state)
+        cv2.imshow("ai-state", state)
         diff_state = current_state - last_state
         model_states.append(diff_state.astype(np.uint8))
         diff_state_rev = np.flip(diff_state, axis=1)
@@ -59,8 +61,9 @@ def simulate_game(env_type=Config.CUSTOM, left=None, right=None, batch=1, visual
         action_l, prob_l, action_r, prob_r = None, None, None, None
         x = diff_state.ravel()
         x_flip = diff_state_rev.ravel()
-        if left is not None: action_l, prob_l = left.act(x_flip)
-        if right is not None: action_r, prob_r = right.act(x)
+        if left is not None: action_l, _, prob_l = left.act(x_flip)
+        cv2.imshow("ai-state-diff", diff_state)
+        if right is not None: action_r, _, prob_r = right.act(x)
         states.append(x)
 
         state, reward, done = None, None, None

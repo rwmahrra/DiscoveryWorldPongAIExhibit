@@ -22,7 +22,7 @@ convenient monitoring and graphing of the training process.
 
 GAME_BATCH = 2#10
 #was 10, shortened for troubleshooting
-MODE = Config.CUSTOM
+MODE = Config.HIT_PRACTICE
 LEARNING_RATE = 0.001
 DENSE_STRUCTURE = (200,)
 ALWAYS_FOLLOW = False
@@ -35,7 +35,7 @@ if __name__ == "__main__":
     os.makedirs("analytics/plots", exist_ok=True)
 
     # Initialize for checks & scope
-    start_index = 555#None
+    start_index = None
 
     # Set constants for custom env
     action_size = Config.CUSTOM_ACTION_SIZE

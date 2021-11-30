@@ -99,7 +99,7 @@ class BotPlayer:
         :param state: Unused, preserves interface for train script
         :return: (action id, confidence)
         """
-        return self.move(), None, 1
+        return self.move(), 1
 
     def move(self):
         if self.always_follow:
