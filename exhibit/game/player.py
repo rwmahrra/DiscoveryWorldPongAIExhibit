@@ -145,6 +145,6 @@ class AIPlayer:
         :return: (action id, confidence)
         """
         if self.left:
-            return self.subscriber.paddle1_action, self.subscriber.paddle1_prob
+            return self.subscriber.paddle1_action, None, self.subscriber.paddle1_prob
         if self.right:
-            return self.subscriber.paddle2_action, self.subscriber.paddle2_prob
+            return self.subscriber.paddle2_action, None, self.subscriber.paddle2_prob

@@ -265,9 +265,9 @@ class Pong:
         # we need this method because controlling from the depth camera is not fixed speed
         def depthMove(self, depth):
             #print(f'depthMove with value = {depth}')
-            desiredPos = depth * Pong.WIDTH #((depth-500)/2000) * Pong.HEIGHT
+            desiredPos = depth * self.config.WIDTH #((depth-500)/2000) * Pong.HEIGHT
             distance = desiredPos - self.x
-            vel = (self.speed * (distance/Pong.WIDTH) * 25)
+            vel = (self.speed * (distance/self.config.WIDTH) * 25)
             self.velocity[0] += vel
 
         def update(self):
@@ -286,16 +286,16 @@ class Pong:
             if self.x < Pong.Paddle.EDGE_BUFFER:
                 self.x = Pong.Paddle.EDGE_BUFFER
 
-        def handle_action(self, action):
+        def handle_action(self, action, depth=None):
             """
             Parse action and modify state accordingly
             :param action: String representation of action ("UP", "DOWN", "NONE")
             :return:
             """
-            if action == "UP":
-                self.up()
-            elif action == "DOWN":
-                self.down()
+            if action == "LEFT":
+                self.left()
+            elif action == "RIGHT":
+                self.right()
             elif action == "NONE":
                 pass
             elif action == "DEPTH":
@@ -328,11 +328,12 @@ class Pong:
                 self.spawn_hit_practice()
             else:                
                 # start the ball not in the center to give more reaction time
-                self.x = round((Pong.WIDTH / 6)*5) 
+                self.x = round((self.config.WIDTH / 6)*5) 
 
-                self.y = round((Pong.HEIGHT / 2) - 1)
-                self.speed = self.SPEED * Pong.SPEEDUP
+                self.y = round((self.config.HEIGHT / 2) - 1)
+                self.speed = self.config.BALL_SPEED * self.config.SPEEDUP
                 self.velocity = (0, 0)
+                self.start_up = True
                 self.w = self.config.BALL_DIAMETER
                 self.h = self.config.BALL_DIAMETER
                 self.right = None
@@ -348,7 +349,7 @@ class Pong:
             if self.hit_practice:
                 self.spawn_hit_practice()
             else:
-                self.y = round(Pong.HEIGHT / 2) 
+                self.y = round(self.config.HEIGHT / 2) 
                 self.speed = self.config.BALL_SPEED * self.config.SPEEDUP
                 self.velocity = (0, 0)
                 self.x = (self.config.WIDTH - 1) / 2
@@ -422,13 +423,15 @@ class Pong:
                     angle += 180
                 self.velocity = self.get_vector(angle, self.speed)
                 
-                if Pong.score_left + Pong.score_right == 1 and self.delay_counter == 0:
+                if self.start_up == True and self.delay_counter == 0:
                     # change to your side
-                    self.x = round(Pong.WIDTH / 6) # if flipping which is first also change line 347ish
+                    self.y = round(self.config.HEIGHT / 6) # if flipping which is first also change line 347ish
                     self.up = True
+                    self.start_up = False # Start down on the next volley
                 elif self.delay_counter == 0:
-                    self.x = round((Pong.WIDTH / 6)*5)
+                    self.y = round((self.config.HEIGHT / 6)*5)
                     self.up = False
+                    self.start_up = True # Start up on the next volley
                     
                 if self.delay_counter <= 15: # a delay so that players can see the ball there before it launches
                     self.delay_counter += 1 # give a delay before the ball starts off again
@@ -448,7 +451,7 @@ class Pong:
                 self.x = 0
                 self.bounce(x=True)
 
-    def __init__(self, config=None, hit_practice=False, level = 1, pipeline = None, decimation_filter = None, crop_percentage_w = None, crop_percentage_h = None, clipping_distance = None, max_score = Config.MAX_SCORE):
+    def __init__(self, config=None, hit_practice=False, level = 1, pipeline = None, decimation_filter = None, crop_percentage_w = None, crop_percentage_h = None, clipping_distance = None, max_score = Config.instance().MAX_SCORE):
         """
         Initialize basic game state
         :param hit_practice: Trigger training mode with a single paddle and randomly spawned balls
@@ -456,16 +459,15 @@ class Pong:
         """
         if pipeline == None:
             print('pipeline equal to None')
+        if config is None:
+            config = Config.instance()
         
-        Pong.SPEEDUP = 1 #+ 0.4 # (0.4*level) # uncomment this to make it faster each level
-        print(f'Pong environment init level {level} and SPEEDUP is {Pong.SPEEDUP}')
-        Pong.MAX_SCORE = max_score
+        config.SPEEDUP = 1 #+ 0.4 # (0.4*level) # uncomment this to make it faster each level
+        print(f'Pong environment init level {level} and SPEEDUP is {config.SPEEDUP}')
+        config.MAX_SCORE = max_score
 
         if Pong.sounds == None:
             Pong.load_sounds()
-
-        if config is None:
-            config = Config.instance()
 
         self.config = config
 
@@ -594,7 +596,7 @@ class Pong:
         screen = self.render()
         return screen, (reward_l, reward_r), done
 
-    def step(self, bottom_action, top_action, frames=3):
+    def step(self, bottom_action, top_action, frames=3, depth=None):
         """
         Game tick housekeeping
         :param bottom_action: Action from bottom agent
@@ -612,7 +614,7 @@ class Pong:
         done = False
         for i in range(frames):
             if not done:
-                self.bottom.handle_action(bottom_action)
+                self.bottom.handle_action(bottom_action, depth)
                 self.top.handle_action(top_action)
 
                 collide_bottom, pos = self.check_collision(self.ball, self.bottom)
@@ -654,7 +656,7 @@ class Pong:
             self.last_frame_time = time.time()
 
         self.last_screen = screen
-        # self.show(self.render(), 3)
+        self.show(self.render(), duration=3)
 
         self.frames += 1
         return screen, (reward_l, reward_r), done

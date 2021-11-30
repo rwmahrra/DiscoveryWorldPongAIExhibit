@@ -52,11 +52,11 @@ class GameDriver:
             if acted_frame is not None:
                 frames_behind = rendered_frame - acted_frame
                 frame_skips.append(frames_behind)
-            action_l, prob_l = self.bottom_agent.act()
+            action_l, depth_l, prob_l = self.bottom_agent.act()
 
             for i in range(self.config.AI_FRAME_INTERVAL):
                 action_r, depth_r, prob_r = self.top_agent.act()
-                if type(self.bottom_agent) == HumanPlayer or type(self.left_agent) == CameraPlayer:
+                if type(self.bottom_agent) == HumanPlayer or type(self.bottom_agent) == CameraPlayer:
                     action_l, depth_l, prob_l = self.bottom_agent.act()
 
                 next_frame_time = last_frame_time + (1 / currentFPS)
@@ -64,7 +64,7 @@ class GameDriver:
                 reward_l, reward_r = reward
                 if reward_r < 0: score_l -= reward_r
                 if reward_r > 0: score_r += reward_r
-                if i == Config.AI_FRAME_INTERVAL - 1:
+                if i == self.config.AI_FRAME_INTERVAL - 1:
                     self.subscriber.emit_state(env.get_packet_info(), request_action=True)
                 else:
                     self.subscriber.emit_state(env.get_packet_info(), request_action=False)
@@ -235,11 +235,11 @@ def main(in_q, MAX_SCORE=3):
 
     pipeline = rs.pipeline()
 
-    config = rs.config()
-    config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-    config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+    rs_config = rs.config()
+    rs_config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+    rs_config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
 
-    profile = pipeline.start(config)
+    profile = pipeline.start(rs_config)
 
     # Getting the depth sensor's depth scale (see rs-align example for explanation)
     depth_sensor = profile.get_device().first_depth_sensor()
