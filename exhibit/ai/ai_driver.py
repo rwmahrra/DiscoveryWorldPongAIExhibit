@@ -2,11 +2,9 @@ import sys
 from exhibit.ai.model import PGAgent
 from exhibit.shared.config import Config
 from exhibit.game.game_subscriber import GameSubscriber
-
 import time
 from exhibit.ai.ai_subscriber import AISubscriber
 import numpy as np
-import cv2
 
 from queue import Queue
 
@@ -80,9 +78,10 @@ class AIDriver:
                 f"Frame distribution: mean {np.mean(self.frame_diffs)}, stdev {np.std(self.frame_diffs)} counts {np.unique(self.frame_diffs, return_counts=True)}")
             self.frame_diffs = []
 
-    def __init__(self, paddle1=True, in_q = Queue()):
+    def __init__(self, config=Config.instance(), paddle1=True, in_q = Queue()):
         
         self.q = in_q
+        self.config = config
         self.paddle1 = paddle1
         self.paddle2 = not self.paddle1
 
@@ -102,7 +101,8 @@ class AIDriver:
 
 def main(in_q):
     # main is separated out so that we can call it and pass in the queue from GUI
-    instance = AIDriver(in_q = in_q)
+    config = Config.instance()
+    instance = AIDriver(config = config, in_q = in_q)
 
 if __name__ == "__main__":
     main("")

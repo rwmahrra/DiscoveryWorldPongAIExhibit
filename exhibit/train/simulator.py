@@ -3,31 +3,28 @@ import numpy as np
 from exhibit.game.pong import Pong
 from exhibit.game.player import BotPlayer
 from exhibit.shared.config import Config
-import cv2
 
-"""
-Wraps both the OpenAI Gym Atari Pong environment and the custom
-Pong environment in a common interface, useful to test the same training setup
-against both environments
-"""
-
-
-def simulate_game(env_type=Config.CUSTOM, left=None, right=None, batch=1, visualizer=None):
+def simulate_game(config, env_type=Config.instance().CUSTOM, left=None, right=None, batch=1, visualizer=None):
+    """
+    Wraps both the OpenAI Gym Atari Pong environment and the custom
+    Pong environment in a common interface, useful to test the same training setup
+    against both environments
+    """
     env = None
     state_size = None
     games_remaining = batch
-    state_shape = Config.CUSTOM_STATE_SHAPE
+    state_shape = config.CUSTOM_STATE_SHAPE
 
-    if env_type == Config.CUSTOM:
+    if env_type == config.CUSTOM:
         env = Pong()
-        state_size = Config.CUSTOM_STATE_SIZE
-        state_shape = Config.CUSTOM_STATE_SHAPE
+        state_size = config.CUSTOM_STATE_SIZE
+        state_shape = config.CUSTOM_STATE_SHAPE
         if type(left) == BotPlayer: left.attach_env(env)
         if type(right) == BotPlayer: right.attach_env(env)
-    elif env_type == Config.HIT_PRACTICE:
+    elif env_type == config.HIT_PRACTICE:
         env = Pong(hit_practice=True)
-        state_size = Config.CUSTOM_STATE_SIZE
-        state_shape = Config.CUSTOM_STATE_SHAPE
+        state_size = config.CUSTOM_STATE_SIZE
+        state_shape = config.CUSTOM_STATE_SHAPE
         if type(right) == BotPlayer: right.attach_env(env)
 
     # Training data
@@ -53,7 +50,6 @@ def simulate_game(env_type=Config.CUSTOM, left=None, right=None, batch=1, visual
     while True:
         render_states.append(state.astype(np.uint8))
         current_state = utils.preprocess_custom(state)
-        cv2.imshow("ai-state", state)
         diff_state = current_state - last_state
         model_states.append(diff_state.astype(np.uint8))
         diff_state_rev = np.flip(diff_state, axis=1)
@@ -61,16 +57,15 @@ def simulate_game(env_type=Config.CUSTOM, left=None, right=None, batch=1, visual
         action_l, prob_l, action_r, prob_r = None, None, None, None
         x = diff_state.ravel()
         x_flip = diff_state_rev.ravel()
-        if left is not None: action_l, _, prob_l = left.act(x_flip)
-        cv2.imshow("ai-state-diff", diff_state)
-        if right is not None: action_r, _, prob_r = right.act(x)
+        if left is not None: action_l, prob_l = left.act(x_flip)
+        if right is not None: action_r, prob_r = right.act(x)
         states.append(x)
 
         state, reward, done = None, None, None
-        if env_type == Config.HIT_PRACTICE:
-            state, reward, done = env.step(None, Config.ACTIONS[action_r], frames=Config.AI_FRAME_INTERVAL)
+        if env_type == config.HIT_PRACTICE:
+            state, reward, done = env.step(None, config.ACTIONS[action_r], frames=config.AI_FRAME_INTERVAL)
         else:
-            state, reward, done = env.step(Config.ACTIONS[action_l], Config.ACTIONS[action_r], frames=Config.AI_FRAME_INTERVAL)
+            state, reward, done = env.step(config.ACTIONS[action_l], config.ACTIONS[action_r], frames=config.AI_FRAME_INTERVAL)
 
         reward_l = float(reward[0])
         reward_r = float(reward[1])
@@ -89,7 +84,6 @@ def simulate_game(env_type=Config.CUSTOM, left=None, right=None, batch=1, visual
         if done:
             games_remaining -= 1
             print('Score: %f - %f.' % (score_l, score_r))
-            print(f'Games remaining: {games_remaining}')
             utils.write(f'{score_l},{score_r}', f'analytics/scores.csv')
             if games_remaining == 0:
                 metadata = (render_states, model_states, (score_l, score_r))
@@ -97,5 +91,4 @@ def simulate_game(env_type=Config.CUSTOM, left=None, right=None, batch=1, visual
             else:
                 score_l, score_r = 0, 0
                 state = env.reset()
-        #print(f'simulator py i is {i}')
         i += 1

@@ -4,11 +4,11 @@ import numpy as np
 
 class GameSubscriber:
     def emit_state(self, state, request_action=False):
-        (puck_x, puck_y), left_y, right_y, score_left, score_right, frame = state
+        (puck_x, puck_y), bottom_x, top_x, score_left, score_right, frame = state
 
         self.client.publish("puck/position", payload=json.dumps({"x": puck_x, "y": puck_y}))
-        self.client.publish("paddle1/position", payload=json.dumps({"position": left_y}))
-        self.client.publish("paddle2/position", payload=json.dumps({"position": right_y}))
+        self.client.publish("paddle1/position", payload=json.dumps({"position": bottom_x}))
+        self.client.publish("paddle2/position", payload=json.dumps({"position": top_x}))
         self.client.publish("player1/score", payload=json.dumps({"score": score_left}))
         self.client.publish("player2/score", payload=json.dumps({"score": score_right}))
 
@@ -48,9 +48,9 @@ class GameSubscriber:
         self.client.on_connect = lambda client, userdata, flags, rc : self.on_connect(client, userdata, flags, rc)
         self.client.on_message = lambda client, userdata, msg : self.on_message(client, userdata, msg)
         self.client.loop_start()
-        self.paddle1_action = 2 # ID for "NONE"
+        self.paddle1_action = 2  # ID for "NONE"
         self.paddle1_prob = np.array([0, 1])
         self.paddle1_frame = None
-        self.paddle2_action = 2 # ID for "NONE"
+        self.paddle2_action = 2  # ID for "NONE"
         self.paddle2_prob = np.array([0, 1])
         self.paddle2_frame = None

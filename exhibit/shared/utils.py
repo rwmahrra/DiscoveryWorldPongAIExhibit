@@ -43,9 +43,9 @@ def discount_rewards(r, gamma=0.99):
 
 
 def preprocess(state):
-    if Config.ENV_TYPE == Config.CUSTOM or Config.ENV_TYPE == Config.HIT_PRACTICE:
+    if Config.instance().ENV_TYPE == Config.instance().CUSTOM or Config.instance().ENV_TYPE == Config.instance().HIT_PRACTICE:
         return preprocess_custom(state)
-    elif Config.ENV_TYPE == Config.ATARI:
+    elif Config.instance().ENV_TYPE == Config.instance().ATARI:
         return preprocess_gym(state)
     else:
         raise NotImplementedError
@@ -137,23 +137,23 @@ def plot_loss(path=None, show=False, include_left=True):
     y2 = []
 
     if include_left:
-        with open('./analytics/agent_l.csv', 'r') as csvfile:
+        with open('./analytics/agent_bottom.csv', 'r') as csvfile:
             plots = csv.reader(csvfile, delimiter=',')
             i = 0
             for row in plots:
                 x1.append(i)
                 y1.append(float(row[0]))
                 i += 1
-        plt.plot(x1, y1, label='Left Agent')
+        plt.plot(x1, y1, label='Bottom Agent')
 
-    with open('./analytics/agent_r.csv', 'r') as csvfile:
+    with open('./analytics/agent_top.csv', 'r') as csvfile:
         plots = csv.reader(csvfile, delimiter=',')
         i = 0
         for row in plots:
             x2.append(i)
             y2.append(float(row[0]))
             i += 1
-    plt.plot(x2, y2, label='Right Agent')
+    plt.plot(x2, y2, label='Top Agent')
     plt.xlabel('Episode')
     plt.ylabel('Loss')
     plt.title('Loss vs. Training Episode For Policy Gradient Agent')
@@ -179,8 +179,8 @@ def plot_score(path=None, show=False):
             yr.append(float(row[1]))
             i += 1
 
-    plt.plot(x, yl, label='Left Agent')
-    plt.plot(x, yr, label='Right Agent')
+    plt.plot(x, yl, label='Bottom Agent')
+    plt.plot(x, yr, label='Top Agent')
     plt.xlabel('Episode')
     plt.ylabel('Score')
     plt.title('Agent Score By Episode')

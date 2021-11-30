@@ -11,6 +11,7 @@ from exhibit.shared.config import Config
 from exhibit.game.pong import Pong
 import threading
 import time
+from queue import Queue
 
 """
 This file is the driver for the game component.
@@ -23,12 +24,12 @@ class GameDriver:
     def run(self, level):
 
         # The Pong environment
-        env = Pong(level = level, pipeline = self.pipeline, decimation_filter = self.decimation_filter, crop_percentage_w = self.crop_percentage_w, crop_percentage_h = self.crop_percentage_h, clipping_distance = self.clipping_distance, max_score = self.max_score)
-        currentFPS = 60 #(level * 40) + 40#Config.GAME_FPS 
+        env = Pong(config=self.config, level = level, pipeline = self.pipeline, decimation_filter = self.decimation_filter, crop_percentage_w = self.crop_percentage_w, crop_percentage_h = self.crop_percentage_h, clipping_distance = self.clipping_distance, max_score = self.max_score)
+        currentFPS = self.config.GAME_FPS #(level * 40) + 40#Config.GAME_FPS 
 
         # if one of our players is Bot
-        if type(self.left_agent) == BotPlayer: self.left_agent.attach_env(env)
-        if type(self.right_agent) == BotPlayer: self.right_agent.attach_env(env)
+        if type(self.bottom_agent) == BotPlayer: self.bottom_agent.attach_env(env)
+        if type(self.top_agent) == BotPlayer: self.top_agent.attach_env(env)
         
         # Housekeeping
         score_l = 0
@@ -51,16 +52,15 @@ class GameDriver:
             if acted_frame is not None:
                 frames_behind = rendered_frame - acted_frame
                 frame_skips.append(frames_behind)
-            action_l, depth_l, prob_l = self.left_agent.act()
+            action_l, prob_l = self.bottom_agent.act()
 
-            for i in range(Config.AI_FRAME_INTERVAL):
-                action_r, depth_r, prob_r = self.right_agent.act()
-                if type(self.left_agent) == HumanPlayer or type(self.left_agent) == CameraPlayer:
-                    action_l, depth_l, prob_l = self.left_agent.act()
+            for i in range(self.config.AI_FRAME_INTERVAL):
+                action_r, depth_r, prob_r = self.top_agent.act()
+                if type(self.bottom_agent) == HumanPlayer or type(self.left_agent) == CameraPlayer:
+                    action_l, depth_l, prob_l = self.bottom_agent.act()
 
-                next_frame_time = last_frame_time + (1 / currentFPS) #Config.GAME_FPS)
-                #print(f'Depth is {depth_l}')
-                state, reward, done = env.step(Config.ACTIONS[action_l], Config.ACTIONS[action_r], frames=1, depth=depth_l)
+                next_frame_time = last_frame_time + (1 / currentFPS)
+                state, reward, done = env.step(self.config.ACTIONS[action_l], self.config.ACTIONS[action_r], frames=1, depth=depth_l)
                 reward_l, reward_r = reward
                 if reward_r < 0: score_l -= reward_r
                 if reward_r > 0: score_r += reward_r
@@ -68,17 +68,15 @@ class GameDriver:
                     self.subscriber.emit_state(env.get_packet_info(), request_action=True)
                 else:
                     self.subscriber.emit_state(env.get_packet_info(), request_action=False)
-                #print(env.depth_feed)
                 self.subscriber.emit_depth_feed(env.depth_feed)
                 to_sleep = next_frame_time - time.time()
                 if to_sleep < 0:
                     placeholder = 1
-                    #print(f"Warning: render tick is lagging behind by {-int(to_sleep * 1000)} ms.")
+                    print(f"Warning: render tick is lagging behind by {-int(to_sleep * 1000)} ms.")
                 else:
                     time.sleep(to_sleep)
 
                 last_frame_time = time.time()
-            #self.subscriber.emit_depth_feed(env.depth_feed)
 
             last_frame_time = time.time()
 
@@ -89,16 +87,19 @@ class GameDriver:
             #print(f"Behind frames: {np.mean(frame_skips)} mean, {np.std(frame_skips)} stdev, "
                   #f"{np.max(frame_skips)} max, {np.unique(frame_skips, return_counts=True)}")
 
-    def __init__(self, subscriber, left_agent, right_agent, pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance, max_score):
+    def __init__(self, config, subscriber, bottom_agent, top_agent, pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance, max_score):
         self.subscriber = subscriber
-        self.left_agent = left_agent
-        self.right_agent = right_agent
+        self.bottom_agent = bottom_agent
+        self.top_agent = top_agent
         self.pipeline = pipeline
         self.decimation_filter = decimation_filter
         self.crop_percentage_w = crop_percentage_w
         self.crop_percentage_h = crop_percentage_h
         self.clipping_distance = clipping_distance
         self.max_score = max_score
+        self.config = config
+        self.subscriber = subscriber
+
 
 # checks if theres a big enough player sized blob
 def check_for_player(pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance):
@@ -214,6 +215,7 @@ def check_for_still_player(pipeline, decimation_filter, crop_percentage_w, crop_
 def main(in_q, MAX_SCORE=3):
     print("from gameDriver, about to init GameSubscriber")
     print(f'The current MAX_SCORE is set to {MAX_SCORE}')
+    config = Config.instance()
     subscriber = GameSubscriber()
     #opponent = BotPlayer(right=True)
     opponent = CameraPlayer()
@@ -257,7 +259,7 @@ def main(in_q, MAX_SCORE=3):
     subscriber.emit_level(level) 
 
     # was orginally in the loop
-    instance = GameDriver(subscriber, opponent, agent, pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance, MAX_SCORE)
+    instance = GameDriver(config, subscriber, opponent, agent, pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance, MAX_SCORE)
 
     while True: # play the exhibit on loop forever
 
@@ -343,7 +345,7 @@ def main(in_q, MAX_SCORE=3):
     sys.exit()
 
 if __name__ == "__main__":
-    main("", 2)
+    main(Queue(), 2)
 
 
 

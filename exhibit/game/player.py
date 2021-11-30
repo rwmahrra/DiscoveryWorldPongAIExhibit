@@ -70,20 +70,24 @@ class BotPlayer:
     based off of ball and paddle position.
     """
 
-    def __init__(self, env=None, left=False, right=False, always_follow=False):
+    def __init__(self, env=None, bottom=False, top=False, always_follow=False):
         """
         Set state
         :param env: Pong environment
-        :param left: true if operating left paddle
-        :param right: true of operating right paddle
+        :param bottom: true if operating bottom paddle
+        :param top: true of operating top paddle
         :param always_follow: if true, always tries to sit at ball position.
                if false, only follows ball when the ball is moving towards this paddle's side of the screen
         """
-        self.left = left
-        self.right = right
+        self.bottom = bottom
+        self.top = top
         self.always_follow = always_follow
+        if self.top:
+            self.last_move = 1
+        else:
+            self.last_move = 0
         if env is not None:
-            self.paddle, self.ball = env.get_bot_data(left=left, right=right)
+            self.paddle, self.ball = env.get_bot_data(bottom=bottom, top=top)
 
     def attach_env(self, env):
         """
@@ -91,7 +95,7 @@ class BotPlayer:
         :param env: Pong environment
         :return:
         """
-        self.paddle, self.ball = env.get_bot_data(left=self.left, right=self.right)
+        self.paddle, self.ball = env.get_bot_data(bottom=self.bottom, top=self.top)
 
     def act(self, state=None):
         """
@@ -103,21 +107,24 @@ class BotPlayer:
 
     def move(self):
         if self.always_follow:
-            if self.ball.y > self.paddle.y:
+            if self.ball.x > self.paddle.x:
                 return 1
-            elif self.ball.y < self.paddle.y:
+            elif self.ball.x < self.paddle.x:
                 return 0
             else:
-                return 0 if randint(0, 1) == 1 else 1
-        if self.left and not self.ball.right or self.right and self.ball.right:
-            if self.ball.y > self.paddle.y:
+                self.last_move = abs(self.last_move - 1)
+                return self.last_move
+        if self.bottom and not self.ball.up or self.top and self.ball.up:
+            if self.ball.x > self.paddle.x:
                 return 1
-            elif self.ball.y < self.paddle.y:
+            elif self.ball.x < self.paddle.x:
                 return 0
             else:
-                return 0 if randint(0, 1) == 1 else 1
+                self.last_move = abs(self.last_move - 1)
+                return self.last_move
         else:
-            return 0 if randint(0, 1) == 1 else 1
+            self.last_move = abs(self.last_move - 1)
+            return self.last_move
 
 
 class AIPlayer:
@@ -138,6 +145,6 @@ class AIPlayer:
         :return: (action id, confidence)
         """
         if self.left:
-            return self.subscriber.paddle1_action, None, self.subscriber.paddle1_prob
+            return self.subscriber.paddle1_action, self.subscriber.paddle1_prob
         if self.right:
-            return self.subscriber.paddle2_action, None, self.subscriber.paddle2_prob
+            return self.subscriber.paddle2_action, self.subscriber.paddle2_prob

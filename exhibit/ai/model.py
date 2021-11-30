@@ -15,7 +15,7 @@ class PGAgent:
     Partly adapted from https://github.com/keon/policy-gradient/blob/master/pg.py
     """
 
-    def __init__(self, state_size, action_size, name="PGAgent", learning_rate=0.001, structure=(200,)):
+    def __init__(self, state_size, action_size, name="PGAgent", learning_rate=0.001, structure=(200,), verbose=True):
         """
         Set basic variables and construct the model
         :param state_size: Pixels in flattened input state
@@ -24,6 +24,7 @@ class PGAgent:
         :param learning_rate: Model learning rate
         :param structure: Tuple of integers. a dense hidden layer with n layers is crated for each tuple element n
         """
+        self.verbose = verbose
         self.name = name
         self.state_size = state_size
         self.action_size = action_size
@@ -35,7 +36,7 @@ class PGAgent:
         self.probs = []
         self.structure = structure
         self.model = self._build_model()
-        self.model.summary()
+        if self.verbose: self.model.summary()
         self.last_state = None
         self.last_hidden_activation = None
         self.last_output = None
@@ -69,7 +70,7 @@ class PGAgent:
         prob = self.model.predict(state, batch_size=1).flatten()
         self.last_output = prob
         action = np.random.choice(self.action_size, 1, p=prob)[0]
-        state_ravel = state.reshape(Config.CUSTOM_STATE_SHAPE)
+        state_ravel = state.reshape(Config.instance().CUSTOM_STATE_SHAPE)
         self.last_state = np.rot90(state_ravel, axes=(0,1), k=1).flatten()
 
         return action, None, prob
@@ -159,7 +160,7 @@ class PGAgent:
         Load weights from an h5 file
         :param name: path to load weights
         """
-        print(f"Loading {name}")
+        if self.verbose: print(f"Loading {name}")
         self.model.load_weights(name)
 
     def save(self, name):
