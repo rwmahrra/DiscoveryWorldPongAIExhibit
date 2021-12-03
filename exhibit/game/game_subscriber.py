@@ -27,6 +27,7 @@ class GameSubscriber:
         print("Connected with result code " + str(rc))
         client.subscribe("paddle1/action")
         client.subscribe("paddle2/action")
+        client.subscribe("paddle1/frame")
         client.subscribe("paddle2/frame")
 
     def on_message(self, client, userdata, msg):

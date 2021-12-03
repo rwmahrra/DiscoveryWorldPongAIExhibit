@@ -7,6 +7,7 @@ from random import choice, randint, random
 import time
 from exhibit.shared.config import Config
 import pyrealsense2 as rs
+from exhibit.shared.utils import Timer
 
 if Config.instance().ENABLE_AUDIO:
     import pygame.mixer
@@ -77,20 +78,28 @@ class Pong:
     # It filters out everything below a certain height
     def get_human_x():
         #try to get the frame 50 times
-        for i in range(50): 
+        return 0.5
+        for i in range(50):
+            print(f"trials: {i}")
+            Timer.start("wait_frame")
             try:
                 frames = Pong.pipeline.wait_for_frames()
             except Exception:
                 continue
-
+            Timer.stop("wait_frame")
+            Timer.start("get_frame")
             depth = frames.get_depth_frame()
+            Timer.stop("get_frame")
             #color = frames.get_color_frame()
             if not depth: continue
 
+            Timer.start("filter_frame")
             # filtering the image to make it less noisy and inconsistent
             depth_filtered = Pong.decimation_filter.process(depth)
             depth_image = np.asanyarray(depth_filtered.get_data())
+            Timer.stop("filter_frame")
             
+            Timer.start("crop_frame")
             # cropping the image based on a width and height percentage
             w,h = depth_image.shape
             ws, we = int(w/2 - (w * Pong.crop_percentage_w)/2), int(w/2 + (w * Pong.crop_percentage_w)/2)
@@ -100,7 +109,9 @@ class Pong:
             #depth_cropped = depth_image
 
             cutoffImage = np.where((depth_cropped < Pong.clipping_distance) & (depth_cropped > 0.1), True, False)
+            Timer.stop("crop_frame")
 
+            Timer.start("get_islands")
             #print(f'cutoffImage shape is {cutoffImage.shape}, depth_cropped shape is {depth_cropped.shape}');
             avg_x = 0
             avg_x_array = np.array([])
@@ -128,8 +139,9 @@ class Pong:
                 i_max = index
                 p = n
             if not i_min == i_max: islands.append(avg_x_array[i_min:i_max])
+            Timer.stop("get_islands")
             
-
+            Timer.start("compare_islands")
             #print(islands)
             bigIsland = np.array([])
             for array in islands:
@@ -137,29 +149,38 @@ class Pong:
             
             #print(np.median(bigIsland))
             m = (np.median(bigIsland))
+            Timer.stop("compare_islands")
 
             # DISPLAYING ******************************************************************************
-
+            Timer.start("align")
+            print(frames.size())
             aligned_frames = Pong.align.process(frames)
+            Timer.stop("align")
+            Timer.start("extract")
             # Get aligned frames
             aligned_depth_frame = aligned_frames.get_depth_frame() # aligned_depth_frame is a 640x480 depth image
-            color_frame = aligned_frames.get_color_frame()
+            #color_frame = aligned_frames.get_color_frame()
 
             depth_image = np.asanyarray(aligned_depth_frame.get_data())
             #print(color_frame)
-            color_image = np.asanyarray(color_frame.get_data())
-
+            #color_image = np.asanyarray(color_frame.get_data())
+            Timer.stop("extract")
+            Timer.start("stack")
             grey_color = 153
             grey_color2 = 40
-            depth_cropped_3d = np.dstack((depth_image,depth_image,depth_image))
-            bg_removed = np.where((depth_cropped_3d < Pong.clipping_distance) & (depth_cropped_3d > 0.1), color_image, grey_color )
+            #depth_cropped_3d = np.dstack((depth_image,depth_image,depth_image))
+            Timer.stop("stack")
+            Timer.start("colorize")
+            #bg_removed = np.where((depth_cropped_3d < Pong.clipping_distance) & (depth_cropped_3d > 0.1), color_image, grey_color )
 
-            depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_RAINBOW)
+            #depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_RAINBOW)
 
             depth_cropped_3d_actual = np.dstack((depth_cropped,depth_cropped,depth_cropped))
             depth_cropped_3d_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_cropped_3d_actual, alpha=0.03), cv2.COLORMAP_RAINBOW)
+            Timer.stop("colorize")
+            Timer.start("drawline")
             depth_cropped_3d_colormap = np.where((depth_cropped_3d_actual < Pong.clipping_distance) & (depth_cropped_3d_actual > 0.1), depth_cropped_3d_colormap, grey_color2 )
-
+            
             # Uncomment these lines to have a window showing the camera feeds
             # images = np.hstack((bg_removed, depth_colormap))
             
@@ -167,15 +188,22 @@ class Pong:
             # cv2.imshow('Align Example',  images)
             # cv2.namedWindow('Filtered', cv2.WINDOW_NORMAL)
             depth_cropped_3d_colormap = cv2.line(depth_cropped_3d_colormap, (int(m),h), (int(m),0), (255,255,255), 1)
+            Timer.stop("drawline")
+            
             # cv2.imshow('Filtered',  depth_cropped_3d_colormap)
             
+            Timer.start("imgencode")
             buffer = cv2.imencode('.jpg', depth_cropped_3d_colormap)[1].tostring()
             Pong.depth_feed = base64.b64encode(buffer).decode()
+            Timer.stop("imgencode")
+            
 
             # *****************************************************************************************
             # we multiply by 1.4 and subtract -0.2 so that the player can reach the edges of the Pong game.
             # In other words, we shrunk the frame so that the edges of the pong game can be reached without leaving the camera frame
             return (m/(np.size(cutoffImage,1)) * 1.4) -0.2
+        print("depth failed")
+        Timer.stop("get_depth")
         return 0.5 # dummy value if we can't successfully get a good one
 
     @staticmethod

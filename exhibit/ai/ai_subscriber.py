@@ -136,7 +136,7 @@ class AISubscriber:
         self.bottom_paddle_x = None
         self.top_paddle_x = None
         self.game_level = None
-        self.frame = None
+        self.frame = 0
         self.latest_frame = None
         self.trailing_frame = None
         #self.client.loop_start()

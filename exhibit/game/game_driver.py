@@ -12,6 +12,7 @@ from exhibit.game.pong import Pong
 import threading
 import time
 from queue import Queue
+from exhibit.shared.utils import Timer
 
 """
 This file is the driver for the game component.
@@ -46,7 +47,7 @@ class GameDriver:
         done = False
         last_frame_time = time.time()
         while not done:
-            acted_frame = self.subscriber.paddle2_frame
+            acted_frame = self.subscriber.paddle1_frame
             rendered_frame = env.frames
 
             if acted_frame is not None:
@@ -55,24 +56,31 @@ class GameDriver:
             action_l, depth_l, prob_l = self.bottom_agent.act()
 
             for i in range(self.config.AI_FRAME_INTERVAL):
+                Timer.start("act")
                 action_r, depth_r, prob_r = self.top_agent.act()
                 if type(self.bottom_agent) == HumanPlayer or type(self.bottom_agent) == CameraPlayer:
                     action_l, depth_l, prob_l = self.bottom_agent.act()
+                Timer.stop("act")
 
                 next_frame_time = last_frame_time + (1 / currentFPS)
+
+                Timer.start("step")
                 state, reward, done = env.step(self.config.ACTIONS[action_l], self.config.ACTIONS[action_r], frames=1, depth=depth_l)
+                Timer.stop("step")
                 reward_l, reward_r = reward
                 if reward_r < 0: score_l -= reward_r
                 if reward_r > 0: score_r += reward_r
+                Timer.start("emit")
                 if i == self.config.AI_FRAME_INTERVAL - 1:
                     self.subscriber.emit_state(env.get_packet_info(), request_action=True)
                 else:
                     self.subscriber.emit_state(env.get_packet_info(), request_action=False)
                 self.subscriber.emit_depth_feed(env.depth_feed)
+                Timer.stop("emit")
                 to_sleep = next_frame_time - time.time()
                 if to_sleep < 0:
-                    #pass
-                    print(f"Warning: render tick is lagging behind by {-int(to_sleep * 1000)} ms.")
+                    pass
+                    #print(f"Warning: render tick is lagging behind by {-int(to_sleep * 1000)} ms.")
                 else:
                     time.sleep(to_sleep)
 
@@ -84,6 +92,7 @@ class GameDriver:
 
         print('Score: %f - %f.' % (score_l, score_r))
         if self.config.DEBUG:
+            print(frame_skips)
             print(f"Behind frames: {np.mean(frame_skips)} mean, {np.std(frame_skips)} stdev, "
                   f"{np.max(frame_skips)} max, {np.unique(frame_skips, return_counts=True)}")
 

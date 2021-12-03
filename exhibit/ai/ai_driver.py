@@ -58,7 +58,10 @@ class AIDriver:
         
         # Get latest state diff
         diff_state = self.state.render_latest_diff()
+        
         current_frame_id = self.state.frame
+        self.frame_diffs.append(self.state.frame - self.last_acted_frame)
+        self.last_acted_frame = self.state.frame
         # Infer on flattened state vector
         x = diff_state.ravel()
         action, _, probs = self.agent.act(x)
@@ -74,7 +77,7 @@ class AIDriver:
         model_activation = self.agent.get_activation_packet()
         self.state.publish("ai/activation", model_activation)
 
-        if len(self.frame_diffs) > 1000:
+        if len(self.frame_diffs) > 10:
             print(
                 f"Frame distribution: mean {np.mean(self.frame_diffs)}, stdev {np.std(self.frame_diffs)} counts {np.unique(self.frame_diffs, return_counts=True)}")
             self.frame_diffs = []
@@ -98,6 +101,7 @@ class AIDriver:
         self.last_frame_id = self.state.frame
         self.last_tick = time.time()
         self.frame_diffs = []
+        self.last_acted_frame = 0
         self.state.start()
 
 def main(in_q):
