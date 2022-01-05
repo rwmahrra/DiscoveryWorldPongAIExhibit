@@ -39,7 +39,6 @@ class AISubscriber:
             self.frame = payload["frame"]
             self.trailing_frame = self.latest_frame
             self.latest_frame = self.render_latest_preprocessed()
-            if self.trigger_event is not None: self.trigger_event()
 
     def draw_rect(self, screen, x, y, w, h, color):
         """
@@ -52,7 +51,7 @@ class AISubscriber:
         :param color: RGB int tuple
         :return:
         """
-        # IMPORTANT: See notes in the cooresponding method in Pong.py
+        # IMPORTANT: See notes in the corresponding method in Pong.py
         # This needs to be set up such that everything is drawn symmetrically
         y = math.ceil(y)
         x = math.ceil(x)
@@ -139,7 +138,6 @@ class AISubscriber:
         self.frame = 0
         self.latest_frame = None
         self.trailing_frame = None
-        #self.client.loop_start()
 
     def start(self):
         self.client.loop_forever()
