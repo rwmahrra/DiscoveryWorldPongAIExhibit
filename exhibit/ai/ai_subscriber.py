@@ -39,6 +39,7 @@ class AISubscriber:
             self.frame = payload["frame"]
             self.trailing_frame = self.latest_frame
             self.latest_frame = self.render_latest_preprocessed()
+            print(f"recv game {self.frame}")
             if self.trigger_event is not None: self.trigger_event()
 
     def draw_rect(self, screen, x, y, w, h, color):

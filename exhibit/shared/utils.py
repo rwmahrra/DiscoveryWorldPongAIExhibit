@@ -25,7 +25,7 @@ class Timer:
     @staticmethod
     def stop(name):
         t = time.time() - Timer.timers[name]
-        #print(f'Finished {name} in {round(t, 5)}s')
+        print(f'Finished {name} in {round(t, 5)}s')
 
 
 def discount_rewards(r, gamma=0.99):

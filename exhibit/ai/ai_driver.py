@@ -6,6 +6,7 @@ import time
 from exhibit.ai.ai_subscriber import AISubscriber
 import numpy as np
 import cv2
+from exhibit.shared.utils import Timer
 
 from queue import Queue
 
@@ -22,7 +23,7 @@ class AIDriver:
     MODEL_3 = "./validation/sym_large_nomp_10000.h5"#f'./validation/level3_10000.h5'
     level = 1
     def publish_inference(self):
-        
+        Timer.start("infer")
         # Check if the level has changed. If so, we need to load a new model
         if (AIDriver.level != self.state.game_level):
             # check if a kill/quit message has been sent via the queue
@@ -70,6 +71,7 @@ class AIDriver:
         if self.paddle1:
             self.state.publish("paddle1/action", {"action": str(action)})
             self.state.publish("paddle1/frame", {"frame": current_frame_id})
+            print(f"send ai {current_frame_id}")
         elif self.paddle2:
             self.state.publish("paddle2/action", {"action": str(action)})
             self.state.publish("paddle2/frame", {"frame": current_frame_id})
@@ -81,6 +83,7 @@ class AIDriver:
             print(
                 f"Frame distribution: mean {np.mean(self.frame_diffs)}, stdev {np.std(self.frame_diffs)} counts {np.unique(self.frame_diffs, return_counts=True)}")
             self.frame_diffs = []
+        Timer.stop("infer")
 
     def __init__(self, config=Config.instance(), paddle1=True, in_q = Queue()):
         

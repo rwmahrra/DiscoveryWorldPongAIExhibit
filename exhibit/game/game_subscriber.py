@@ -14,6 +14,7 @@ class GameSubscriber:
 
         if request_action:
             self.client.publish("game/frame", payload=json.dumps({"frame": frame}))
+            print(f"send game {frame}")
 
     # get depth camera feed into browser
     def emit_depth_feed(self, feed):
@@ -37,6 +38,7 @@ class GameSubscriber:
             self.paddle1_action = int(payload["action"])
         if topic == "paddle1/frame":
             self.paddle1_frame = payload["frame"]
+            print(f"recv ai {self.paddle1_frame}")
         if topic == "paddle2/action":
             self.paddle2_action = int(payload["action"])
         if topic == "paddle2/frame":
