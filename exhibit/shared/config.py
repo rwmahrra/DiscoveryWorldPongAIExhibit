@@ -15,6 +15,8 @@ class Config:
         return Config.sharedInstance
 
     def __init__(self):
+        self.USE_DEPTH_CAMERA = True
+
         self.PADDING = 10  # Distance between screen edge and player paddles (px)
         self.MAX_SCORE = 2  # Points one side must win to finish game
         self.WIDTH = 192  # Game window width (px)

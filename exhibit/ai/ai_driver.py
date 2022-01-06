@@ -6,6 +6,7 @@ import time
 from exhibit.ai.ai_subscriber import AISubscriber
 import numpy as np
 import cv2
+import threading
 
 from queue import Queue
 
@@ -22,7 +23,6 @@ class AIDriver:
     MODEL_3 = "./validation/sym_large_nomp_10000.h5"#f'./validation/level3_10000.h5'
     level = 1
     def publish_inference(self):
-        
         # Check if the level has changed. If so, we need to load a new model
         if (AIDriver.level != self.state.game_level):
             # check if a kill/quit message has been sent via the queue
@@ -60,12 +60,17 @@ class AIDriver:
         diff_state = self.state.render_latest_diff()
         
         current_frame_id = self.state.frame
-        self.frame_diffs.append(self.state.frame - self.last_acted_frame)
-        self.last_acted_frame = self.state.frame
+
+        # Compute the number of frames that have passed since the last frame
+        #frame_diff = self.state.frame - self.last_acted_frame
+        #self.last_acted_frame = self.state.frame
+        #if frame_diff >= 0:
+        #    # Throw away negative diffs because we're in a new round
+        #    self.frame_diffs.append(frame_diff)
+
         # Infer on flattened state vector
         x = diff_state.ravel()
         action, _, probs = self.agent.act(x)
-
         # Publish prediction
         if self.paddle1:
             self.state.publish("paddle1/action", {"action": str(action)})
@@ -77,10 +82,20 @@ class AIDriver:
         model_activation = self.agent.get_activation_packet()
         self.state.publish("ai/activation", model_activation)
 
-        if len(self.frame_diffs) > 10:
-            print(
-                f"Frame distribution: mean {np.mean(self.frame_diffs)}, stdev {np.std(self.frame_diffs)} counts {np.unique(self.frame_diffs, return_counts=True)}")
-            self.frame_diffs = []
+        #if len(self.frame_diffs) > 10:
+        #    print(
+        #        f"Frame distribution: mean {np.mean(self.frame_diffs)}"
+        #        f", stdev {np.std(self.frame_diffs)} counts {np.unique(self.frame_diffs, return_counts=True)}")
+        #    self.frame_diffs = []
+
+    def inference_loop(self):
+        while True:
+            current_frame_id = self.state.frame
+            if self.last_acted_frame == current_frame_id:
+                time.sleep(0.001)
+            else:
+                self.publish_inference()
+                self.last_acted_frame = current_frame_id
 
     def __init__(self, config=Config.instance(), paddle1=True, in_q = Queue()):
         
@@ -102,6 +117,8 @@ class AIDriver:
         self.last_tick = time.time()
         self.frame_diffs = []
         self.last_acted_frame = 0
+        self.inference_thread = threading.Thread(target=self.inference_loop)
+        self.inference_thread.start()
         self.state.start()
 
 def main(in_q):

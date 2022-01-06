@@ -364,7 +364,7 @@ class Pong:
                 self.start_up = True
                 self.w = self.config.BALL_DIAMETER
                 self.h = self.config.BALL_DIAMETER
-                self.right = None
+                self.up = None
             
             self.delay_counter = 0
             self.angle = 0
