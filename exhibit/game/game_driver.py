@@ -23,7 +23,7 @@ class GameDriver:
     def run(self, level):
 
         # The Pong environment
-        env = Pong(config=self.config, level = level, pipeline = self.pipeline, decimation_filter = self.decimation_filter, crop_percentage_w = self.crop_percentage_w, crop_percentage_h = self.crop_percentage_h, clipping_distance = self.clipping_distance, max_score = self.max_score)
+        env = Pong(config=self.config, level = level, pipeline = self.pipeline, decimation_filter = self.decimation_filter, crop_percentage_w = self.crop_percentage_w, crop_percentage_h = self.crop_percentage_h, clipping_distance = self.clipping_distance)
         currentFPS = self.config.GAME_FPS #(level * 40) + 40#Config.GAME_FPS 
 
         # if one of our players is Bot
@@ -94,7 +94,7 @@ class GameDriver:
             print(f"Behind frames: {np.mean(frame_skips)} mean, {np.std(frame_skips)} stdev, "
                   f"{np.max(frame_skips)} max, {np.unique(frame_skips, return_counts=True)}")
 
-    def __init__(self, config, subscriber, bottom_agent, top_agent, pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance, max_score):
+    def __init__(self, config, subscriber, bottom_agent, top_agent, pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance):
         self.subscriber = subscriber
         self.bottom_agent = bottom_agent
         self.top_agent = top_agent
@@ -103,7 +103,6 @@ class GameDriver:
         self.crop_percentage_w = crop_percentage_w
         self.crop_percentage_h = crop_percentage_h
         self.clipping_distance = clipping_distance
-        self.max_score = max_score
         self.config = config
         self.subscriber = subscriber
 
@@ -220,11 +219,10 @@ def check_for_still_player(pipeline, decimation_filter, crop_percentage_w, crop_
     return -5.0 # failed to get camera image, return bas value
 
 
-def main(in_q, MAX_SCORE=3):
+def main(in_q, config=Config.instance()):
     print("from gameDriver, about to init GameSubscriber")
-    print(f'The current MAX_SCORE is set to {MAX_SCORE}')
-    config = Config.instance()
     subscriber = GameSubscriber()
+    print(f'The current MAX_SCORE is set to {config.MAX_SCORE}')
 
     agent = AIPlayer(subscriber, top=True)
     #agent = HumanPlayer('o', 'l')
@@ -260,8 +258,8 @@ def main(in_q, MAX_SCORE=3):
         clipping_distance = clipping_distance_in_meters / depth_scale
         print(f'the Clipping Distance is : {clipping_distance}')
     else:
-        opponent = HumanPlayer('w', 's')
-        # opponent = BotPlayer(right=True)
+        #opponent = HumanPlayer('w', 's')
+        opponent = BotPlayer(bottom=True)
         pipeline = None
         decimation_filter = None
         crop_percentage_w = None
@@ -276,7 +274,7 @@ def main(in_q, MAX_SCORE=3):
     # was orginally in the loop
     instance = GameDriver(
         config, subscriber, opponent, agent, pipeline, decimation_filter,
-        crop_percentage_w, crop_percentage_h, clipping_distance, MAX_SCORE)
+        crop_percentage_w, crop_percentage_h, clipping_distance)
 
     while True: # play the exhibit on loop forever
         start = time.time()
@@ -365,8 +363,9 @@ def main(in_q, MAX_SCORE=3):
 
     sys.exit()
 
+
 if __name__ == "__main__":
-    main(Queue(), 2)
+    main(Queue(), config=Config())
 
 
 

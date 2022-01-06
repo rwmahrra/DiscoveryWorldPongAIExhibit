@@ -23,7 +23,6 @@ gameActive = False
 aiActive = False
 visualizationActive = False
 emulate3DActive = False
-max_score = 2
 killObject = "endThreads"
 q = Queue()
 q.put('noneActive')
@@ -79,7 +78,7 @@ def startGameDriver():
     varText.update(value=emptyString)
     importlib.reload(gd)
     # functionT = gd.main
-    threading.Thread(target=gd.main, args=(q,max_score), name='gameThread', daemon=True).start()
+    threading.Thread(target=gd.main, args=(q,), name='gameThread', daemon=True).start()
     time.sleep(0.5)
 
 def startAIDriver():
