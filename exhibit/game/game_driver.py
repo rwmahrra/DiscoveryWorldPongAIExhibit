@@ -58,6 +58,9 @@ class GameDriver:
                 action_r, depth_r, prob_r = self.top_agent.act()
                 if type(self.bottom_agent) == HumanPlayer or type(self.bottom_agent) == CameraPlayer:
                     action_l, depth_l, prob_l = self.bottom_agent.act()
+                    #print(type(self.bottom_agent))
+                    #print(action_l, depth_l, prob_l)
+                    #print("bottom_agent is a HumanPlayer or CameraPlayer act")
                 Timer.stop("act")
 
                 next_frame_time = last_frame_time + (1 / currentFPS)
@@ -228,6 +231,7 @@ def main(in_q, config=Config.instance()):
     #agent = HumanPlayer('o', 'l')
 
     if config.USE_DEPTH_CAMERA:
+        print("Configured to use depth Camera")
         opponent = CameraPlayer()
         decimation_filter = rs.decimation_filter()
         decimation_filter.set_option(rs.option.filter_magnitude, 6)
@@ -258,8 +262,11 @@ def main(in_q, config=Config.instance()):
         clipping_distance = clipping_distance_in_meters / depth_scale
         print(f'the Clipping Distance is : {clipping_distance}')
     else:
-        #opponent = HumanPlayer('w', 's')
-        opponent = BotPlayer(bottom=True)
+        print("Configured to NOT use depth Camera")
+        #opponent = HumanPlayer('a', 'd')
+        #print("setting opponent to be a HumanPlayer")
+        opponent = BotPlayer(bottom=True) #, always_follow=True)
+        print("setting opponent to be a BotPlayer")
         pipeline = None
         decimation_filter = None
         crop_percentage_w = None

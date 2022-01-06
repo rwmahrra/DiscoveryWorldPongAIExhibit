@@ -39,6 +39,7 @@ class HumanPlayer:
         :param state: Unused, preserves interface
         :return: (action id, confidence)
         """
+        #print("HumanPlayer acting")
         return self.move(), None, 1
 
     def move(self):
@@ -50,6 +51,7 @@ class CameraPlayer:
         """
         Player controlled via the depth camera
         """
+        print("CameraPlayer acting")
         return self.move(), Pong.get_human_x(), 1 # Pong.get_depth(), 1 #
 
     def move(self):
@@ -103,6 +105,7 @@ class BotPlayer:
         :param state: Unused, preserves interface for train script
         :return: (action id, confidence)
         """
+        #print("BotPlayer acting")
         return self.move(), None, 1
 
     def move(self):
