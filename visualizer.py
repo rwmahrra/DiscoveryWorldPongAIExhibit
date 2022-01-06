@@ -1,10 +1,7 @@
 from exhibit.game.pong import Pong
 import numpy as np
 from exhibit.game import player
-<<<<<<< HEAD
-=======
 from exhibit.shared.config import Config
->>>>>>> xander
 from exhibit.shared.utils import encode_action
 from initial_experiments.ai import DQN
 import matplotlib.pyplot as plt
@@ -71,11 +68,7 @@ def plot_scores(path='./tmp/', show=False, average_of=100):
     plt.cla()
 
 
-<<<<<<< HEAD
-def get_weight_image(model, neuron=0, layer=0, size=(Pong.HEIGHT // 2, Pong.WIDTH // 2)):
-=======
 def get_weight_image(model, neuron=0, layer=0, size=(Config.instance().HEIGHT // 2, Config.instance().WIDTH // 2)):
->>>>>>> xander
     weights = model.get_weights()[layer][:, neuron]
     # Normalize and scale weights to pixel values
     weights /= np.max(weights)
@@ -88,20 +81,19 @@ def get_weight_image(model, neuron=0, layer=0, size=(Config.instance().HEIGHT //
 def debug_step():
     env = Pong()
     right = player.HumanPlayer('up', 'down')
-    left = player.BotPlayer(env, left=True)
+    left = player.BotPlayer(env, bottom=True)
     last_screen = None
     state = env.reset()
     done = False
     while not done:
-        left_action = left.move(state)
-        right_action = right.move(state)
+        left_action = left.move()
+        right_action = right.move()
         action = np.stack((encode_action(left_action), encode_action(right_action)))
         start_state = state
         state, reward, done = env.step(left_action, right_action)
         reward_l, reward_r = reward
 
         env.show(duration=0)
-        env.show_state(duration=0)
 
 #
 # The commented out lines below can be useful for running this

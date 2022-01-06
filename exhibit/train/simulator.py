@@ -57,8 +57,8 @@ def simulate_game(config, env_type=Config.instance().CUSTOM, left=None, right=No
         action_l, prob_l, action_r, prob_r = None, None, None, None
         x = diff_state.ravel()
         x_flip = diff_state_rev.ravel()
-        if left is not None: action_l, prob_l = left.act(x_flip)
-        if right is not None: action_r, prob_r = right.act(x)
+        if left is not None: action_l, _, prob_l = left.act(x_flip)
+        if right is not None: action_r, _, prob_r = right.act(x)
         states.append(x)
 
         state, reward, done = None, None, None

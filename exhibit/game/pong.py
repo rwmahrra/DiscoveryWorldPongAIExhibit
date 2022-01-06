@@ -485,13 +485,10 @@ class Pong:
         :param hit_practice: Trigger training mode with a single paddle and randomly spawned balls
                              See the Ball class's hit_practice method.
         """
-        if pipeline == None:
-            print('pipeline equal to None')
         if config is None:
             config = Config.instance()
         
         config.SPEEDUP = 1 #+ 0.4 # (0.4*level) # uncomment this to make it faster each level
-        print(f'Pong environment init level {level} and SPEEDUP is {config.SPEEDUP}')
         config.MAX_SCORE = max_score
 
         if Pong.sounds == None:
@@ -619,7 +616,6 @@ class Pong:
                 self.top.update()
                 done = False
                 if self.score_top >= self.config.MAX_SCORE or self.score_bottom >= self.config.MAX_SCORE:
-                    print(f'The scores have hit the max_score of {self.config.MAX_SCORE} with AI: {self.score_top} and Human: {self.score_bottom}')
                     done = True
         screen = self.render()
         return screen, (reward_l, reward_r), done

@@ -1,25 +1,16 @@
-<<<<<<< HEAD
-=======
+
 import warnings
 warnings.filterwarnings("ignore", message=r"Passing", category=FutureWarning)
->>>>>>> xander
+
 import os
 from exhibit.train import simulator
 from exhibit.shared.utils import save_video, plot_loss, plot_score
 from exhibit.shared.config import Config
-<<<<<<< HEAD
-from exhibit.game.player import BotPlayer
-from exhibit.game.player import HumanPlayer
-from exhibit.ai.model import PGAgent
-from visualizer import get_weight_image
-import numpy as np
-=======
 from exhibit.ai.model import PGAgent
 from visualizer import get_weight_image
 import numpy as np
 from multiprocessing import Pool
 from tqdm import tqdm
->>>>>>> xander
 
 """
 This file is the driver for training a new DRL pong model.
