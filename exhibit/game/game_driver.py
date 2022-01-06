@@ -361,6 +361,8 @@ def main(in_q, config=Config.instance()):
                 level = level + 1
                 print(f'    !      Beginning level {level}. ')
                 subscriber.emit_level(level)
+                instance.run(level) # RUN LEVEL (2 or 3)
+
 
         else: # level == 3
             # if there was a level 4, the logic would be here
