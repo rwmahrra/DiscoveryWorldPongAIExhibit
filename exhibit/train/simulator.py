@@ -50,7 +50,11 @@ def simulate_game(config, env_type=Config.instance().CUSTOM, left=None, right=No
     while True:
         render_states.append(state.astype(np.uint8))
         current_state = utils.preprocess_custom(state)
-        diff_state = current_state - last_state
+
+        # mask out paddle position so that we don't diff over paddle state
+        last_state_masked = last_state.copy()
+        last_state_masked[:6, :] = 0
+        diff_state = current_state - last_state_masked
         model_states.append(diff_state.astype(np.uint8))
         diff_state_rev = np.flip(diff_state, axis=1)
         last_state = current_state
