@@ -27,7 +27,7 @@ convenient monitoring and graphing of the training process.
 GAME_BATCH = 10
 MODE = Config.instance().HIT_PRACTICE  # Config.instance().CUSTOM
 LEARNING_RATE = 0.001
-DENSE_STRUCTURE = (200,)
+DENSE_STRUCTURE = (500,)
 ALWAYS_FOLLOW = False
 PARALLELIZE = False
 
