@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras import Model
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dense, Input
 from tensorflow.keras.optimizers import Adam
 
 from exhibit.shared.config import Config
@@ -41,20 +41,18 @@ class PGAgent:
         self.last_hidden_activation = None
         self.last_output = None
 
-        # Truncated model to only calculate hidden layer activations
-        # (it's hard to get at them otherwise since the model is compiled)
-        self.hl_model = Model(inputs=self.model.inputs, outputs=self.model.layers[0].output)
-
     def _build_model(self):
         """
         Helper to construct model with Keras based on configuration
         """
-        model = Sequential()
-        model.add(Dense(self.structure[0], activation='relu', input_shape=(self.state_size,)))
+        state_input = Input((self.state_size,))
+        hidden_layer_output = Dense(self.structure[0], activation='relu', input_shape=(self.state_size,))(state_input)
+        x = hidden_layer_output
         if len(self.structure) > 1:
             for layer in self.structure[1:]:
-                model.add(Dense(layer, activation='relu'))
-        model.add(Dense(self.action_size, activation='softmax'))
+                x = Dense(layer, activation='relu')(x)
+        action_output = Dense(self.action_size, activation='softmax')(x)
+        model = Model(inputs=state_input, outputs=(action_output, hidden_layer_output))
         opt = Adam(lr=self.learning_rate)
         model.compile(loss='categorical_crossentropy', optimizer=opt)
         return model
@@ -66,14 +64,15 @@ class PGAgent:
         :return: (action id, confidence vector)
         """
         state = state.reshape([1, state.shape[0]])
-        self.last_hidden_activation = self.hl_model.predict(state, batch_size=1).squeeze()
-        prob = self.model.predict(state, batch_size=1).flatten()
-        self.last_output = prob
-        action = np.random.choice(self.action_size, 1, p=prob)[0]
+        prob, activation = self.model(state, training=False)
+        self.last_hidden_activation = activation.numpy().squeeze()
+        self.last_output = prob.numpy().flatten()
+
+        action = np.random.choice(self.action_size, 1, p=self.last_output)[0]
         state_ravel = state.reshape(Config.instance().CUSTOM_STATE_SHAPE)
         self.last_state = state_ravel.flatten()
 
-        return action, None, prob
+        return action, None, self.last_output
 
     def get_structure_packet(self):
         """
