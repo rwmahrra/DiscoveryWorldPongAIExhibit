@@ -100,7 +100,7 @@ if __name__ == "__main__":
             states_rev = [np.flip(state, axis=1) for state in states]
             agent_bottom.train(states_rev, *left)
 
-        neuron_states.append(get_weight_image(agent_top.model, size=state_shape))
+        neuron_states.append(get_weight_image(agent_top.train_model, size=state_shape))
         if episode == 1 or episode % 50 == 0:
             save_video(render_states, f'./analytics/{episode}.mp4')
             plot_loss(f'./analytics/plots/loss_{episode}.png', include_left=False)

@@ -35,8 +35,8 @@ class PGAgent:
         self.rewards = []
         self.probs = []
         self.structure = structure
-        self.model = self._build_model()
-        if self.verbose: self.model.summary()
+        self.train_model, self.infer_model = self._build_model()
+        if self.verbose: self.infer_model.summary()
         self.last_state = None
         self.last_hidden_activation = None
         self.last_output = None
@@ -52,10 +52,18 @@ class PGAgent:
             for layer in self.structure[1:]:
                 x = Dense(layer, activation='relu')(x)
         action_output = Dense(self.action_size, activation='softmax')(x)
-        model = Model(inputs=state_input, outputs=(action_output, hidden_layer_output))
+
+        # Model with hidden state output for inference visualization
+        infer_model = Model(inputs=state_input, outputs=(action_output, hidden_layer_output))
         opt = Adam(lr=self.learning_rate)
-        model.compile(loss='categorical_crossentropy', optimizer=opt)
-        return model
+        infer_model.compile(loss='categorical_crossentropy', optimizer=opt)
+
+        # Model without state output for training
+        train_model = Model(inputs=state_input, outputs=action_output)
+        opt = Adam(lr=self.learning_rate)
+        train_model.compile(loss='categorical_crossentropy', optimizer=opt)
+
+        return train_model, infer_model
 
     def act(self, state):
         """
@@ -64,7 +72,7 @@ class PGAgent:
         :return: (action id, confidence vector)
         """
         state = state.reshape([1, state.shape[0]])
-        prob, activation = self.model(state, training=False)
+        prob, activation = self.infer_model(state, training=False)
         self.last_hidden_activation = activation.numpy().squeeze()
         self.last_output = prob.numpy().flatten()
 
@@ -81,11 +89,11 @@ class PGAgent:
         """
         layers = []
         i = 0
-        for w in self.model.weights:
+        for w in self.infer_model.weights:
             l = None
             if i == 0: # Rotate first weight matrix as temporary solution for rotated
-                l = w.numpy().reshape(*Config.CUSTOM_STATE_SHAPE, -1)
-                l = l.reshape(Config.CUSTOM_STATE_SIZE, 200).tolist()
+                l = w.numpy().reshape(*Config.instance().CUSTOM_STATE_SHAPE, -1)
+                l = l.reshape(Config.instance().CUSTOM_STATE_SIZE, 200).tolist()
             else:
                 l = w.numpy().tolist()
 
@@ -148,10 +156,12 @@ class PGAgent:
         rewards = np.vstack(rewards)
         rewards = self.discount_rewards(rewards)
         gradients *= rewards
-
         X = np.squeeze(np.vstack([states]))
         Y = probs + self.learning_rate * np.squeeze(np.vstack([gradients]))
-        result = self.model.train_on_batch(X, Y)
+
+        # It shouldn't be necessary to update the inference model explicitly,
+        # since it shares weights with the train model
+        result = self.train_model.train_on_batch(X, Y)
         write(str(result), f'analytics/{self.name}.csv')
 
     def load(self, name):
@@ -160,7 +170,8 @@ class PGAgent:
         :param name: path to load weights
         """
         if self.verbose: print(f"Loading {name}")
-        self.model.load_weights(name)
+        self.train_model.load_weights(name)
+        self.infer_model.load_weights(name)
 
     def save(self, name):
         """
@@ -168,5 +179,5 @@ class PGAgent:
         :param name: path to save weights
         """
         print(f"Saving {name}")
-        self.model.save_weights(name)
+        self.train_model.save_weights(name)
 
