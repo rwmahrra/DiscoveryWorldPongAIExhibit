@@ -47,6 +47,10 @@ def simulate_game(config, env_type=Config.instance().CUSTOM, left=None, right=No
     if visualizer is not None:
         visualizer.base_render(utils.preprocess_custom(state))
     i = 0
+
+    # Fill buffer with "NONE" actions as needed for delay
+    action_buffer = [2 for i in range(config.AI_FRAME_DELAY)]
+
     while True:
         render_states.append(state.astype(np.uint8))
         current_state = utils.preprocess_custom(state)
@@ -63,7 +67,9 @@ def simulate_game(config, env_type=Config.instance().CUSTOM, left=None, right=No
 
         state, reward, done = None, None, None
         if env_type == config.HIT_PRACTICE:
-            state, reward, done = env.step(None, config.ACTIONS[action_r], frames=config.AI_FRAME_INTERVAL)
+            action_buffer.append(action_r)
+            next_action = action_buffer.pop(0)
+            state, reward, done = env.step(None, config.ACTIONS[next_action], frames=config.AI_FRAME_INTERVAL)
         else:
             state, reward, done = env.step(config.ACTIONS[action_l], config.ACTIONS[action_r], frames=config.AI_FRAME_INTERVAL)
 
