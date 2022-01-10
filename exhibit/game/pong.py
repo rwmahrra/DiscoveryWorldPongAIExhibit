@@ -6,8 +6,11 @@ import keyboard
 from random import choice, randint, random
 import time
 from exhibit.shared.config import Config
-import pyrealsense2 as rs
+
 from exhibit.shared.utils import Timer
+
+if Config.instance().USE_DEPTH_CAMERA:
+    import pyrealsense2 as rs
 
 if Config.instance().ENABLE_AUDIO:
     import pygame.mixer
@@ -23,8 +26,9 @@ class Pong:
     in order to allow for complete flexibility.
     """
     sounds = None
-    align_to = rs.stream.color
-    align = rs.align(align_to)  
+    if Config.instance().USE_DEPTH_CAMERA:
+        align_to = rs.stream.color
+        align = rs.align(align_to)
 
     depth_feed = ""
 
@@ -485,13 +489,10 @@ class Pong:
         :param hit_practice: Trigger training mode with a single paddle and randomly spawned balls
                              See the Ball class's hit_practice method.
         """
-        if pipeline == None:
-            print('pipeline equal to None')
         if config is None:
             config = Config.instance()
         
         config.SPEEDUP = 1 #+ 0.4 # (0.4*level) # uncomment this to make it faster each level
-        print(f'Pong environment init level {level} and SPEEDUP is {config.SPEEDUP}')
         config.MAX_SCORE = max_score
 
         if Pong.sounds == None:
@@ -619,7 +620,6 @@ class Pong:
                 self.top.update()
                 done = False
                 if self.score_top >= self.config.MAX_SCORE or self.score_bottom >= self.config.MAX_SCORE:
-                    print(f'The scores have hit the max_score of {self.config.MAX_SCORE} with AI: {self.score_top} and Human: {self.score_bottom}')
                     done = True
         screen = self.render()
         return screen, (reward_l, reward_r), done

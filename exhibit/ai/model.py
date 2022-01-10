@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras import Model
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dense, Input
 from tensorflow.keras.optimizers import Adam
 
 from exhibit.shared.config import Config
@@ -35,29 +35,35 @@ class PGAgent:
         self.rewards = []
         self.probs = []
         self.structure = structure
-        self.model = self._build_model()
-        if self.verbose: self.model.summary()
+        self.train_model, self.infer_model = self._build_model()
+        if self.verbose: self.infer_model.summary()
         self.last_state = None
         self.last_hidden_activation = None
         self.last_output = None
-
-        # Truncated model to only calculate hidden layer activations
-        # (it's hard to get at them otherwise since the model is compiled)
-        self.hl_model = Model(inputs=self.model.inputs, outputs=self.model.layers[0].output)
 
     def _build_model(self):
         """
         Helper to construct model with Keras based on configuration
         """
-        model = Sequential()
-        model.add(Dense(self.structure[0], activation='relu', input_shape=(self.state_size,)))
+        state_input = Input((self.state_size,))
+        hidden_layer_output = Dense(self.structure[0], activation='relu', input_shape=(self.state_size,))(state_input)
+        x = hidden_layer_output
         if len(self.structure) > 1:
             for layer in self.structure[1:]:
-                model.add(Dense(layer, activation='relu'))
-        model.add(Dense(self.action_size, activation='softmax'))
+                x = Dense(layer, activation='relu')(x)
+        action_output = Dense(self.action_size, activation='softmax')(x)
+
+        # Model with hidden state output for inference visualization
+        infer_model = Model(inputs=state_input, outputs=(action_output, hidden_layer_output))
         opt = Adam(lr=self.learning_rate)
-        model.compile(loss='categorical_crossentropy', optimizer=opt)
-        return model
+        infer_model.compile(loss='categorical_crossentropy', optimizer=opt)
+
+        # Model without state output for training
+        train_model = Model(inputs=state_input, outputs=action_output)
+        opt = Adam(lr=self.learning_rate)
+        train_model.compile(loss='categorical_crossentropy', optimizer=opt)
+
+        return train_model, infer_model
 
     def act(self, state):
         """
@@ -66,14 +72,15 @@ class PGAgent:
         :return: (action id, confidence vector)
         """
         state = state.reshape([1, state.shape[0]])
-        self.last_hidden_activation = self.hl_model.predict(state, batch_size=1).squeeze()
-        prob = self.model.predict(state, batch_size=1).flatten()
-        self.last_output = prob
-        action = np.random.choice(self.action_size, 1, p=prob)[0]
+        prob, activation = self.infer_model(state, training=False)
+        self.last_hidden_activation = activation.numpy().squeeze()
+        self.last_output = prob.numpy().flatten()
+
+        action = np.random.choice(self.action_size, 1, p=self.last_output)[0]
         state_ravel = state.reshape(Config.instance().CUSTOM_STATE_SHAPE)
         self.last_state = state_ravel.flatten()
 
-        return action, None, prob
+        return action, None, self.last_output
 
     def get_structure_packet(self):
         """
@@ -82,11 +89,11 @@ class PGAgent:
         """
         layers = []
         i = 0
-        for w in self.model.weights:
+        for w in self.infer_model.weights:
             l = None
             if i == 0: # Rotate first weight matrix as temporary solution for rotated
-                l = w.numpy().reshape(*Config.CUSTOM_STATE_SHAPE, -1)
-                l = l.reshape(Config.CUSTOM_STATE_SIZE, 200).tolist()
+                l = w.numpy().reshape(*Config.instance().CUSTOM_STATE_SHAPE, -1)
+                l = l.reshape(Config.instance().CUSTOM_STATE_SIZE, 200).tolist()
             else:
                 l = w.numpy().tolist()
 
@@ -149,10 +156,12 @@ class PGAgent:
         rewards = np.vstack(rewards)
         rewards = self.discount_rewards(rewards)
         gradients *= rewards
-
         X = np.squeeze(np.vstack([states]))
         Y = probs + self.learning_rate * np.squeeze(np.vstack([gradients]))
-        result = self.model.train_on_batch(X, Y)
+
+        # It shouldn't be necessary to update the inference model explicitly,
+        # since it shares weights with the train model
+        result = self.train_model.train_on_batch(X, Y)
         write(str(result), f'analytics/{self.name}.csv')
 
     def load(self, name):
@@ -161,7 +170,8 @@ class PGAgent:
         :param name: path to load weights
         """
         if self.verbose: print(f"Loading {name}")
-        self.model.load_weights(name)
+        self.train_model.load_weights(name)
+        self.infer_model.load_weights(name)
 
     def save(self, name):
         """
@@ -169,5 +179,5 @@ class PGAgent:
         :param name: path to save weights
         """
         print(f"Saving {name}")
-        self.model.save_weights(name)
+        self.train_model.save_weights(name)
 

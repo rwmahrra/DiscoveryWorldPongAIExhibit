@@ -18,13 +18,14 @@ class Config:
         self.USE_DEPTH_CAMERA = False
 
         self.PADDING = 10  # Distance between screen edge and player paddles (px)
-        self.MAX_SCORE = 2  # Points one side must win to finish game
+        self.MAX_SCORE = 21  # Points one side must win to finish game
         self.WIDTH = 192  # Game window width (px)
         self.HEIGHT = 160  # Game window height (px)
         self.SPEEDUP = 1  # Flat multiplier to game movement speeds
         self.ACTIONS = ["LEFT", "RIGHT", "NONE", "DEPTH"]
         self.GAME_FPS = 60
         self.AI_FRAME_INTERVAL = 5  # AI will publish inference every n frames
+        self.AI_FRAME_DELAY = 1  # Game will receive each inference n frames late
         self.BALL_MARKER_SIZE = 4  # Pixel height and width of experimental position markers
         self.CUSTOM = 0
         self.HIT_PRACTICE = 2

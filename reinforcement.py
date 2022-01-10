@@ -1,25 +1,16 @@
-<<<<<<< HEAD
-=======
+
 import warnings
 warnings.filterwarnings("ignore", message=r"Passing", category=FutureWarning)
->>>>>>> xander
+
 import os
 from exhibit.train import simulator
 from exhibit.shared.utils import save_video, plot_loss, plot_score
 from exhibit.shared.config import Config
-<<<<<<< HEAD
-from exhibit.game.player import BotPlayer
-from exhibit.game.player import HumanPlayer
-from exhibit.ai.model import PGAgent
-from visualizer import get_weight_image
-import numpy as np
-=======
 from exhibit.ai.model import PGAgent
 from visualizer import get_weight_image
 import numpy as np
 from multiprocessing import Pool
 from tqdm import tqdm
->>>>>>> xander
 
 """
 This file is the driver for training a new DRL pong model.
@@ -109,7 +100,7 @@ if __name__ == "__main__":
             states_rev = [np.flip(state, axis=1) for state in states]
             agent_bottom.train(states_rev, *left)
 
-        neuron_states.append(get_weight_image(agent_top.model, size=state_shape))
+        neuron_states.append(get_weight_image(agent_top.train_model, size=state_shape))
         if episode == 1 or episode % 50 == 0:
             save_video(render_states, f'./analytics/{episode}.mp4')
             plot_loss(f'./analytics/plots/loss_{episode}.png', include_left=False)

@@ -47,6 +47,10 @@ def simulate_game(config, env_type=Config.instance().CUSTOM, left=None, right=No
     if visualizer is not None:
         visualizer.base_render(utils.preprocess_custom(state))
     i = 0
+
+    # Fill buffer with "NONE" actions as needed for delay
+    action_buffer = [2 for i in range(config.AI_FRAME_DELAY)]
+
     while True:
         render_states.append(state.astype(np.uint8))
         current_state = utils.preprocess_custom(state)
@@ -57,13 +61,15 @@ def simulate_game(config, env_type=Config.instance().CUSTOM, left=None, right=No
         action_l, prob_l, action_r, prob_r = None, None, None, None
         x = diff_state.ravel()
         x_flip = diff_state_rev.ravel()
-        if left is not None: action_l, prob_l = left.act(x_flip)
-        if right is not None: action_r, prob_r = right.act(x)
+        if left is not None: action_l, _, prob_l = left.act(x_flip)
+        if right is not None: action_r, _, prob_r = right.act(x)
         states.append(x)
 
         state, reward, done = None, None, None
         if env_type == config.HIT_PRACTICE:
-            state, reward, done = env.step(None, config.ACTIONS[action_r], frames=config.AI_FRAME_INTERVAL)
+            action_buffer.append(action_r)
+            next_action = action_buffer.pop(0)
+            state, reward, done = env.step(None, config.ACTIONS[next_action], frames=config.AI_FRAME_INTERVAL)
         else:
             state, reward, done = env.step(config.ACTIONS[action_l], config.ACTIONS[action_r], frames=config.AI_FRAME_INTERVAL)
 
