@@ -263,10 +263,10 @@ def main(in_q, config=Config.instance()):
         print(f'the Clipping Distance is : {clipping_distance}')
     else:
         print("Configured to NOT use depth Camera")
-        #opponent = HumanPlayer('a', 'd')
-        #print("setting opponent to be a HumanPlayer")
-        opponent = BotPlayer(bottom=True) #, always_follow=True)
-        print("setting opponent to be a BotPlayer")
+        opponent = HumanPlayer('a', 'd')
+        print("setting opponent to be a HumanPlayer")
+        #opponent = BotPlayer(bottom=True) #, always_follow=True)
+        #print("setting opponent to be a BotPlayer")
         pipeline = None
         decimation_filter = None
         crop_percentage_w = None
