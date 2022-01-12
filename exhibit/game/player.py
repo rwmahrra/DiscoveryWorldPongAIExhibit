@@ -148,3 +148,9 @@ class AIPlayer:
             return self.subscriber.paddle1_action, None, self.subscriber.paddle1_prob
         if self.bottom:
             return self.subscriber.paddle2_action, None, self.subscriber.paddle2_prob
+
+    def get_frame(self):
+        if self.top:
+            return self.subscriber.paddle1_frame
+        if self.bottom:
+            return self.subscriber.paddle2_frame
