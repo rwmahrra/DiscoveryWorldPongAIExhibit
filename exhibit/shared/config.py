@@ -17,6 +17,11 @@ class Config:
     def __init__(self):
         self.USE_DEPTH_CAMERA = False
 
+        # Debug/diagnostic config options
+        # Leave disabled unless you want console spam (may affect performance)
+        self.NETWORK_TIMESTAMPS = True  # Note: output is occasionally a little jumbled because it isn't threadsafe
+        self.MOVE_TIMESTAMPS = True
+
         self.PADDING = 10  # Distance between screen edge and player paddles (px)
         self.MAX_SCORE = 2  # Points one side must win to finish game
         self.WIDTH = 192  # Game window width (px)

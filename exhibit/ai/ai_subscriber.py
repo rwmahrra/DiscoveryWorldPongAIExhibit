@@ -1,3 +1,5 @@
+import time
+
 import paho.mqtt.client as mqtt
 import numpy as np
 import json
@@ -37,6 +39,8 @@ class AISubscriber:
             self.game_level = payload["level"]
         if topic == "game/frame":
             self.frame = payload["frame"]
+            if Config.instance().NETWORK_TIMESTAMPS:
+                print(f'{time.time_ns() // 1_000_000} F{self.frame} RECV GM->AI')
             self.trailing_frame = self.latest_frame
             self.latest_frame = self.render_latest_preprocessed()
 
@@ -64,6 +68,8 @@ class AISubscriber:
         :param message: payload object, will be JSON stringified
         :return:
         """
+        if topic == 'paddle1/frame' and Config.instance().NETWORK_TIMESTAMPS:
+            print(f'{time.time_ns() // 1_000_000} F{message["frame"]} SEND AI->GM')
         p = json.dumps(message)
         self.client.publish(topic, payload=p, qos=qos)
 

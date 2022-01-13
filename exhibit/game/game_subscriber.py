@@ -1,6 +1,8 @@
 import json
 import paho.mqtt.client as mqtt
 import numpy as np
+import time
+from exhibit.shared.utils import Config
 
 class GameSubscriber:
     def emit_state(self, state, request_action=False):
@@ -14,6 +16,8 @@ class GameSubscriber:
 
         if request_action:
             self.client.publish("game/frame", payload=json.dumps({"frame": frame}))
+            if Config.instance().NETWORK_TIMESTAMPS:
+                print(f'{time.time_ns() // 1_000_000} F{frame} SEND GM->AI')
 
     # get depth camera feed into browser
     def emit_depth_feed(self, feed):
@@ -37,6 +41,8 @@ class GameSubscriber:
             self.paddle1_action = int(payload["action"])
         if topic == "paddle1/frame":
             self.paddle1_frame = payload["frame"]
+            if Config.instance().NETWORK_TIMESTAMPS:
+                print(f'{time.time_ns() // 1_000_000} F{self.paddle1_frame} RECV AI->GM')
         if topic == "paddle2/action":
             self.paddle2_action = int(payload["action"])
         if topic == "paddle2/frame":
