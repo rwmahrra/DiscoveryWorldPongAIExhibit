@@ -78,7 +78,7 @@ if __name__ == "__main__":
     # Store neuron images for fun
     neuron_states = []
     # Train loop
-    for episode in tqdm(range(10000)):
+    for episode in tqdm(range(30000)):
         episode += 1
         bottom_path = None
         top_path = None

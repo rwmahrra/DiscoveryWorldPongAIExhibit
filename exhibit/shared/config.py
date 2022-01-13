@@ -30,8 +30,8 @@ class Config:
         self.SPEEDUP = 1  # Flat multiplier to game movement speeds
         self.ACTIONS = ["LEFT", "RIGHT", "NONE", "DEPTH"]
         self.GAME_FPS = 60
-        self.AI_FRAME_INTERVAL = 5  # AI will publish inference every n frames
-        self.AI_FRAME_DELAY = 1  # Game will receive each inference n frames late
+        self.AI_FRAME_INTERVAL = 3  # AI will publish inference every n frames
+        self.AI_FRAME_DELAY = 0  # Game will receive each inference n frames late
         self.BALL_MARKER_SIZE = 4  # Pixel height and width of experimental position markers
         self.CUSTOM = 0
         self.HIT_PRACTICE = 2
