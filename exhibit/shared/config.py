@@ -19,8 +19,8 @@ class Config:
 
         # Debug/diagnostic config options
         # Leave disabled unless you want console spam (may affect performance)
-        self.NETWORK_TIMESTAMPS = True  # Note: output is occasionally a little jumbled because it isn't threadsafe
-        self.MOVE_TIMESTAMPS = True
+        self.NETWORK_TIMESTAMPS = False  # Note: output is occasionally a little jumbled because it isn't threadsafe
+        self.MOVE_TIMESTAMPS = False
 
         self.PADDING = 10  # Distance between screen edge and player paddles (px)
         self.MAX_SCORE = 2  # Points one side must win to finish game
