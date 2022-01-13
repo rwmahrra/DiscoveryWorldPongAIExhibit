@@ -96,7 +96,7 @@ class GameDriver:
             i += 1
 
         print('Score: %f - %f.' % (score_l, score_r))
-        if self.config.DEBUG:
+        if self.config.BEHIND_FRAMES:
             print(frame_skips)
             print(f"Behind frames: {np.mean(frame_skips)} mean, {np.std(frame_skips)} stdev, "
                   f"{np.max(frame_skips)} max, {np.unique(frame_skips, return_counts=True)}")

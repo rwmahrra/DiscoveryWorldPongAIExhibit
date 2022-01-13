@@ -21,6 +21,7 @@ class Config:
         # Leave disabled unless you want console spam (may affect performance)
         self.NETWORK_TIMESTAMPS = False  # Note: output is occasionally a little jumbled because it isn't threadsafe
         self.MOVE_TIMESTAMPS = False
+        self.BEHIND_FRAMES = True
 
         self.PADDING = 10  # Distance between screen edge and player paddles (px)
         self.MAX_SCORE = 2  # Points one side must win to finish game
@@ -47,7 +48,6 @@ class Config:
         self.TOP_PADDLE_Y = self.PADDING + 0.5
 
         self.ENV_TYPE = self.CUSTOM
-        self.DEBUG = True
         self.ENABLE_AUDIO = False
         self.VOLLEY_SPEEDUP = 0.2  # Multiplier to ball speed after each paddle hit
         self.AUDIO_DIR = "C:\\dev\\DiscoveryWorld\\exhibit\\game\\resources\\"
