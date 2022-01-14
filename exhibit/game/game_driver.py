@@ -45,39 +45,43 @@ class GameDriver:
         done = False
         last_frame_time = time.time()
         while not done:
-            acted_frame = self.subscriber.paddle1_frame
-            rendered_frame = env.frames
-
-            if acted_frame is not None:
-                frames_behind = rendered_frame - acted_frame
-                frame_skips.append(frames_behind)
             action_l, depth_l, prob_l = self.bottom_agent.act()
-
             for i in range(self.config.AI_FRAME_INTERVAL):
-                Timer.start("act")
+                rendered_frame = env.frames
+                #Timer.start("act")
                 action_r, depth_r, prob_r = self.top_agent.act()
+                acted_frame = self.top_agent.get_frame()
+                if self.config.MOVE_TIMESTAMPS:
+                    print(f'{time.time_ns() // 1_000_000} F{env.frames} MOVE W/PRED {self.top_agent.get_frame()}')
+                if acted_frame is not None:
+                    frames_behind = rendered_frame - acted_frame
+                    if frames_behind >= 0 and frames_behind:
+                        # Throw out frame ids from previous games
+                        if frames_behind <= self.config.AI_FRAME_INTERVAL:
+                            frame_skips.append(0)  # Frame diffs of 0-5 frames are always intentional
+                        else:
+                            frame_skips.append(frames_behind - self.config.AI_FRAME_INTERVAL)
+
                 if type(self.bottom_agent) == HumanPlayer or type(self.bottom_agent) == CameraPlayer:
                     action_l, depth_l, prob_l = self.bottom_agent.act()
-                    #print(type(self.bottom_agent))
-                    #print(action_l, depth_l, prob_l)
-                    #print("bottom_agent is a HumanPlayer or CameraPlayer act")
-                Timer.stop("act")
+
+                #Timer.stop("act")
 
                 next_frame_time = last_frame_time + (1 / currentFPS)
 
-                Timer.start("step")
+                #Timer.start("step")
                 state, reward, done = env.step(self.config.ACTIONS[action_l], self.config.ACTIONS[action_r], frames=1, depth=depth_l)
-                Timer.stop("step")
+                #Timer.stop("step")
                 reward_l, reward_r = reward
                 if reward_r < 0: score_l -= reward_r
                 if reward_r > 0: score_r += reward_r
-                Timer.start("emit")
+                #Timer.start("emit")
                 if i == self.config.AI_FRAME_INTERVAL - 1:
                     self.subscriber.emit_state(env.get_packet_info(), request_action=True)
                 else:
                     self.subscriber.emit_state(env.get_packet_info(), request_action=False)
                 self.subscriber.emit_depth_feed(env.depth_feed)
-                Timer.stop("emit")
+                #Timer.stop("emit")
                 to_sleep = next_frame_time - time.time()
                 if to_sleep < 0:
                     pass
@@ -92,7 +96,7 @@ class GameDriver:
             i += 1
 
         print('Score: %f - %f.' % (score_l, score_r))
-        if self.config.DEBUG:
+        if self.config.BEHIND_FRAMES:
             print(frame_skips)
             print(f"Behind frames: {np.mean(frame_skips)} mean, {np.std(frame_skips)} stdev, "
                   f"{np.max(frame_skips)} max, {np.unique(frame_skips, return_counts=True)}")
