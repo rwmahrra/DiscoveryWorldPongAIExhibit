@@ -25,6 +25,7 @@ convenient monitoring and graphing of the training process.
 """
 
 GAME_BATCH = 10
+EPISODES = 30000
 MODE = Config.instance().HIT_PRACTICE  # Config.instance().CUSTOM
 LEARNING_RATE = 0.001
 DENSE_STRUCTURE = (200,)
@@ -78,7 +79,7 @@ if __name__ == "__main__":
     # Store neuron images for fun
     neuron_states = []
     # Train loop
-    for episode in tqdm(range(10000)):
+    for episode in tqdm(range(EPISODES)):
         episode += 1
         bottom_path = None
         top_path = None
@@ -107,6 +108,6 @@ if __name__ == "__main__":
             plot_score(f'./analytics/plots/score_{episode}.png')
             if bottom_is_model: agent_bottom.save(f'./models/bottom/{episode}.h5')
             if top_is_model: agent_top.save(f'./models/top/{episode}.h5')
-        if episode == 10000:
+        if episode == EPISODES:
             if top_is_model: save_video(neuron_states, f'./analytics/{episode}_weights0.mp4', fps=60)
             exit(0)
