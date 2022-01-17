@@ -81,7 +81,58 @@ class GameDriver:
                 else:
                     self.subscriber.emit_state(env.get_packet_info(), request_action=False)
                 self.subscriber.emit_depth_feed(env.depth_feed)
-                #Timer.stop("emit")
+                #Time
+                # 
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                r.stop("emit")
                 to_sleep = next_frame_time - time.time()
                 if to_sleep < 0:
                     pass
