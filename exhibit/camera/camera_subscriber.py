@@ -17,13 +17,10 @@ class CameraSubscriber:
 
     def on_connect(self, client, userdata, flags, rc):
         print("Connected with result code " + str(rc))
-        client.subscribe("puck/position")
-        client.subscribe("player1/score")
-        client.subscribe("player2/score")
-        client.subscribe("paddle1/position")
-        client.subscribe("paddle2/position")
-        client.subscribe("game/level")
-        client.subscribe("game/frame")
+        client.subscribe("paddle1/action")
+        client.subscribe("paddle2/action")
+        client.subscribe("paddle1/frame")
+        client.subscribe("paddle2/frame")
 
     # get depth camera feed into browser
     def emit_depth_feed(self, feed):
@@ -33,21 +30,16 @@ class CameraSubscriber:
     def on_message(self, client, userdata, msg):
         topic = msg.topic
         payload = json.loads(msg.payload)
-        if topic == "puck/position":
-            self.puck_x = payload["x"]
-            self.puck_y = payload["y"]
-        if topic == "paddle1/position":
-            self.bottom_paddle_x = payload["position"]
-        if topic == "paddle2/position":
-            self.top_paddle_x = payload["position"]
-        if topic == "game/level":
-            self.game_level = payload["level"]
-        if topic == "game/frame":
-            self.frame = payload["frame"]
+        if topic == "paddle1/action":
+            self.paddle1_action = int(payload["action"])
+        if topic == "paddle1/frame":
+            self.paddle1_frame = payload["frame"]
             if Config.instance().NETWORK_TIMESTAMPS:
-                print(f'{time.time_ns() // 1_000_000} F{self.frame} RECV GM->AI')
-            self.trailing_frame = self.latest_frame
-            self.latest_frame = self.render_latest_preprocessed()
+                print(f'{time.time_ns() // 1_000_000} F{self.paddle1_frame} RECV AI->GM')
+        if topic == "paddle2/action":
+            self.paddle2_action = int(payload["action"])
+        if topic == "paddle2/frame":
+            self.paddle2_frame = payload["frame"]
 
 
     def publish(self, topic, message, qos=0):

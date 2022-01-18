@@ -81,58 +81,7 @@ class GameDriver:
                 else:
                     self.subscriber.emit_state(env.get_packet_info(), request_action=False)
                 self.subscriber.emit_depth_feed(env.depth_feed)
-                #Time
-                # 
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                r.stop("emit")
+                #Timer.stop("emit")
                 to_sleep = next_frame_time - time.time()
                 if to_sleep < 0:
                     pass
@@ -152,129 +101,14 @@ class GameDriver:
             print(f"Behind frames: {np.mean(frame_skips)} mean, {np.std(frame_skips)} stdev, "
                   f"{np.max(frame_skips)} max, {np.unique(frame_skips, return_counts=True)}")
 
-    def __init__(self, config, subscriber, bottom_agent, top_agent, pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance):
+    def __init__(self, config, subscriber, bottom_agent, top_agent):
         self.subscriber = subscriber
         self.bottom_agent = bottom_agent
         self.top_agent = top_agent
-        self.pipeline = pipeline
-        self.decimation_filter = decimation_filter
-        self.crop_percentage_w = crop_percentage_w
-        self.crop_percentage_h = crop_percentage_h
-        self.clipping_distance = clipping_distance
         self.config = config
         self.subscriber = subscriber
 
 
-# checks if theres a big enough player sized blob
-def check_for_player(pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance):
-        #try to get the frame 50 times
-        for i in range(50): 
-            frames = pipeline.wait_for_frames()
-            depth = frames.get_depth_frame()
-            #color = frames.get_color_frame()
-            if not depth: continue
-
-            # filtering the image to make it less noisy and inconsistent
-            depth_filtered = decimation_filter.process(depth)
-            depth_image = np.asanyarray(depth_filtered.get_data())
-            
-            # cropping the image based on a width and height percentage
-            w,h = depth_image.shape
-            ws, we = int(w/2 - (w * crop_percentage_w)/2), int(w/2 + (w * crop_percentage_w)/2)
-            hs, he = int(h/2 - (h * crop_percentage_h)/2), int(h/2 + (h * crop_percentage_h)/2)
-            #print("dimension: {}, {}, width: {},{} height: {},{}".format(w,h,ws,we,hs,he))
-            depth_cropped = depth_image[ws:we, hs:he]
-            #depth_cropped = depth_image
-
-            cutoffImage = np.where((depth_cropped < clipping_distance) & (depth_cropped > 0.1), True, False)
-
-            #print(f'cutoffImage shape is {cutoffImage.shape}, depth_cropped shape is {depth_cropped.shape}');
-            avg_x = 0
-            avg_x_array = np.array([])
-            countB = 0
-            for a in range(np.size(cutoffImage,0)):
-                for b in range(np.size(cutoffImage,1)):
-                    if cutoffImage[a,b] :
-                        avg_x += b
-                        #print(b)
-                        avg_x_array = np.append(avg_x_array,b)
-                        countB = countB+1
-            # if we got no pixels in depth, return false
-            if countB <= 40: 
-                return False
-
-            return True # successfully found a player, return true
-        return False # failed to get camera image, return false
-
-# checks if there is a player and returns their position from 0 to 1 so that we can tell if theyre walking through or still to play
-def check_for_still_player(pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance):
-    #try to get the frame 50 times
-    for i in range(20):
-        try:
-            # print('trying wait_for_frames')
-            frames = pipeline.wait_for_frames()
-        except Exception as ed:
-            print(ed)
-            continue
-
-        depth = frames.get_depth_frame()
-        #color = frames.get_color_frame()
-        if not depth: continue
-
-        # filtering the image to make it less noisy and inconsistent
-        depth_filtered = decimation_filter.process(depth)
-        depth_image = np.asanyarray(depth_filtered.get_data())
-
-        # cropping the image based on a width and height percentage
-        w,h = depth_image.shape
-        ws, we = int(w/2 - (w * crop_percentage_w)/2), int(w/2 + (w * crop_percentage_w)/2)
-        hs, he = int(h/2 - (h * crop_percentage_h)/2), int(h/2 + (h * crop_percentage_h)/2)
-        #print("dimension: {}, {}, width: {},{} height: {},{}".format(w,h,ws,we,hs,he))
-        depth_cropped = depth_image[ws:we, hs:he]
-        #depth_cropped = depth_image
-
-        cutoffImage = np.where((depth_cropped < clipping_distance) & (depth_cropped > 0.1), True, False)
-
-        #print(f'cutoffImage shape is {cutoffImage.shape}, depth_cropped shape is {depth_cropped.shape}');
-        avg_x = 0
-        avg_x_array = np.array([])
-        countB = 0
-        for a in range(np.size(cutoffImage,0)):
-            for b in range(np.size(cutoffImage,1)):
-                if cutoffImage[a,b] :
-                    avg_x += b
-                    #print(b)
-                    avg_x_array = np.append(avg_x_array,b)
-                    countB = countB+1
-        # if we got no pixels in depth, return false
-        if countB <= 40:
-            return -5.0
-
-        avg_x_array.sort()
-        islands = []
-        i_min = 0
-        i_max = 0
-        p = avg_x_array[0]
-        for index in range(np.size(avg_x_array,0)) :
-            n = avg_x_array[index]
-            if n > p+1 and not i_min == i_max : # if the island is done
-                islands.append(avg_x_array[i_min:i_max])
-                i_min = index
-            i_max = index
-            p = n
-        if not i_min == i_max: islands.append(avg_x_array[i_min:i_max])
-
-
-        #print(islands)
-        bigIsland = np.array([])
-        for array in islands:
-            if np.size(array,0) > np.size(bigIsland,0): bigIsland = array
-
-        #print(np.median(bigIsland))
-        m = (np.median(bigIsland))
-
-        return (m/(np.size(cutoffImage,1)) * 1) # -0.2 # return value
-    return -5.0 # failed to get camera image, return bas value
 
 
 def main(in_q, config=Config.instance()):
@@ -288,34 +122,7 @@ def main(in_q, config=Config.instance()):
     if config.USE_DEPTH_CAMERA:
         print("Configured to use depth Camera")
         opponent = CameraPlayer()
-        decimation_filter = rs.decimation_filter()
-        decimation_filter.set_option(rs.option.filter_magnitude, 6)
-
-        crop_percentage_w = 1.0
-        crop_percentage_h = 1.0
-
-        print("starting with crop w at {}".format(crop_percentage_w * 100))
-        print("starting with crop h at {}".format(crop_percentage_h * 100))
-
-        pipeline = rs.pipeline()
-
-        rs_config = rs.config()
-        rs_config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-        rs_config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
-
-        profile = pipeline.start(rs_config)
-
-        # Getting the depth sensor's depth scale (see rs-align example for explanation)
-        depth_sensor = profile.get_device().first_depth_sensor()
-        depth_scale = depth_sensor.get_depth_scale()
-        print("Depth Scale is: " , depth_scale)
-
-        # We will be removing the background of objects more than
-        #  clipping_distance_in_meters meters away
-        # filter out far away so we only have a person
-        clipping_distance_in_meters = 1.6 #2 meter
-        clipping_distance = clipping_distance_in_meters / depth_scale
-        print(f'the Clipping Distance is : {clipping_distance}')
+        
     else:
         print("Configured to NOT use depth Camera")
         opponent = HumanPlayer('a', 'd')
@@ -361,7 +168,7 @@ def main(in_q, config=Config.instance()):
             if config.USE_DEPTH_CAMERA:
                 print("          Waiting for user interaction to begin game . . . ")
                 # checking if theres a large enough human blob to track
-                while not check_for_player(pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance):
+                while not check_for_player():
                     time.sleep(0.01) # will just loop and stay at level zero until it sees someone
                 print("          Human detected, checking if still . . . ")
 
@@ -370,7 +177,7 @@ def main(in_q, config=Config.instance()):
 
                 # take 40 measurements of the player to see if they actually are trying to
                 for counter in range(0,30):
-                    c_value = check_for_still_player(pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance)
+                    c_value = check_for_still_player()
                     if c_value == -0.5:
                         # c_value is our dummy value for not seeing a human blob
                         # continue loop back at waiting for interaction
