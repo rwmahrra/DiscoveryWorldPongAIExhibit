@@ -10,6 +10,8 @@ from queue import Queue
 import os
 import exhibit.game
 from exhibit.game import game_driver as gd
+import exhibit.camera
+from exhibit.camera import camera_driver as cd
 import exhibit.ai
 from exhibit.ai import ai_driver
 import exhibit.visualization
@@ -28,6 +30,8 @@ q = Queue()
 q.put('noneActive')
 q_ai = Queue()
 q_ai.put('noneActive')
+q_camera = Queue()
+q_camera.put('noneActive')
 
 def openMqttShell():
     fileLoc = 'cd C:\\"Program Files"\\Mosquitto\\' #cd C:\'Program Files'\Mosquitto\
@@ -63,6 +67,8 @@ def long_function(new_value):
 sg.theme('DarkGrey')   #
 mqttButton = sg.Button('mqtt server',button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
 gameButton = sg.Button('game',button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
+cameraButton = sg.Button('camera',button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
+
 visualizationButton = sg.Button('visualization',button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
 Emulate3DButton = sg.Button('Emulate3D',button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
 aiButton = sg.Button('AI - only if single pc',button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
@@ -81,6 +87,11 @@ def startGameDriver():
     threading.Thread(target=gd.main, args=(q,), name='gameThread', daemon=True).start()
     time.sleep(0.5)
 
+def startCameraDriver():
+    importlib.reload(cd)
+    threading.Thread(target=cd.main, args=(q_camera,), name='cameraThread', daemon=True).start()
+    time.sleep(0.5)
+
 def startAIDriver():
     threading.Thread(target=ai_driver.main, args=(q_ai,), name='ai_thread', daemon=True).start()
 
@@ -91,7 +102,7 @@ def openVisualizationBrowser():
     #os.system('start C:\\Users\\"DW Pong"\\Downloads\\DiscoveryWorldPongAIExhibit-master\\DiscoveryWorldPongAIExhibit-master\\visualizer\\index.html')
 
 layout = [  [sg.Text('Pong Placeholder Text')], 
-            [mqttButton, gameButton, visualizationButton, Emulate3DButton, aiButton],
+            [mqttButton, gameButton, cameraButton, visualizationButton, Emulate3DButton, aiButton],
             [sg.Text('Change Points per Level:'), sg.InputText(size=(10, 1)), sg.Button('Accept')],
             [varText, sg.Button('Close')] ]
 
@@ -118,6 +129,12 @@ while True:
         if tempQ2 == 'noneActive':
             aiActive = False
             aiButton.update(button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
+    if not q_camera.empty():
+        tempQ2 = q_camera.get()
+        q_camera.put(tempQ2)
+        if tempQ2 == 'noneActive':
+            cameraActive = False
+            camreaButton.update(button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
 
     if event == sg.WIN_CLOSED or event == 'Close': # if user closes window or clicks cancel
         # close down everything
@@ -162,6 +179,29 @@ while True:
                     gameButton.update(button_color=(sg.theme_element_text_color() +' on '+ sg.theme_button_color()[1]))
                 else:
                     print('old game thread is not exited yet')
+    
+    elif event == 'camera':
+        if cameraActive:
+            
+            if q.empty():
+                print('shutting down camera driver')
+                q.put("endThreads")
+            else:
+                print('no camera thread active')
+
+        else:
+            
+            if not q.empty():
+                tempQ = q.get()
+                if tempQ == 'noneActive':
+                    while not q.empty(): # clear the queue
+                        q.get()
+                    print('starting up camera driver')
+                    cameraActive = True
+                    startCameraDriver()
+                    cameraButton.update(button_color=(sg.theme_element_text_color() +' on '+ sg.theme_button_color()[1]))
+                else:
+                    print('old camera thread is not exited yet')
 
     elif event == 'visualization':
         if not visualizationActive:
@@ -224,6 +264,7 @@ while True:
     #    print(event, values)
 q.put("endThreads")
 q_ai.put("endThreads")
+q_camera.put("endThreads")
 closeEmulate3D()
 # if z.is_alive:
 #     z.join()
