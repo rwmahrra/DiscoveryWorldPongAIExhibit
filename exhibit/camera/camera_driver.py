@@ -3,6 +3,8 @@ from exhibit.shared.config import Config
 from exhibit.camera.camera_subscriber import CameraSubscriber
 import time
 import numpy as np
+
+import pyrealsense2 as rs
 import cv2
 import threading
 from exhibit.shared.utils import Timer
@@ -45,42 +47,45 @@ class CameraDriver:
 
 
 
-    def __init__(self, config=Config.instance(), in_q = Queue(), pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance):
-        self.pipeline = pipeline
+    def __init__(self, config=Config.instance(), in_q = Queue(), pipeline = rs.pipeline(), decimation_filter = rs.decimation_filter(), crop_percentage_w = 1.0, crop_percentage_h = 0.1, clipping_distance_in_meters = 1.6):
+        self.pipeline = pipeline # = pipeline
         self.decimation_filter = decimation_filter
         self.crop_percentage_w = crop_percentage_w
         self.crop_percentage_h = crop_percentage_h
-        self.clipping_distance = clipping_distance
+        self.clipping_distance_in_meters = clipping_distance_in_meters
+        self.clipping_distance = clipping_distance_in_meters
         self.config = config
-        self.subscriber = subscriber
+        self.subscriber = CameraSubscriber() #= subscriber
         
 
-        self.state = AISubscriber(self.config, trigger_event=lambda: self.publish_inference())
-        self.last_frame_id = self.state.frame
-        self.last_tick = time.time()
-        self.frame_diffs = []
-        self.last_acted_frame = 0
-        self.inference_thread = threading.Thread(target=self.inference_loop)
-        self.inference_thread.start()
-        self.state.start()
+        #self.state = AISubscriber(self.config, trigger_event=lambda: self.publish_inference())
+        #self.last_frame_id = self.state.frame
+        # self.last_tick = time.time()
+        # self.frame_diffs = []
+        # self.last_acted_frame = 0
+        # self.inference_thread = threading.Thread(target=self.inference_loop)
+        # self.inference_thread.start()
+        # self.state.start()
+
+        self.configure_pipeline()
     
-    def configure_pipeline():
-        decimation_filter = rs.decimation_filter()
-        decimation_filter.set_option(rs.option.filter_magnitude, 6)
+    def configure_pipeline(self):
+        # decimation_filter = rs.decimation_filter()
+        self.decimation_filter.set_option(rs.option.filter_magnitude, 6)
 
-        crop_percentage_w = 1.0
-        crop_percentage_h = 1.0
+        # crop_percentage_w = 1.0
+        # crop_percentage_h = 1.0
 
-        print("starting with crop w at {}".format(crop_percentage_w * 100))
-        print("starting with crop h at {}".format(crop_percentage_h * 100))
+        print("starting with crop w at {}".format(self.crop_percentage_w * 100))
+        print("starting with crop h at {}".format(self.crop_percentage_h * 100))
 
-        pipeline = rs.pipeline()
+        #pipeline = rs.pipeline()
 
         rs_config = rs.config()
         rs_config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
         rs_config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
 
-        profile = pipeline.start(rs_config)
+        profile = self.pipeline.start(rs_config)
 
         # Getting the depth sensor's depth scale (see rs-align example for explanation)
         depth_sensor = profile.get_device().first_depth_sensor()
@@ -90,34 +95,34 @@ class CameraDriver:
         # We will be removing the background of objects more than
         #  clipping_distance_in_meters meters away
         # filter out far away so we only have a person
-        clipping_distance_in_meters = 1.6 #2 meter
-        clipping_distance = clipping_distance_in_meters / depth_scale
-        print(f'the Clipping Distance is : {clipping_distance}')
+        # clipping_distance_in_meters = 1.6 #2 meter
+        self.clipping_distance = self.clipping_distance_in_meters / depth_scale
+        print(f'the Clipping Distance is : {self.clipping_distance}')
 
 
-# checks if theres a big enough player sized blob
-#check_for_player(pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance)
-def check_for_player(pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance):
+    # checks if theres a big enough player sized blob
+    #check_for_player(pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance)
+    def check_for_player(self):
         #try to get the frame 50 times
         for i in range(50): 
-            frames = pipeline.wait_for_frames()
+            frames = self.pipeline.wait_for_frames()
             depth = frames.get_depth_frame()
             #color = frames.get_color_frame()
             if not depth: continue
 
             # filtering the image to make it less noisy and inconsistent
-            depth_filtered = decimation_filter.process(depth)
+            depth_filtered = self.decimation_filter.process(depth)
             depth_image = np.asanyarray(depth_filtered.get_data())
             
             # cropping the image based on a width and height percentage
             w,h = depth_image.shape
-            ws, we = int(w/2 - (w * crop_percentage_w)/2), int(w/2 + (w * crop_percentage_w)/2)
-            hs, he = int(h/2 - (h * crop_percentage_h)/2), int(h/2 + (h * crop_percentage_h)/2)
+            ws, we = int(w/2 - (w * self.crop_percentage_w)/2), int(w/2 + (w * self.crop_percentage_w)/2)
+            hs, he = int(h/2 - (h * self.crop_percentage_h)/2), int(h/2 + (h * self.crop_percentage_h)/2)
             #print("dimension: {}, {}, width: {},{} height: {},{}".format(w,h,ws,we,hs,he))
             depth_cropped = depth_image[ws:we, hs:he]
             #depth_cropped = depth_image
 
-            cutoffImage = np.where((depth_cropped < clipping_distance) & (depth_cropped > 0.1), True, False)
+            cutoffImage = np.where((depth_cropped < self.clipping_distance) & (depth_cropped > 0.1), True, False)
 
             #print(f'cutoffImage shape is {cutoffImage.shape}, depth_cropped shape is {depth_cropped.shape}');
             avg_x = 0
@@ -140,12 +145,12 @@ def check_for_player(pipeline, decimation_filter, crop_percentage_w, crop_percen
 # checks if there is a player and returns their position from 0 to 1 so that we can tell if theyre walking through or still to play
 # check_for_still_player(pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance)
 
-def check_for_still_player(pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance):
+def check_for_still_player(self):
     #try to get the frame 50 times
     for i in range(20):
         try:
             # print('trying wait_for_frames')
-            frames = pipeline.wait_for_frames()
+            frames = self.pipeline.wait_for_frames()
         except Exception as ed:
             print(ed)
             continue
@@ -155,18 +160,18 @@ def check_for_still_player(pipeline, decimation_filter, crop_percentage_w, crop_
         if not depth: continue
 
         # filtering the image to make it less noisy and inconsistent
-        depth_filtered = decimation_filter.process(depth)
+        depth_filtered = self.decimation_filter.process(depth)
         depth_image = np.asanyarray(depth_filtered.get_data())
 
         # cropping the image based on a width and height percentage
         w,h = depth_image.shape
-        ws, we = int(w/2 - (w * crop_percentage_w)/2), int(w/2 + (w * crop_percentage_w)/2)
-        hs, he = int(h/2 - (h * crop_percentage_h)/2), int(h/2 + (h * crop_percentage_h)/2)
+        ws, we = int(w/2 - (w * self.crop_percentage_w)/2), int(w/2 + (w * self.crop_percentage_w)/2)
+        hs, he = int(h/2 - (h * self.crop_percentage_h)/2), int(h/2 + (h * self.crop_percentage_h)/2)
         #print("dimension: {}, {}, width: {},{} height: {},{}".format(w,h,ws,we,hs,he))
         depth_cropped = depth_image[ws:we, hs:he]
         #depth_cropped = depth_image
 
-        cutoffImage = np.where((depth_cropped < clipping_distance) & (depth_cropped > 0.1), True, False)
+        cutoffImage = np.where((depth_cropped < self.clipping_distance) & (depth_cropped > 0.1), True, False)
 
         #print(f'cutoffImage shape is {cutoffImage.shape}, depth_cropped shape is {depth_cropped.shape}');
         avg_x = 0
@@ -212,7 +217,7 @@ def check_for_still_player(pipeline, decimation_filter, crop_percentage_w, crop_
 def main(in_q):
     # main is separated out so that we can call it and pass in the queue from GUI
     config = Config.instance()
-    instance = AIDriver(config = config, in_q = in_q)
+    instance = CameraDriver(config = config, in_q = in_q)
 
 if __name__ == "__main__":
     main("")

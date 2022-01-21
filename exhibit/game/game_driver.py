@@ -4,7 +4,6 @@ import numpy as np
 from exhibit.game.player import BotPlayer, AIPlayer, HumanPlayer, CameraPlayer
 import time
 
-import pyrealsense2 as rs
 import cv2
 
 from exhibit.shared.config import Config
