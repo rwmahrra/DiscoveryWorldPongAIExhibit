@@ -42,30 +42,11 @@ class CameraSubscriber:
             self.paddle2_frame = payload["frame"]
 
 
-    def publish(self, topic, message, qos=0):
-        """
-        Use the state subscriber to send a message since we have the connection open anyway
-        :param topic: MQTT topic
-        :param message: payload object, will be JSON stringified
-        :return:
-        """
-        if topic == 'paddle1/frame' and Config.instance().NETWORK_TIMESTAMPS:
-            print(f'{time.time_ns() // 1_000_000} F{message["frame"]} SEND AI->GM')
-        p = json.dumps(message)
-        self.client.publish(topic, payload=p, qos=qos)
-
     
+    def publish(self, state, request_action=False):
+        
+        self.client.publish("camera/position", payload=json.dumps({"camposition": state}))
 
-    def ready(self):
-        """
-        Determine if all state attributes have been received since initialization
-        :return: Boolean indicating that all state values are populated.
-        """
-        return self.puck_x is not None \
-               and self.puck_y is not None \
-               and self.bottom_paddle_x is not None \
-               and self.top_paddle_x is not None \
-               and self.game_level is not None
 
     def __init__(self, config, trigger_event=None):
         """
