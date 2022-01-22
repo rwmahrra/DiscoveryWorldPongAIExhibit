@@ -58,10 +58,10 @@ if __name__ == "__main__":
     if MODE == config.HIT_PRACTICE:
         agent_bottom = None
     else:
-        agent_bottom = PGAgent(state_size, action_size, name="agent_bottom", learning_rate=LEARNING_RATE, structure=DENSE_STRUCTURE)
+        agent_bottom = PGAgent((state_shape[0], state_shape[1], 1), action_size, name="agent_bottom", learning_rate=LEARNING_RATE, structure=DENSE_STRUCTURE)
         #agent_bottom.load("./validation/hitstop_5frame.h5")
 
-    agent_top = PGAgent(state_size, action_size, name="agent_top", learning_rate=LEARNING_RATE, structure=DENSE_STRUCTURE)
+    agent_top = PGAgent((state_shape[0], state_shape[1], 1), action_size, name="agent_top", learning_rate=LEARNING_RATE, structure=DENSE_STRUCTURE)
     #agent_top.load("./validation/hitstop_5frame.h5")
 
     # Type checks for convenience later
@@ -101,7 +101,7 @@ if __name__ == "__main__":
             states_rev = [np.flip(state, axis=1) for state in states]
             agent_bottom.train(states_rev, *left)
 
-        neuron_states.append(get_weight_image(agent_top.train_model, size=state_shape))
+        #neuron_states.append(get_weight_image(agent_top.train_model, size=state_shape))
         if episode == 1 or episode % 50 == 0:
             save_video(render_states, f'./analytics/{episode}.mp4')
             plot_loss(f'./analytics/plots/loss_{episode}.png', include_left=False)

@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras import Model
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Dense, Input
+from tensorflow.keras.layers import Dense, Input, Conv2D, Flatten, MaxPool2D
 from tensorflow.keras.optimizers import Adam
 
 from exhibit.shared.config import Config
@@ -15,7 +15,7 @@ class PGAgent:
     Partly adapted from https://github.com/keon/policy-gradient/blob/master/pg.py
     """
 
-    def __init__(self, state_size, action_size, name="PGAgent", learning_rate=0.001, structure=(200,), verbose=True):
+    def __init__(self, state_shape, action_size, name="PGAgent", learning_rate=0.001, structure=(200,), verbose=True):
         """
         Set basic variables and construct the model
         :param state_size: Pixels in flattened input state
@@ -26,7 +26,7 @@ class PGAgent:
         """
         self.verbose = verbose
         self.name = name
-        self.state_size = state_size
+        self.state_shape = state_shape
         self.action_size = action_size
         self.gamma = 0.99
         self.learning_rate = learning_rate
@@ -45,8 +45,11 @@ class PGAgent:
         """
         Helper to construct model with Keras based on configuration
         """
-        state_input = Input((self.state_size,))
-        hidden_layer_output = Dense(self.structure[0], activation='relu', input_shape=(self.state_size,))(state_input)
+        state_input = Input(self.state_shape)
+        conv1 = Conv2D(8, 3)(state_input)
+        pool1 = MaxPool2D()(conv1)
+        ravel = Flatten()(pool1)
+        hidden_layer_output = Dense(self.structure[0], activation='relu', input_shape=(self.state_shape,))(ravel)
         x = hidden_layer_output
         if len(self.structure) > 1:
             for layer in self.structure[1:]:
@@ -71,8 +74,7 @@ class PGAgent:
         :param state: ndarray representing game state
         :return: (action id, confidence vector)
         """
-        state = state.reshape([1, state.shape[0]])
-        prob, activation = self.infer_model(state, training=False)
+        prob, activation = self.infer_model(state[np.newaxis, :, :, :], training=False)
         self.last_hidden_activation = activation.numpy().squeeze()
         self.last_output = prob.numpy().flatten()
 
