@@ -44,50 +44,78 @@ def simulate_game(config, env_type=Config.instance().CUSTOM, left=None, right=No
     score_r = 0
     last_state = np.zeros(state_shape)
     state = env.reset()
+    reward_r = 0
+    reward_l = 0
     if visualizer is not None:
         visualizer.base_render(utils.preprocess_custom(state))
     i = 0
 
-    # Fill buffer with "NONE" actions as needed for delay
-    action_buffer = [2 for i in range(config.AI_FRAME_DELAY)]
-
+    # Simulate latency. When the AI moves (every AI_FRAME_INTERVAL frames), it becomes the queued_action
+    # and sets the queue_timestamp
+    queued_action = None
+    queue_timestamp = None
+    selected_action = 2  # Stationary action
+    action_l, prob_l, action_r, prob_r = None, None, None, None
     while True:
-        render_states.append(state.astype(np.uint8))
-        current_state = utils.preprocess_custom(state)
-        diff_state = current_state - last_state
-        model_states.append(diff_state.astype(np.uint8))
-        diff_state_rev = np.flip(diff_state, axis=1)
-        last_state = current_state
-        action_l, prob_l, action_r, prob_r = None, None, None, None
-        x = diff_state.ravel()
-        x_flip = diff_state_rev.ravel()
-        if left is not None: action_l, _, prob_l = left.act(x_flip)
-        if right is not None: action_r, _, prob_r = right.act(x)
-        states.append(x)
+        if queue_timestamp == i - config.AI_FRAME_DELAY:
+            selected_action = queued_action
+            queue_timestamp = None
+            queued_action = None
 
-        state, reward, done = None, None, None
+        if i % config.AI_FRAME_INTERVAL == 0:
+            render_states.append(state.astype(np.uint8))
+            current_state = utils.preprocess_custom(state)
+            diff_state = current_state - last_state
+            model_states.append(diff_state.astype(np.uint8))
+            diff_state_rev = np.flip(diff_state, axis=1)
+            last_state = current_state
+
+            x = diff_state.ravel()
+            x_flip = diff_state_rev.ravel()
+            if left is not None: action_l, _, prob_l = left.act(x_flip)
+            if right is not None: action_r, _, prob_r = right.act(x)
+            states.append(x)
+            queued_action = action_r
+            queue_timestamp = i
+
         if env_type == config.HIT_PRACTICE:
-            action_buffer.append(action_r)
-            next_action = action_buffer.pop(0)
-            state, reward, done = env.step(None, config.ACTIONS[next_action], frames=config.AI_FRAME_INTERVAL)
+            state, reward, done = env.step(None, config.ACTIONS[selected_action], frames=1)
         else:
-            state, reward, done = env.step(config.ACTIONS[action_l], config.ACTIONS[action_r], frames=config.AI_FRAME_INTERVAL)
+            state, reward, done = env.step(config.ACTIONS[action_l], config.ACTIONS[action_r], frames=1)
 
-        reward_l = float(reward[0])
-        reward_r = float(reward[1])
+        reward_l = reward_l + float(reward[0])
+        reward_r = reward_r + float(reward[1])
 
-        # Save observations
-        probs_l.append(prob_l)
-        probs_r.append(prob_r)
-        actions_l.append(action_l)
-        actions_r.append(action_r)
-        rewards_l.append(reward_l)
-        rewards_r.append(reward_r)
-
-        if reward_r < 0: score_l -= reward_r
-        if reward_r > 0: score_r += reward_r
+        if action_r is not None and (i + 1) % config.AI_FRAME_INTERVAL == 0:
+            # Save observations
+            probs_l.append(prob_l)
+            probs_r.append(prob_r)
+            actions_l.append(action_l)
+            actions_r.append(action_r)
+            rewards_l.append(reward_l)
+            rewards_r.append(reward_r)
+            if reward_r < 0:
+                score_l -= reward_r
+            if reward_r > 0:
+                score_r += reward_r
+            reward_l = 0
+            reward_r = 0
 
         if done:
+            # Stash last action/prob/reward results because we didn't complete a move cycle
+            print(len(states), len(actions_r), len(rewards_r), (i + 1) % config.AI_FRAME_INTERVAL)
+            if (i + 1) % config.AI_FRAME_INTERVAL != 0:
+                probs_l.append(prob_l)
+                probs_r.append(prob_r)
+                actions_l.append(action_l)
+                actions_r.append(action_r)
+                rewards_l.append(reward_l)
+                rewards_r.append(reward_r)
+                if reward_r < 0: score_l -= reward_r
+                if reward_r > 0: score_r += reward_r
+                reward_l = 0
+                reward_r = 0
+            print(len(states), len(actions_r), len(rewards_r))
             games_remaining -= 1
             print('Score: %f - %f.' % (score_l, score_r))
             utils.write(f'{score_l},{score_r}', f'analytics/scores.csv')
@@ -96,5 +124,6 @@ def simulate_game(config, env_type=Config.instance().CUSTOM, left=None, right=No
                 return states, (actions_l, probs_l, rewards_l), (actions_r, probs_r, rewards_r), metadata
             else:
                 score_l, score_r = 0, 0
+                action_l, prob_l, action_r, prob_r = None, None, None, None
                 state = env.reset()
         i += 1
