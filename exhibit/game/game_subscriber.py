@@ -33,6 +33,9 @@ class GameSubscriber:
         client.subscribe("paddle2/action")
         client.subscribe("paddle1/frame")
         client.subscribe("paddle2/frame")
+        client.subscribe("depth/check")
+        client.subscribe("depth/stillcheck")
+        client.subscribe("depth/camposition")
 
     def on_message(self, client, userdata, msg):
         topic = msg.topic
@@ -47,6 +50,12 @@ class GameSubscriber:
             self.paddle2_action = int(payload["action"])
         if topic == "paddle2/frame":
             self.paddle2_frame = payload["frame"]
+        if topic == "depth/check":
+            self.playerCheck = payload["check"]
+        if topic == "depth/check":
+            self.playerStillCheck = payload["stillcheck"]
+        if topic == "depth/camposition":
+            self.camposition = payload["camposition"]
 
     def __init__(self):
         print("init GameSubscriber")
@@ -61,3 +70,6 @@ class GameSubscriber:
         self.paddle2_action = 2  # ID for "NONE"
         self.paddle2_prob = np.array([0, 1])
         self.paddle2_frame = None
+        self.playerCheck = False
+        self.playerStillCheck = False
+        self.camposition = 0.5

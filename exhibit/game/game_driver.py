@@ -106,6 +106,8 @@ class GameDriver:
         self.top_agent = top_agent
         self.config = config
         self.subscriber = subscriber
+        
+        #self.playerCheck = False # a value updated over MQTT of if camera sees player
 
 
 
@@ -167,7 +169,10 @@ def main(in_q, config=Config.instance()):
             if config.USE_DEPTH_CAMERA:
                 print("          Waiting for user interaction to begin game . . . ")
                 # checking if theres a large enough human blob to track
-                while not check_for_player():
+                subscriber.playerCheck = False
+                while not subscriber.playerCheck:
+                    # TODO ask for check if still player over MQTT
+                    # in onmessage update playerCheck
                     time.sleep(0.01) # will just loop and stay at level zero until it sees someone
                 print("          Human detected, checking if still . . . ")
 

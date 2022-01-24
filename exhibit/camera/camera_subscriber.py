@@ -17,35 +17,39 @@ class CameraSubscriber:
 
     def on_connect(self, client, userdata, flags, rc):
         print("Connected with result code " + str(rc))
-        client.subscribe("paddle1/action")
-        client.subscribe("paddle2/action")
-        client.subscribe("paddle1/frame")
-        client.subscribe("paddle2/frame")
+        # client.subscribe("paddle1/action")
+        # client.subscribe("paddle2/action")
+        # client.subscribe("paddle1/frame")
+        # client.subscribe("paddle2/frame")
 
     # get depth camera feed into browser
     def emit_depth_feed(self, feed):
         self.client.publish("depth/feed", payload=json.dumps({"feed": feed}))
         #print(f'emitting depth feed: {feed}')
 
+    def emit_camposition(self, data):
+        self.client.publish("depth/camposition", payload=json.dumps({"camposition": data}))
+
+
     def on_message(self, client, userdata, msg):
         topic = msg.topic
         payload = json.loads(msg.payload)
-        if topic == "paddle1/action":
-            self.paddle1_action = int(payload["action"])
-        if topic == "paddle1/frame":
-            self.paddle1_frame = payload["frame"]
-            if Config.instance().NETWORK_TIMESTAMPS:
-                print(f'{time.time_ns() // 1_000_000} F{self.paddle1_frame} RECV AI->GM')
-        if topic == "paddle2/action":
-            self.paddle2_action = int(payload["action"])
-        if topic == "paddle2/frame":
-            self.paddle2_frame = payload["frame"]
+        # if topic == "paddle1/action":
+        #     self.paddle1_action = int(payload["action"])
+        # if topic == "paddle1/frame":
+        #     self.paddle1_frame = payload["frame"]
+        #     if Config.instance().NETWORK_TIMESTAMPS:
+        #         print(f'{time.time_ns() // 1_000_000} F{self.paddle1_frame} RECV AI->GM')
+        # if topic == "paddle2/action":
+        #     self.paddle2_action = int(payload["action"])
+        # if topic == "paddle2/frame":
+        #     self.paddle2_frame = payload["frame"]
 
 
     
     def publish(self, state, request_action=False):
         
-        self.client.publish("camera/position", payload=json.dumps({"camposition": state}))
+        self.client.publish("depth/position", payload=json.dumps({"camposition": state}))
 
 
     def __init__(self, config, trigger_event=None):
