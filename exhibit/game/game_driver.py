@@ -98,8 +98,11 @@ class GameDriver:
         print('Score: %f - %f.' % (score_l, score_r))
         if self.config.BEHIND_FRAMES:
             print(frame_skips)
-            print(f"Behind frames: {np.mean(frame_skips)} mean, {np.std(frame_skips)} stdev, "
-                  f"{np.max(frame_skips)} max, {np.unique(frame_skips, return_counts=True)}")
+            try:
+                print(f"Behind frames: {np.mean(frame_skips)} mean, {np.std(frame_skips)} stdev, "
+                    f"{np.max(frame_skips)} max, {np.unique(frame_skips, return_counts=True)}")
+            except Exception as excep:
+                print(excep)
 
     def __init__(self, config, subscriber, bottom_agent, top_agent, pipeline, decimation_filter, crop_percentage_w, crop_percentage_h, clipping_distance):
         self.subscriber = subscriber
