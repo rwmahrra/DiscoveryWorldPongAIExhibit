@@ -51,7 +51,8 @@ class CameraPlayer:
         """
         Player controlled via the depth camera
         """
-        print("CameraPlayer acting")
+        #print("CameraPlayer acting")
+        # TODO get camera move over MQTT
         return self.move(), Pong.get_human_x(), 1 # Pong.get_depth(), 1 #
 
     def move(self):

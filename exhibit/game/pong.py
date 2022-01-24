@@ -82,9 +82,9 @@ class Pong:
     # It filters out everything below a certain height
     def get_human_x():
         #try to get the frame 50 times
-        return 0.5
+        #return 0.5
         for i in range(50):
-            print(f"trials: {i}")
+            #print(f"trials: {i}")
             #Timer.start("wait_frame")
             try:
                 frames = Pong.pipeline.wait_for_frames()

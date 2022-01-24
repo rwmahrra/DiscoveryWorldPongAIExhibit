@@ -15,7 +15,7 @@ class Config:
         return Config.sharedInstance
 
     def __init__(self):
-        self.USE_DEPTH_CAMERA = False
+        self.USE_DEPTH_CAMERA = True
 
         # Debug/diagnostic config options
         # Leave disabled unless you want console spam (may affect performance)
