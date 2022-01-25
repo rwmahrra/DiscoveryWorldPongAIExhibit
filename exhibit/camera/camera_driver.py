@@ -4,6 +4,8 @@ from exhibit.camera.camera_subscriber import CameraSubscriber
 import time
 import numpy as np
 import base64
+import json
+
 
 import pyrealsense2 as rs
 import cv2
@@ -15,37 +17,37 @@ from queue import Queue
 
 class CameraDriver:
 
-    def publish_inference(self):
-        #Timer.start('inf')
-        
-        # check if a kill/quit message has been sent via the queue
-        if not self.q.empty():
-            dataQ = self.q.get()
-            if dataQ == "endThreads":
-                print('ai thread quitting')
-                while not self.q.empty: # empty the rest of the q
-                    dataQ = self.q.get()
-                self.q.put('noneActive') 
-                # a message that goes back to the main program to tell it that the ai_driver has stopped
-                sys.exit()
-                print('the sys exit didnt work')
+    def run(self):
+        while True:
+            last_frame_time = time.time()
 
-        
+            # do
+            self.subscriber.client.publish("depth/camposition", payload=json.dumps({"camposition": self.get_human_x()}))
+            #publish(get_human_x())
+            #TODO publish the values to depth/camposition
 
-        # Infer on flattened state vector
-        x = diff_state.ravel()
-        action, _, probs = self.agent.act(x)
-        # Publish prediction
-        if self.paddle1:
-            self.state.publish("paddle1/action", {"action": str(action)})
-            self.state.publish("paddle1/frame", {"frame": current_frame_id})
-        elif self.paddle2:
-            self.state.publish("paddle2/action", {"action": str(action)})
-            self.state.publish("paddle2/frame", {"frame": current_frame_id})
+            if not self.q.empty():
+                dataQ = self.q.get()
+                if dataQ == "endThreads":
+                    print('ai thread quitting')
+                    while not self.q.empty: # empty the rest of the q
+                        dataQ = self.q.get()
+                    self.q.put('noneActive') 
+                    # a message that goes back to the main program to tell it that the ai_driver has stopped
+                    sys.exit()
+                    print('the sys exit didnt work')
 
-        model_activation = self.agent.get_activation_packet()
-        self.state.publish("ai/activation", model_activation)
+            # 
 
+            next_frame_time = last_frame_time + (1 / self.currentFPS)
+            to_sleep = next_frame_time - time.time()
+            if to_sleep < 0:
+                pass
+                print(f"Warning: camera publishing tick is lagging behind by {-int(to_sleep * 1000)} ms.")
+            else:
+                time.sleep(to_sleep)
+
+                last_frame_time = time.time()
 
 
     def __init__(self, config=Config.instance(), in_q = Queue(), pipeline = rs.pipeline(), decimation_filter = rs.decimation_filter(), crop_percentage_w = 1.0, crop_percentage_h = 0.1, clipping_distance_in_meters = 1.6):
@@ -56,9 +58,10 @@ class CameraDriver:
         self.clipping_distance_in_meters = clipping_distance_in_meters
         self.clipping_distance = clipping_distance_in_meters
         self.config = config
+        self.in_q = in_q
         self.subscriber = CameraSubscriber() #= subscriber
         
-
+        self.currentFPS = self.config.GAME_FPS
         #self.state = AISubscriber(self.config, trigger_event=lambda: self.publish_inference())
         #self.last_frame_id = self.state.frame
         # self.last_tick = time.time()
@@ -171,8 +174,8 @@ class CameraDriver:
             #Timer.start("crop_frame")
             # cropping the image based on a width and height percentage
             w,h = depth_image.shape
-            ws, we = int(w/2 - (w * self.crop_percentage_w)/2), int(w/2 + (w * Pong.crop_percentage_w)/2)
-            hs, he = int(h/2 - (h * self.crop_percentage_h)/2), int(h/2 + (h * Pong.crop_percentage_h)/2)
+            ws, we = int(w/2 - (w * self.crop_percentage_w)/2), int(w/2 + (w * self.crop_percentage_w)/2)
+            hs, he = int(h/2 - (h * self.crop_percentage_h)/2), int(h/2 + (h * self.crop_percentage_h)/2)
             #print("dimension: {}, {}, width: {},{} height: {},{}".format(w,h,ws,we,hs,he))
             depth_cropped = depth_image[ws:we, hs:he]
             #depth_cropped = depth_image
@@ -273,6 +276,9 @@ class CameraDriver:
             return (m/(np.size(cutoffImage,1)) * 1.4) -0.2
         print("depth failed")
         #Timer.stop("get_depth")
+        #publish false on finding player
+        self.subscriber.client.publish("depth/check", payload=json.dumps({"check": False}))
+
         return 0.5 # dummy value if we can't successfully get a good one
 
 
@@ -352,7 +358,8 @@ def main(in_q):
     # main is separated out so that we can call it and pass in the queue from GUI
     config = Config.instance()
     instance = CameraDriver(config = config, in_q = in_q)
+    instance.run()
 
 if __name__ == "__main__":
-    main("")
+    main(Queue())
 

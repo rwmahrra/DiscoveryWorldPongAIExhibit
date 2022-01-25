@@ -17,7 +17,7 @@ class CameraSubscriber:
 
     def on_connect(self, client, userdata, flags, rc):
         print("Connected with result code " + str(rc))
-        # client.subscribe("paddle1/action")
+        client.subscribe("depth/request")
         # client.subscribe("paddle2/action")
         # client.subscribe("paddle1/frame")
         # client.subscribe("paddle2/frame")
@@ -34,8 +34,10 @@ class CameraSubscriber:
     def on_message(self, client, userdata, msg):
         topic = msg.topic
         payload = json.loads(msg.payload)
-        # if topic == "paddle1/action":
-        #     self.paddle1_action = int(payload["action"])
+        if topic == "depth/request":
+            pass
+            #publish(get_human_x())
+            #TODO publish the values to depth/camposition
         # if topic == "paddle1/frame":
         #     self.paddle1_frame = payload["frame"]
         #     if Config.instance().NETWORK_TIMESTAMPS:
@@ -49,7 +51,7 @@ class CameraSubscriber:
     
     def publish(self, state, request_action=False):
         
-        self.client.publish("depth/position", payload=json.dumps({"camposition": state}))
+        self.client.publish("depth/camposition", payload=json.dumps({"camposition": state}))
 
 
     def __init__(self, config, trigger_event=None):
