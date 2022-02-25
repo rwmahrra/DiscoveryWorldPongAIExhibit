@@ -3,7 +3,7 @@
 #SBATCH --gpus=1
 #SBATCH --cpus-per-gpu=11
 #SBATCH --output=pong_job.out
-#SBATCH --job-name=newtrain_int5_delay2
+#SBATCH --job-name=speedup_s6_f3_d3
 
 # Your job
 #python3 -m pip3 install --user -r requirements.txt
