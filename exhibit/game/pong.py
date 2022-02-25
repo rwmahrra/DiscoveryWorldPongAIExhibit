@@ -307,16 +307,14 @@ class Pong:
             Run game tick housekeeping logic
             """
             # First blindly increment position by velocity
-            self.x += self.velocity[0]
-            self.y += self.velocity[1]  # Y should never actually change, but it feels right to include it
+            next_x = self.x + self.velocity[0]
+            next_y = self.y + self.velocity[1]  # Y should never actually change, but it feels right to include it
             self.velocity = [0, 0]  # We don't actually want velocity to persist from tick to tick, so deplete it all
 
             # Then back up position if we cross the screen border
             max = self.config.WIDTH - Pong.Paddle.EDGE_BUFFER
-            if self.x > max:
-                self.x = max
-            if self.x < Pong.Paddle.EDGE_BUFFER:
-                self.x = Pong.Paddle.EDGE_BUFFER
+            if not math.ceil(next_x - self.w / 2) > max and not math.ceil(next_x + self.w / 2) < Pong.Paddle.EDGE_BUFFER:
+                self.x = next_x
 
         def handle_action(self, action, depth=None):
             """
