@@ -603,7 +603,8 @@ class Pong:
                 if self.ball.y > self.config.HEIGHT - 1:
                     Pong.play_sound("score")
                     self.score_top += 1
-                    reward_l -= 1.0
+                    # No distance based loss for bottom since it doesn't exist in hit practice
+                    reward_l -= 1.0 #+ abs(self.bottom.x - self.ball.x) / self.config.WIDTH
                     reward_r += 1.0
                     self.ball.reset()
                     self.top.reset(hit_practice=True)
@@ -611,7 +612,7 @@ class Pong:
                     Pong.play_sound("score")
                     self.score_bottom += 1
                     reward_l += 1.0
-                    reward_r -= 1.0
+                    reward_r -= 1.0 + abs(self.top.x - self.ball.x) / self.config.WIDTH
                     self.ball.reset()
                     self.top.reset(hit_practice=True)
                 self.ball.update()
@@ -657,7 +658,7 @@ class Pong:
                 if self.ball.y > self.config.HEIGHT - 1:
                     Pong.play_sound("score")
                     self.score_top += 1
-                    reward_l -= 1.0
+                    reward_l -= 1.0 + abs(self.top.x - self.ball.x) / self.config.WIDTH
                     reward_r += 1.0
                     self.ball.reset()
                     self.bottom.reset()
@@ -666,7 +667,7 @@ class Pong:
                     Pong.play_sound("score")
                     self.score_bottom += 1
                     reward_l += 1.0
-                    reward_r -= 1.0
+                    reward_r -= 1.0 + abs(self.bottom.x - self.ball.x) / self.config.WIDTH
                     self.ball.reset()
                     self.bottom.reset()
                     self.top.reset()

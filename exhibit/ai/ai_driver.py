@@ -19,9 +19,9 @@ class AIDriver:
     # MODEL_3 = f'./validation/canstop_randomstart_10k.h5'
 
     # The locations of the three models used. 1 for each level.
-    MODEL_1 = "./validation/sym_large_nomp_10000.h5"#f'./validation/level1_4500.h5'
-    MODEL_2 = "./validation/sym_large_nomp_10000.h5" #f'./validation/level2_7500.h5'
-    MODEL_3 = "./validation/sym_large_nomp_10000.h5"#f'./validation/level3_10000.h5'
+    MODEL_1 = "./validation/s6_f5_d2_25950.h5"#f'./validation/level1_4500.h5'
+    MODEL_2 = "./validation/s6_f5_d2_25950.h5" #f'./validation/level2_7500.h5'
+    MODEL_3 = "./validation/s6_f5_d2_25950.h5"#f'./validation/level3_10000.h5'
     level = 1
     def publish_inference(self):
         #Timer.start('inf')
