@@ -233,7 +233,7 @@ class Pong:
 
     class Paddle:
         EDGE_BUFFER = 0  # Pixel distance from screen edges that paddle is allowed to reach
-        SPEED = 3  # base speed (in px/tick)
+        SPEED = 6  # base speed (in px/tick)
 
         def __init__(self, side, config=None):
             self.config = config
