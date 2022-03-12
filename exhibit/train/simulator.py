@@ -95,15 +95,14 @@ def simulate_game(config, env_type=Config.instance().CUSTOM, left=None, right=No
             rewards_l.append(reward_l)
             rewards_r.append(reward_r)
             if reward_r < 0:
-                score_l -= reward_r
+                score_l += reward_l
             if reward_r > 0:
-                score_r += reward_r
+                score_r -= reward_l
             reward_l = 0
             reward_r = 0
 
         if done:
             # Stash last action/prob/reward results because we didn't complete a move cycle
-            print(len(states), len(actions_r), len(rewards_r), (i + 1) % config.AI_FRAME_INTERVAL)
             if (i + 1) % config.AI_FRAME_INTERVAL != 0:
                 probs_l.append(prob_l)
                 probs_r.append(prob_r)
@@ -115,7 +114,6 @@ def simulate_game(config, env_type=Config.instance().CUSTOM, left=None, right=No
                 if reward_r > 0: score_r += reward_r
                 reward_l = 0
                 reward_r = 0
-            print(len(states), len(actions_r), len(rewards_r))
             games_remaining -= 1
             print('Score: %f - %f.' % (score_l, score_r))
             utils.write(f'{score_l},{score_r}', f'analytics/scores.csv')
