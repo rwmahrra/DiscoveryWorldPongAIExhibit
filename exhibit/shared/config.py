@@ -31,7 +31,7 @@ class Config:
         self.ACTIONS = ["LEFT", "RIGHT", "NONE", "DEPTH"]
         self.GAME_FPS = 60
         self.AI_FRAME_INTERVAL = 5  # AI will publish inference every n frames
-        self.AI_FRAME_DELAY = 2  # Game will receive each inference n frames late
+        self.AI_FRAME_DELAY = 3  # Game will receive each inference n frames late
         self.BALL_MARKER_SIZE = 4  # Pixel height and width of experimental position markers
         self.CUSTOM = 0
         self.HIT_PRACTICE = 2
@@ -41,7 +41,7 @@ class Config:
         self.RANDOMIZE_START = True
         self.BALL_DIAMETER = 8
         self.PADDLE_HEIGHT = 3
-        self.PADDLE_WIDTH = 20
+        self.PADDLE_WIDTH = 10
 
         # The 0.5 offsets are a sad artifact of using pixel-centered instead of pixel grid aligned coordinates
         self.BOTTOM_PADDLE_Y = self.HEIGHT - 0.5 - self.PADDING
