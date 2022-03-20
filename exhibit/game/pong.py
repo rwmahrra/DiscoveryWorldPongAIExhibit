@@ -71,7 +71,7 @@ class Pong:
             self.side = side
             self.x = int(self.config.WIDTH / 2)
             self.y = 0
-            self.w = self.config.PADDLE_WIDTH
+            self.w = self.config.PADDLE_WIDTH + self.config.DEPLOYMENT_PADDLE_ADVANTAGE
             self.h = self.config.PADDLE_HEIGHT
             self.velocity = [0, 0]
             self.speed = self.SPEED * self.config.SPEEDUP
@@ -105,7 +105,7 @@ class Pong:
                     start -= self.speed
                 self.y = choice(valid_starts)
 
-            self.w = self.config.PADDLE_WIDTH
+            self.w = self.config.PADDLE_WIDTH + self.config.DEPLOYMENT_PADDLE_ADVANTAGE
             self.h = self.config.PADDLE_HEIGHT
             self.speed = self.SPEED * self.config.SPEEDUP
             if self.side == "top":

@@ -143,14 +143,14 @@ class AIPlayer:
             raise ValueError("AI paddle must be specified as top or bottom with the corresponding keyword argument")
         self.subscriber = subscriber
 
-    def act(self):
+    def act(self, current_frame=None):
         """
         Send game details over network. Return response from agent.
         :param state: dictionary representing game state
         :return: (action id, confidence)
         """
         if self.top:
-            return self.subscriber.paddle1_action, None, self.subscriber.paddle1_prob
+            return self.subscriber.get_paddle1_action(current_frame), None, self.subscriber.paddle1_prob
         if self.bottom:
             return self.subscriber.paddle2_action, None, self.subscriber.paddle2_prob
 
