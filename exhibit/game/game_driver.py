@@ -49,7 +49,7 @@ class GameDriver:
             for i in range(self.config.AI_FRAME_INTERVAL):
                 rendered_frame = env.frames
                 #Timer.start("act")
-                action_r, depth_r, prob_r = self.top_agent.act()
+                action_r, depth_r, prob_r = self.top_agent.act(rendered_frame)
                 acted_frame = self.top_agent.get_frame()
                 if self.config.MOVE_TIMESTAMPS:
                     print(f'{time.time_ns() // 1_000_000} F{env.frames} MOVE W/PRED {self.top_agent.get_frame()}')

@@ -38,15 +38,23 @@ class GameSubscriber:
         topic = msg.topic
         payload = json.loads(msg.payload)
         if topic == "paddle1/action":
-            self.paddle1_action = int(payload["action"])
+            self.paddle1_queued_action = int(payload["action"])
         if topic == "paddle1/frame":
             self.paddle1_frame = payload["frame"]
+            self.paddle1_queued_timestep = payload["frame"]
             if Config.instance().NETWORK_TIMESTAMPS:
                 print(f'{time.time_ns() // 1_000_000} F{self.paddle1_frame} RECV AI->GM')
         if topic == "paddle2/action":
             self.paddle2_action = int(payload["action"])
         if topic == "paddle2/frame":
             self.paddle2_frame = payload["frame"]
+
+    def get_paddle1_action(self, frame):
+        if self.paddle1_queued_action is not None and self.paddle1_queued_timestep == frame - Config.instance().AI_FRAME_DELAY:
+            self.paddle1_action = self.paddle1_queued_action
+            self.paddle1_queued_action = None
+            self.paddle1_queued_timestep = None
+        return self.paddle1_action
 
     def __init__(self):
         print("init GameSubscriber")
@@ -55,6 +63,8 @@ class GameSubscriber:
         self.client.on_connect = lambda client, userdata, flags, rc : self.on_connect(client, userdata, flags, rc)
         self.client.on_message = lambda client, userdata, msg : self.on_message(client, userdata, msg)
         self.client.loop_start()
+        self.paddle1_queued_action = None
+        self.paddle1_queued_timestep = None
         self.paddle1_action = 2  # ID for "NONE"
         self.paddle1_prob = np.array([0, 1])
         self.paddle1_frame = None
