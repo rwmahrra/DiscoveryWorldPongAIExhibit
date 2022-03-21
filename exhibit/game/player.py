@@ -62,8 +62,9 @@ class RandomPlayer:
     Mostly for testing. Makes purely random actions.
     """
 
-    def move(self):
-        return Pong.random_action()
+    def act(self):
+        return randint(0, 2)
+        #return Pong.random_action()
 
 
 class BotPlayer:
