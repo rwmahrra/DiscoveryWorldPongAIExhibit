@@ -18,7 +18,7 @@ code changes.
 """
 
 
-class HumanPlayer:
+class ControllerPlayer:
     """
     Listens to keyboard input to drive a paddle
     """
@@ -45,7 +45,12 @@ class HumanPlayer:
     def move(self):
         return Pong.read_key(self.up, self.down)
 
-class CameraPlayer:
+class MotionPlayer:
+    """
+    Abstraction for motion detection player - need to provide abs position
+    """
+    def __init__(self, subscriber):
+        self.subscriber = subscriber
 
     def act(self, state=None):
         """
@@ -139,7 +144,7 @@ class AIPlayer:
         self.top = top
         self.bottom = bottom
         if not self.top and not self.bottom:
-            raise ValueError("AI paddle must be specified as left or right with the cooresponding keyword argument")
+            raise ValueError("AI paddle must be specified as top or bottom with the corresponding keyword argument")
         self.subscriber = subscriber
 
     def act(self):

@@ -1,6 +1,6 @@
 import sys
 from exhibit.shared.config import Config
-from exhibit.camera.camera_subscriber import CameraSubscriber
+from exhibit.motion.motion_subscriber import MotionSubscriber
 import time
 import numpy as np
 
@@ -12,7 +12,7 @@ from exhibit.shared.utils import Timer
 from queue import Queue
 
 
-class CameraDriver:
+class MotionDriver:
 
     def publish_inference(self):
         #Timer.start('inf')
@@ -55,7 +55,7 @@ class CameraDriver:
         self.clipping_distance_in_meters = clipping_distance_in_meters
         self.clipping_distance = clipping_distance_in_meters
         self.config = config
-        self.subscriber = CameraSubscriber() #= subscriber
+        self.subscriber = MotionSubscriber() #= subscriber
         
 
         #self.state = AISubscriber(self.config, trigger_event=lambda: self.publish_inference())
@@ -217,7 +217,7 @@ class CameraDriver:
 def main(in_q):
     # main is separated out so that we can call it and pass in the queue from GUI
     config = Config.instance()
-    instance = CameraDriver(config = config, in_q = in_q)
+    instance = MotionDriver(config = config, in_q = in_q)
 
 if __name__ == "__main__":
     main("")

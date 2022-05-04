@@ -1,7 +1,7 @@
 import sys
 from exhibit.game.game_subscriber import GameSubscriber
 import numpy as np
-from exhibit.game.player import BotPlayer, AIPlayer, HumanPlayer, CameraPlayer
+from exhibit.game.player import BotPlayer, AIPlayer, ControllerPlayer, MotionPlayer
 import time
 
 import pyrealsense2 as rs
@@ -23,19 +23,19 @@ class GameDriver:
     def run(self, level):
         print("running level: ", level)
         # The Pong environment
-        env = Pong(config=self.config, level = level, pipeline = self.pipeline, decimation_filter = self.decimation_filter, crop_percentage_w = self.crop_percentage_w, crop_percentage_h = self.crop_percentage_h, clipping_distance = self.clipping_distance)
+        pong_environment = Pong(config=self.config, level = level, pipeline = self.pipeline, decimation_filter = self.decimation_filter, crop_percentage_w = self.crop_percentage_w, crop_percentage_h = self.crop_percentage_h, clipping_distance = self.clipping_distance)
         currentFPS = self.config.GAME_FPS #(level * 40) + 40#Config.GAME_FPS 
 
         # if one of our players is Bot
-        if type(self.bottom_agent) == BotPlayer: self.bottom_agent.attach_env(env)
-        if type(self.top_agent) == BotPlayer: self.top_agent.attach_env(env)
+        if type(self.bottom_agent) == BotPlayer: self.bottom_agent.attach_env(pong_environment)
+        if type(self.top_agent) == BotPlayer: self.top_agent.attach_env(pong_environment)
         
-        # Housekeeping
+        # score top and bottom
         score_l = 0
         score_r = 0
 
         # Emit state over MQTT and keep a running timer to track the interval
-        self.subscriber.emit_state(env.get_packet_info(), request_action=True)
+        self.subscriber.emit_state(pong_environment.get_packet_info(), request_action=True)
         last_frame_time = time.time()
 
         # Track skipped frame statistics
@@ -47,12 +47,12 @@ class GameDriver:
         while not done:
             action_l, depth_l, prob_l = self.bottom_agent.act()
             for i in range(self.config.AI_FRAME_INTERVAL):
-                rendered_frame = env.frames
+                rendered_frame = pong_environment.frames
                 #Timer.start("act")
                 action_r, depth_r, prob_r = self.top_agent.act()
                 acted_frame = self.top_agent.get_frame()
                 if self.config.MOVE_TIMESTAMPS:
-                    print(f'{time.time_ns() // 1_000_000} F{env.frames} MOVE W/PRED {self.top_agent.get_frame()}')
+                    print(f'{time.time_ns() // 1_000_000} F{pong_environment.frames} MOVE W/PRED {self.top_agent.get_frame()}')
                 if acted_frame is not None:
                     frames_behind = rendered_frame - acted_frame
                     if frames_behind >= 0 and frames_behind:
@@ -62,7 +62,7 @@ class GameDriver:
                         else:
                             frame_skips.append(frames_behind - self.config.AI_FRAME_INTERVAL)
 
-                if type(self.bottom_agent) == HumanPlayer or type(self.bottom_agent) == CameraPlayer:
+                if type(self.bottom_agent) == ControllerPlayer or type(self.bottom_agent) == MotionPlayer:
                     action_l, depth_l, prob_l = self.bottom_agent.act()
 
                 #Timer.stop("act")
@@ -70,17 +70,17 @@ class GameDriver:
                 next_frame_time = last_frame_time + (1 / currentFPS)
 
                 #Timer.start("step")
-                state, reward, done = env.step(self.config.ACTIONS[action_l], self.config.ACTIONS[action_r], frames=1, depth=depth_l)
+                state, reward, done = pong_environment.step(self.config.ACTIONS[action_l], self.config.ACTIONS[action_r], frames=1, depth=depth_l)
                 #Timer.stop("step")
                 reward_l, reward_r = reward
                 if reward_r < 0: score_l -= reward_r
                 if reward_r > 0: score_r += reward_r
                 #Timer.start("emit")
                 if i == self.config.AI_FRAME_INTERVAL - 1:
-                    self.subscriber.emit_state(env.get_packet_info(), request_action=True)
+                    self.subscriber.emit_state(pong_environment.get_packet_info(), request_action=True)
                 else:
-                    self.subscriber.emit_state(env.get_packet_info(), request_action=False)
-                self.subscriber.emit_depth_feed(env.depth_feed)
+                    self.subscriber.emit_state(pong_environment.get_packet_info(), request_action=False)
+                self.subscriber.emit_depth_feed(pong_environment.depth_feed)
                 #Timer.stop("emit")
                 to_sleep = next_frame_time - time.time()
                 if to_sleep < 0:
@@ -230,16 +230,14 @@ def check_for_still_player(pipeline, decimation_filter, crop_percentage_w, crop_
 
 
 def main(in_q, config=Config.instance()):
-    print("from gameDriver, about to init GameSubscriber")
     subscriber = GameSubscriber()
     print(f'The current MAX_SCORE is set to {config.MAX_SCORE}')
 
     agent = AIPlayer(subscriber, top=True)
-    #agent = HumanPlayer('o', 'l')
 
     if config.USE_DEPTH_CAMERA:
         print("Configured to use depth Camera")
-        opponent = CameraPlayer()
+        opponent = MotionPlayer()
         decimation_filter = rs.decimation_filter()
         decimation_filter.set_option(rs.option.filter_magnitude, 6)
 
@@ -270,8 +268,8 @@ def main(in_q, config=Config.instance()):
         print(f'the Clipping Distance is : {clipping_distance}')
     else:
         print("Configured to NOT use depth Camera")
-        opponent = HumanPlayer('a', 'd')
-        print("setting opponent to be a HumanPlayer")
+        opponent = ControllerPlayer('a', 'd')
+        print("setting opponent to be a ControllerPlayer")
         #opponent = BotPlayer(bottom=True) #, always_follow=True)
         #print("setting opponent to be a BotPlayer")
         pipeline = None
@@ -339,8 +337,7 @@ def main(in_q, config=Config.instance()):
             print(f'          Still human detected, beginning level {level}. ')
             
             subscriber.emit_level(level) 
-            time.sleep(6)
-            # right here would be where you would add time.sleep(0.9) to add a delay for some start graphic in emulate 3d
+            time.sleep(6) # delay for start here - need better user feedback
             instance.run(level) # RUN LEVEL (1)
 
         elif level == 1 or level == 2: # if we just played level 1 or 2 and now have to play level 3
