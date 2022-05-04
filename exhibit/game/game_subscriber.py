@@ -19,10 +19,10 @@ class GameSubscriber:
             if Config.instance().NETWORK_TIMESTAMPS:
                 print(f'{time.time_ns() // 1_000_000} F{frame} SEND GM->AI')
 
-    # get depth camera feed into browser
-    def emit_depth_feed(self, feed):
-        self.client.publish("depth/feed", payload=json.dumps({"feed": feed}))
-        #print(f'emitting depth feed: {feed}')
+    # # get depth camera feed into browser
+    # def emit_depth_feed(self, feed):
+    #     self.client.publish("depth/feed", payload=json.dumps({"feed": feed}))
+    #     #print(f'emitting depth feed: {feed}')
 
     def emit_level(self, level):
         self.client.publish("game/level", payload=json.dumps({"level": level}), qos=2)
@@ -33,6 +33,7 @@ class GameSubscriber:
         client.subscribe("paddle2/action")
         client.subscribe("paddle1/frame")
         client.subscribe("paddle2/frame")
+        client.subscribe("motion/position")
 
     def on_message(self, client, userdata, msg):
         topic = msg.topic

@@ -5,6 +5,7 @@ import math
 import keyboard
 from random import choice, randint, random
 import time
+from exhibit import motion
 from exhibit.shared.config import Config
 
 from exhibit.shared.utils import Timer
@@ -295,12 +296,15 @@ class Pong:
             self.velocity[0] += self.speed
 
         # we need this method because controlling from the depth camera is not fixed speed
-        def depthMove(self, depth):
-            #print(f'depthMove with value = {depth}')
-            desiredPos = depth * self.config.WIDTH #((depth-500)/2000) * Pong.HEIGHT
-            distance = desiredPos - self.x
-            vel = (self.speed * (distance/self.config.WIDTH) * 25)
-            self.velocity[0] += vel
+        # def depthMove(self, depth):
+        #     #print(f'depthMove with value = {depth}')
+        #     desiredPos = depth * self.config.WIDTH #((depth-500)/2000) * Pong.HEIGHT
+        #     distance = desiredPos - self.x
+        #     vel = (self.speed * (distance/self.config.WIDTH) * 25)
+        #     self.velocity[0] += vel
+
+        def absolute_move(self, motion_position):
+            self.x = motion_position
 
         def update(self):
             """
@@ -318,7 +322,7 @@ class Pong:
             if self.x < Pong.Paddle.EDGE_BUFFER:
                 self.x = Pong.Paddle.EDGE_BUFFER
 
-        def handle_action(self, action, depth=None):
+        def handle_action(self, action, motion_position=None):
             """
             Parse action and modify state accordingly
             :param action: String representation of action ("UP", "DOWN", "NONE")
@@ -330,8 +334,9 @@ class Pong:
                 self.right()
             elif action == "NONE":
                 pass
-            elif action == "DEPTH":
-                self.depthMove(depth = depth)
+            elif action == "ABSOLUTE":
+                # self.depthMove(depth = depth)
+                self.absolute_move(motion_position=motion_position)
 
     class Ball:
         def spawn_hit_practice(self):
@@ -624,7 +629,7 @@ class Pong:
         screen = self.render()
         return screen, (reward_l, reward_r), done
 
-    def step(self, bottom_action, top_action, frames=3, depth=None):
+    def step(self, bottom_action, top_action, frames=3, motion_position=None):
         """
         Game tick housekeeping
         :param bottom_action: Action from bottom agent
@@ -642,7 +647,7 @@ class Pong:
         done = False
         for i in range(frames):
             if not done:
-                self.bottom.handle_action(bottom_action, depth)
+                self.bottom.handle_action(bottom_action, motion_position)
                 self.top.handle_action(top_action)
 
                 collide_bottom, pos = self.check_collision(self.ball, self.bottom)

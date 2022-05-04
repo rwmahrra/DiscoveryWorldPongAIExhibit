@@ -28,7 +28,7 @@ class Config:
         self.WIDTH = 192  # Game window width (px)
         self.HEIGHT = 160  # Game window height (px)
         self.SPEEDUP = 1  # Flat multiplier to game movement speeds
-        self.ACTIONS = ["LEFT", "RIGHT", "NONE", "MOTION"] # available action from real player - motion provides position from tracking
+        self.ACTIONS = ["LEFT", "RIGHT", "NONE", "ABSOLUTE"] # available action from real player - ABSOLUTE provides position for paddle rather than a vector
         self.GAME_FPS = 60
         self.AI_FRAME_INTERVAL = 5  # AI will publish inference every n frames
         self.AI_FRAME_DELAY = 1  # Game will receive each inference n frames late
