@@ -39,7 +39,6 @@ class ControllerPlayer:
         :param state: Unused, preserves interface
         :return: (action id, confidence)
         """
-        #print("HumanPlayer acting")
         return self.move(), None, 1
 
     def move(self):
@@ -56,9 +55,7 @@ class MotionPlayer:
         """
         Player controlled via the depth camera
         """
-        #print("CameraPlayer acting")
-        # TODO get camera move over MQTT
-        return self.move(), Pong.get_human_x(), 1 # Pong.get_depth(), 1 #
+        return self.move(), self.subscriber.motion_position, 1
 
     def move(self):
         return 3 # the code for moving based on depth value, which is different than fixed speed movement
@@ -111,7 +108,6 @@ class BotPlayer:
         :param state: Unused, preserves interface for train script
         :return: (action id, confidence)
         """
-        #print("BotPlayer acting")
         return self.move(), None, 1
 
     def move(self):

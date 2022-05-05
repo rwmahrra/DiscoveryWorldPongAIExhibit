@@ -5,6 +5,10 @@ import time
 from exhibit.shared.utils import Config
 
 class GameSubscriber:
+
+    """
+    This emits game state when in the run loop
+    """
     def emit_state(self, state, request_action=False):
         (puck_x, puck_y), bottom_x, top_x, score_left, score_right, frame = state
 
@@ -24,8 +28,15 @@ class GameSubscriber:
     #     self.client.publish("depth/feed", payload=json.dumps({"feed": feed}))
     #     #print(f'emitting depth feed: {feed}')
 
+    """
+    Special method to handle change in level number
+    """
     def emit_level(self, level):
         self.client.publish("game/level", payload=json.dumps({"level": level}), qos=2)
+
+    def emit_game_state(self, state):
+        # 0 waiting, 1 ready, 2 running
+        self.client.publish("game/state", payload=json.dumps({"state": state}), qos=2)
 
     def on_connect(self, client, userdata, flags, rc):
         print("Connected with result code " + str(rc))
@@ -34,6 +45,7 @@ class GameSubscriber:
         client.subscribe("paddle1/frame")
         client.subscribe("paddle2/frame")
         client.subscribe("motion/position")
+        client.subscribe("motion/presence")
 
     def on_message(self, client, userdata, msg):
         topic = msg.topic
@@ -48,6 +60,10 @@ class GameSubscriber:
             self.paddle2_action = int(payload["action"])
         if topic == "paddle2/frame":
             self.paddle2_frame = payload["frame"]
+        if topic == "motion/position":
+            self.motion_position = float(payload)
+        if topic == "motion/presence":
+            self.motion_presence = bool(payload)
 
     def __init__(self):
         print("init GameSubscriber")
@@ -62,3 +78,5 @@ class GameSubscriber:
         self.paddle2_action = 2  # ID for "NONE"
         self.paddle2_prob = np.array([0, 1])
         self.paddle2_frame = None
+        self.motion_position = 0.5
+        self.motion_presence = False

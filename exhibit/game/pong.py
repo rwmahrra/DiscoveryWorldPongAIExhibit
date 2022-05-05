@@ -26,12 +26,6 @@ class Pong:
     It was used instead of OpenAI Gym or various other publicly available alternatives
     in order to allow for complete flexibility.
     """
-    sounds = None
-    if Config.instance().USE_DEPTH_CAMERA:
-        align_to = rs.stream.color
-        align = rs.align(align_to)
-
-    depth_feed = ""
 
     @staticmethod
     def read_key(up, down):
@@ -48,168 +42,7 @@ class Pong:
         else:
             return 2
 
-    # get_depth() is not the currently used method
-    # get_depth() gets the distance the center of the image is from the camera. 
-    def get_depth():
-        for i in range(50):
-            # try 50 times. the intel realsense d435 can be finicky
-            frames = Pong.pipeline.wait_for_frames()
-            depth = frames.get_depth_frame()
-            if not depth: continue # if it didn't work, try again
-
-            depth_filtered = Pong.decimation_filter.process(depth)
-            depth_image = np.asanyarray(depth_filtered.get_data())
-            
-            # get dimensions of image after filtering (it usually shrinks)
-            w,h = depth_image.shape
-            ws, we = int(w/2 - (w * Pong.crop_percentage_w)), int(w/2 + (w * Pong.crop_percentage_w))
-            hs, he = int(h/2 - (h * Pong.crop_percentage_h)), int(h/2 + (h * Pong.crop_percentage_h))
-            #print("dimension: {}, {}, width: {},{} height: {},{}".format(w,h,ws,we,hs,he))
-            depth_cropped = depth_image[ws:we, hs:he]
-            depth_cropped_3d = np.dstack((depth_cropped,depth_cropped,depth_cropped))
-            mean = 0.5
-            try :
-                mean = depth_cropped[~(depth_cropped > Pong.clipping_distance) &~(depth_cropped <= 0.1)].mean()
-            except Exception as ex :
-                print('failed to take mean of depth_cropped, could be zero values')
-                print(ex)
-                mean = 0.5
-            
-            return mean/2000 # This is where the range of values and how we scale that distance is set
-        return 0.5 # middle value for when no player found
     
-    # This is the currently used method.
-    # This finds the "biggest blob"/island and gets the x coordinate of their center of mass
-    # It filters out everything below a certain height
-    def get_human_x():
-        #try to get the frame 50 times
-        #return 0.5
-        for i in range(50):
-            #print(f"trials: {i}")
-            #Timer.start("wait_frame")
-            try:
-                frames = Pong.pipeline.wait_for_frames()
-            except Exception:
-                continue
-            #Timer.stop("wait_frame")
-            #Timer.start("get_frame")
-            depth = frames.get_depth_frame()
-            #Timer.stop("get_frame")
-            #color = frames.get_color_frame()
-            if not depth: continue
-
-            #Timer.start("filter_frame")
-            # filtering the image to make it less noisy and inconsistent
-            depth_filtered = Pong.decimation_filter.process(depth)
-            depth_image = np.asanyarray(depth_filtered.get_data())
-            #Timer.stop("filter_frame")
-            
-            #Timer.start("crop_frame")
-            # cropping the image based on a width and height percentage
-            w,h = depth_image.shape
-            ws, we = int(w/2 - (w * Pong.crop_percentage_w)/2), int(w/2 + (w * Pong.crop_percentage_w)/2)
-            hs, he = int(h/2 - (h * Pong.crop_percentage_h)/2), int(h/2 + (h * Pong.crop_percentage_h)/2)
-            #print("dimension: {}, {}, width: {},{} height: {},{}".format(w,h,ws,we,hs,he))
-            depth_cropped = depth_image[ws:we, hs:he]
-            #depth_cropped = depth_image
-
-            cutoffImage = np.where((depth_cropped < Pong.clipping_distance) & (depth_cropped > 0.1), True, False)
-            #Timer.stop("crop_frame")
-
-            #Timer.start("get_islands")
-            #print(f'cutoffImage shape is {cutoffImage.shape}, depth_cropped shape is {depth_cropped.shape}');
-            avg_x = 0
-            avg_x_array = np.array([])
-            countB = 0
-            for a in range(np.size(cutoffImage,0)):
-                for b in range(np.size(cutoffImage,1)):
-                    if cutoffImage[a,b] :
-                        avg_x += b
-                        #print(b)
-                        avg_x_array = np.append(avg_x_array,b)
-                        countB = countB+1
-            # if we got no pixels in depth, return dumb value
-            if countB <= 40: 
-                return 0.5
-            avg_x_array.sort()
-            islands = []
-            i_min = 0
-            i_max = 0
-            p = avg_x_array[0]
-            for index in range(np.size(avg_x_array,0)) :
-                n = avg_x_array[index]
-                if n > p+1 and not i_min == i_max : # if the island is done
-                    islands.append(avg_x_array[i_min:i_max])
-                    i_min = index
-                i_max = index
-                p = n
-            if not i_min == i_max: islands.append(avg_x_array[i_min:i_max])
-            #Timer.stop("get_islands")
-            
-            #Timer.start("compare_islands")
-            #print(islands)
-            bigIsland = np.array([])
-            for array in islands:
-                if np.size(array,0) > np.size(bigIsland,0): bigIsland = array
-            
-            #print(np.median(bigIsland))
-            m = (np.median(bigIsland))
-            #Timer.stop("compare_islands")
-
-            # DISPLAYING ******************************************************************************
-            #Timer.start("align")
-            print(frames.size())
-            aligned_frames = Pong.align.process(frames)
-            #Timer.stop("align")
-            #Timer.start("extract")
-            # Get aligned frames
-            aligned_depth_frame = aligned_frames.get_depth_frame() # aligned_depth_frame is a 640x480 depth image
-            #color_frame = aligned_frames.get_color_frame()
-
-            depth_image = np.asanyarray(aligned_depth_frame.get_data())
-            #print(color_frame)
-            #color_image = np.asanyarray(color_frame.get_data())
-            #Timer.stop("extract")
-            #Timer.start("stack")
-            grey_color = 153
-            grey_color2 = 40
-            #depth_cropped_3d = np.dstack((depth_image,depth_image,depth_image))
-            #Timer.stop("stack")
-            #Timer.start("colorize")
-            #bg_removed = np.where((depth_cropped_3d < Pong.clipping_distance) & (depth_cropped_3d > 0.1), color_image, grey_color )
-
-            #depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_RAINBOW)
-
-            depth_cropped_3d_actual = np.dstack((depth_cropped,depth_cropped,depth_cropped))
-            depth_cropped_3d_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_cropped_3d_actual, alpha=0.03), cv2.COLORMAP_RAINBOW)
-            #Timer.stop("colorize")
-            #Timer.start("drawline")
-            depth_cropped_3d_colormap = np.where((depth_cropped_3d_actual < Pong.clipping_distance) & (depth_cropped_3d_actual > 0.1), depth_cropped_3d_colormap, grey_color2 )
-            
-            # Uncomment these lines to have a window showing the camera feeds
-            # images = np.hstack((bg_removed, depth_colormap))
-            
-            # cv2.namedWindow('Align Example', cv2.WINDOW_NORMAL)
-            # cv2.imshow('Align Example',  images)
-            # cv2.namedWindow('Filtered', cv2.WINDOW_NORMAL)
-            depth_cropped_3d_colormap = cv2.line(depth_cropped_3d_colormap, (int(m),h), (int(m),0), (255,255,255), 1)
-            #Timer.stop("drawline")
-            
-            # cv2.imshow('Filtered',  depth_cropped_3d_colormap)
-            
-            #Timer.start("imgencode")
-            buffer = cv2.imencode('.jpg', depth_cropped_3d_colormap)[1].tostring()
-            Pong.depth_feed = base64.b64encode(buffer).decode()
-            #Timer.stop("imgencode")
-            
-
-            # *****************************************************************************************
-            # we multiply by 1.4 and subtract -0.2 so that the player can reach the edges of the Pong game.
-            # In other words, we shrunk the frame so that the edges of the pong game can be reached without leaving the camera frame
-            return (m/(np.size(cutoffImage,1)) * 1.4) -0.2
-        print("depth failed")
-        #Timer.stop("get_depth")
-        return 0.5 # dummy value if we can't successfully get a good one
 
     @staticmethod
     def random_action():
@@ -295,16 +128,15 @@ class Pong:
             """
             self.velocity[0] += self.speed
 
-        # we need this method because controlling from the depth camera is not fixed speed
-        # def depthMove(self, depth):
-        #     #print(f'depthMove with value = {depth}')
-        #     desiredPos = depth * self.config.WIDTH #((depth-500)/2000) * Pong.HEIGHT
-        #     distance = desiredPos - self.x
-        #     vel = (self.speed * (distance/self.config.WIDTH) * 25)
-        #     self.velocity[0] += vel
-
         def absolute_move(self, motion_position):
             self.x = motion_position
+
+        def depthMove(self, depth):
+            #print(f'depthMove with value = {depth}')
+            desiredPos = depth * self.config.WIDTH #((depth-500)/2000) * Pong.HEIGHT
+            distance = desiredPos - self.x
+            vel = (self.speed * (distance/self.config.WIDTH) * 25)
+            self.velocity[0] += vel
 
         def update(self):
             """
@@ -321,6 +153,7 @@ class Pong:
                 self.x = max
             if self.x < Pong.Paddle.EDGE_BUFFER:
                 self.x = Pong.Paddle.EDGE_BUFFER
+            print(self.x)
 
         def handle_action(self, action, motion_position=None):
             """
@@ -328,6 +161,8 @@ class Pong:
             :param action: String representation of action ("UP", "DOWN", "NONE")
             :return:
             """
+            print(f'action {action}')
+            print(motion_position)
             if action == "LEFT":
                 self.left()
             elif action == "RIGHT":
@@ -335,8 +170,8 @@ class Pong:
             elif action == "NONE":
                 pass
             elif action == "ABSOLUTE":
-                # self.depthMove(depth = depth)
-                self.absolute_move(motion_position=motion_position)
+                self.depthMove(depth = motion_position)
+                # self.absolute_move(motion_position=motion_position)
 
     class Ball:
         def spawn_hit_practice(self):
@@ -488,7 +323,7 @@ class Pong:
                 self.x = 0
                 self.bounce(x=True)
 
-    def __init__(self, config=None, hit_practice=False, level = 1, pipeline = None, decimation_filter = None, crop_percentage_w = None, crop_percentage_h = None, clipping_distance = None, max_score = Config.instance().MAX_SCORE):
+    def __init__(self, config=None, hit_practice=False, level = 1, max_score = Config.instance().MAX_SCORE):
         """
         Initialize basic game state
         :param hit_practice: Trigger training mode with a single paddle and randomly spawned balls
@@ -500,8 +335,8 @@ class Pong:
         config.SPEEDUP = 1 #+ 0.4 # (0.4*level) # uncomment this to make it faster each level
         config.MAX_SCORE = max_score
 
-        if Pong.sounds == None:
-            Pong.load_sounds()
+        # if Pong.sounds == None:
+        #     Pong.load_sounds()
 
         self.config = config
 
@@ -514,13 +349,6 @@ class Pong:
         self.top = Pong.Paddle("top", config=config)
         self.ball = Pong.Ball(hit_practice=hit_practice, config=config)
         self.frames = 0
-
-        # For managing our depth camera later
-        Pong.decimation_filter = decimation_filter
-        Pong.pipeline = pipeline
-        Pong.crop_percentage_w = crop_percentage_w
-        Pong.crop_percentage_h = crop_percentage_h
-        Pong.clipping_distance = clipping_distance
 
     def reset(self):
         """
