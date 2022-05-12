@@ -129,11 +129,12 @@ class Pong:
             self.velocity[0] += self.speed
 
         def absolute_move(self, motion_position):
-            self.x = motion_position
+            position = motion_position * self.config.WIDTH
+            self.x = position
 
-        def depthMove(self, depth):
+        def MotionMove(self, motion_position):
             #print(f'depthMove with value = {depth}')
-            desiredPos = depth * self.config.WIDTH #((depth-500)/2000) * Pong.HEIGHT
+            desiredPos = motion_position * self.config.WIDTH #((depth-500)/2000) * Pong.HEIGHT
             distance = desiredPos - self.x
             vel = (self.speed * (distance/self.config.WIDTH) * 25)
             self.velocity[0] += vel
@@ -170,8 +171,7 @@ class Pong:
             elif action == "NONE":
                 pass
             elif action == "ABSOLUTE":
-                self.depthMove(depth = motion_position)
-                # self.absolute_move(motion_position=motion_position)
+                self.MotionMove(motion_position = motion_position)
 
     class Ball:
         def spawn_hit_practice(self):
@@ -295,21 +295,22 @@ class Pong:
                     angle += 180
                 self.velocity = self.get_vector(angle, self.speed)
                 
-                if self.start_up == True and self.delay_counter == 0:
+                # if self.start_up == True and self.delay_counter == 0:
+                if self.delay_counter == 0:
                     # change to your side
-                    self.y = round(self.config.HEIGHT / 6) # if flipping which is first also change line 347ish
+                    self.y = round(self.config.HEIGHT / 2) # just spawn in the middle
                     self.up = True
-                    self.start_up = False # Start down on the next volley
-                elif self.delay_counter == 0:
-                    self.y = round((self.config.HEIGHT / 6)*5)
-                    self.up = False
-                    self.start_up = True # Start up on the next volley
+                    self.start_up = True # Start down on the next volley
+                # elif self.delay_counter == 0:
+                #     self.y = round((self.config.HEIGHT / 6)*5)
+                #     self.up = False
+                #     self.start_up = True # Start up on the next volley
                     
                 if self.delay_counter <= 15: # a delay so that players can see the ball there before it launches
                     self.delay_counter += 1 # give a delay before the ball starts off again
                     #print(f'delay count {self.delay_counter}')
                 else:
-                    self.velocity = self.get_vector(self.angle, self.speed) if self.up else self.get_vector(self.angle + 180, self.speed)
+                    self.velocity = self.get_vector(self.angle, self.speed)
                     #print(f'velocity set to to {self.velocity} using angle {self.angle}, self.right equals {self.right} (true is unchanged)')
 
             # Higher positions = lower on screen, so negative y velocity is up        

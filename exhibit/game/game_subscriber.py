@@ -36,7 +36,18 @@ class GameSubscriber:
 
     def emit_game_state(self, state):
         # 0 waiting, 1 ready, 2 running
-        self.client.publish("game/state", payload=json.dumps({"state": state}), qos=2)
+        self.client.publish("game/state", payload=json.dumps({"state": state}))
+    
+
+    """
+    Method to override any hanging variables out there and reset - useful for GUIs as some game variables are not published until a change
+    """
+    def reset_game_state(self):
+        # self.client.publish("puck/position", payload=json.dumps({"x": puck_x, "y": puck_y}))
+        # self.client.publish("paddle1/position", payload=json.dumps({"position": bottom_x}))
+        # self.client.publish("paddle2/position", payload=json.dumps({"position": top_x}))
+        self.client.publish("player1/score", payload=json.dumps({"score": 0}))
+        self.client.publish("player2/score", payload=json.dumps({"score": 0}))
 
     def on_connect(self, client, userdata, flags, rc):
         print("Connected with result code " + str(rc))

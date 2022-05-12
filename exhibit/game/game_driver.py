@@ -170,36 +170,24 @@ def main(in_q, config=Config.instance()):
         print("motion detected, beginning game")
         print(f'level {level}')
 
-        if level == 0: # if the game hasn't started yet and the next level would be level 1
-            print("moving to level 1")
-            level = 1
-            
-            subscriber.emit_level(level) 
-            subscriber.emit_game_state(1) # ready
-            print("wait for start")
-            time.sleep(6) # delay for start here - gives a chance for components to give feedback
-            subscriber.emit_game_state(2) # running
-            print("run level")
-            game_instance.run(level) # RUN LEVEL (1)
-
-        elif level == 1 or level == 2: # if we just played level 1 or 2 and now have to play level 3
+        if level < 3: # if the game hasn't started yet and the next level would be level 1
             print("proceed to next level")
             level = level + 1
             
             subscriber.emit_level(level) 
             subscriber.emit_game_state(1) # ready
-            time.sleep(6) # delay for start here - gives a chance for components to give feedback
+            subscriber.reset_game_state()
+            time.sleep(3) # delay for start here - gives a chance for components to give feedback
             subscriber.emit_game_state(2) # running
+            time.sleep(1)
             game_instance.run(level) # RUN LEVEL (1)
 
-
         else: # level == 3
-            # if there was a level 4, the logic would be here
             level = 0 # the game is over so we need to reset to level 0 (the state before the game starts
             print(f'            Game reset to level {level} (zero).')
             subscriber.emit_level(level)
-            subscriber.emit_game_state(0)
-            time.sleep(1) # wait 1 second so person has time to leave and next person can come in
+            subscriber.emit_game_state(3)
+            time.sleep(6) # wait 1 second so person has time to leave and next person can come in
 
     sys.exit()
 

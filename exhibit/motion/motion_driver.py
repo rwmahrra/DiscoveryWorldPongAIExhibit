@@ -262,6 +262,7 @@ class MotionDriver:
                 has_bad_values = False
 
                 for counter in range(0,30):
+                    print(counter)
                     c_value = self.get_position()
                     if c_value == -0.5:
                         # c_value is our dummy value for not seeing a human blob
@@ -279,10 +280,10 @@ class MotionDriver:
                     self.subscriber.publish("motion/presence", True)    
 
             # let's run this about 60 times a second to approximately keep up with frame rate
-            else: # if ready or running
-                position = self.get_human_x()
-                self.subscriber.publish("motion/position", position)
-                time.sleep(0.016) # wait so we're not spamming as fast as the system can - approx 60 per second is more than enough for a max
+            # else: # if ready or running
+            position = self.get_human_x()
+            self.subscriber.publish("motion/position", position)
+            time.sleep(0.016) # wait so we're not spamming as fast as the system can - approx 60 per second is more than enough for a max
 
     def __init__(self, config=Config.instance(), in_q = Queue(), pipeline = rs.pipeline(), decimation_filter = rs.decimation_filter(), crop_percentage_w = 1.0, crop_percentage_h = 1.0, clipping_distance_in_meters = 1.6):
         self.q = in_q

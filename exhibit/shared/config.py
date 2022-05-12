@@ -38,7 +38,7 @@ class Config:
         self.CUSTOM_ACTION_SIZE = 3
         self.CUSTOM_STATE_SHAPE = self.HEIGHT // 2, self.WIDTH // 2
         self.CUSTOM_STATE_SIZE = self.HEIGHT // 2 * self.WIDTH // 2
-        self.RANDOMIZE_START = True
+        self.RANDOMIZE_START = False
         self.BALL_DIAMETER = 8
         self.PADDLE_HEIGHT = 3
         self.PADDLE_WIDTH = 20
