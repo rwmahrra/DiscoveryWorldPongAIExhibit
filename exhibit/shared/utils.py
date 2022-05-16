@@ -190,3 +190,27 @@ def plot_score(path=None, show=False):
     if path:
         plt.savefig(path)
     plt.cla()
+
+
+def plot_duration(path=None, show=False):
+    x = []
+    y = []
+
+    with open('analytics/durations.csv', 'r') as csvfile:
+        plots = csv.reader(csvfile, delimiter=',')
+        i = 0
+        for row in plots:
+            x.append(i)
+            y.append(float(row[0]))
+            i += 1
+
+    plt.plot(x, y)
+    plt.xlabel('Episode')
+    plt.ylabel('Duration')
+    plt.title('Frames Count By Episode')
+    plt.legend()
+    if show:
+        plt.show()
+    if path:
+        plt.savefig(path)
+    plt.cla()

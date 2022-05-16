@@ -7,4 +7,4 @@
 
 # Your job
 #python3 -m pip3 install --user -r requirements.txt
-singularity run --nv /data/containers/msoe-tensorflow-20.07-tf2-py3.sif python3 reinforcement.py
+singularity run --nv /data/containers/msoe-tensorflow-20.07-tf2-py3.sif python3 reinforcement_selfplay.py

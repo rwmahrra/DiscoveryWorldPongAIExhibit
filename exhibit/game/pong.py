@@ -352,9 +352,11 @@ class Pong:
         if not self.hit_practice: self.bottom.reset()
         self.top.reset()
         self.ball.reset()
-        screen = self.render()
-        self.last_screen = screen
-        return screen
+        screen_full = self.render()
+        screen_top = self.render(top_only=True)
+        screen_bottom = self.render(bottom_only=True)
+        self.last_screen = screen_full
+        return screen_bottom, screen_top
 
     def get_score(self):
         """
@@ -506,15 +508,17 @@ class Pong:
                 if self.score_top >= self.config.MAX_SCORE or self.score_bottom >= self.config.MAX_SCORE:
                     done = True
 
-            screen = self.render()
-            self.last_screen = screen
+            screen_full = self.render()
+            screen_top = self.render(top_only=True)
+            screen_bottom = self.render(bottom_only=True)
+            self.last_screen = screen_full
             self.last_frame_time = time.time()
 
-        self.last_screen = screen
+        self.last_screen = screen_full
         self.show(self.render(), duration=3)
 
         self.frames += 1
-        return screen, (reward_l, reward_r), done
+        return (screen_bottom, screen_top), (reward_l, reward_r), done
 
     def show(self, screen, scale=1,  duration=100):
         """
@@ -573,7 +577,7 @@ class Pong:
         x = math.ceil(x)
         screen[max(y, 0):y+h, max(x, 0):x+w] = color
 
-    def render(self):
+    def render(self, top_only=False, bottom_only=False):
         """
         Render the current game pixel state by hand in an ndarray
         :return: ndarray of RGB screen pixels
@@ -584,11 +588,18 @@ class Pong:
         # Draw middle grid line
         self.draw_rect(screen, 0, (self.config.HEIGHT)/2 - 1, self.config.WIDTH, 2, 255)
 
-        if not self.hit_practice:
+        if top_only:
+            self.draw_rect(screen, self.top.x - self.top.w / 2, (self.top.y - (self.top.h / 2)),
+                           self.top.w, self.top.h, 255)
+        elif bottom_only:
             self.draw_rect(screen, self.bottom.x - self.bottom.w / 2, (self.bottom.y - (self.bottom.h / 2)),
                            self.bottom.w, self.bottom.h, 255)
-        self.draw_rect(screen, self.top.x - self.top.w / 2, (self.top.y - (self.top.h / 2)),
-                       self.top.w, self.top.h, 255)
+        else:
+            if not self.hit_practice:
+                self.draw_rect(screen, self.bottom.x - self.bottom.w / 2, (self.bottom.y - (self.bottom.h / 2)),
+                               self.bottom.w, self.bottom.h, 255)
+            self.draw_rect(screen, self.top.x - self.top.w / 2, (self.top.y - (self.top.h / 2)),
+                           self.top.w, self.top.h, 255)
         self.draw_rect(screen, self.ball.x - self.ball.w / 2, (self.ball.y - (self.ball.h / 2)),
                        self.ball.w, self.ball.h, 255)
         return screen
