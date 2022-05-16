@@ -72,7 +72,7 @@ class AIDriver:
 
         # Infer on flattened state vector
         x = diff_state.ravel()
-        action, _, probs = self.agent.act(x)
+        action, _, probs = self.agent.act(x, greedy=False)
         # Publish prediction
         if self.paddle1:
             self.state.publish("paddle1/action", {"action": str(action)})

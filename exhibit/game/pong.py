@@ -284,10 +284,7 @@ class Pong:
             Run game tick housekeeping logic
             """
             if self.velocity == (0, 0):
-                angle = choice(self.config.BALL_START_ANGLES)   
-                if self.config.RANDOMIZE_START and randint(0, 1) == 1:
-                    angle += 180
-                self.velocity = self.get_vector(angle, self.speed)
+                #self.velocity = self.get_vector(angle, self.speed)
                 
                 # if self.start_up == True and self.delay_counter == 0:
                 if self.delay_counter == 0:
@@ -304,19 +301,20 @@ class Pong:
                     self.delay_counter += 1 # give a delay before the ball starts off again
                     #print(f'delay count {self.delay_counter}')
                 else:
-                    self.velocity = self.get_vector(self.angle, self.speed)
+                    angle = choice(self.config.BALL_START_ANGLES)
+                    self.velocity = self.get_vector(angle + 180, self.speed) if self.up else self.get_vector(angle, self.speed)
                     #print(f'velocity set to to {self.velocity} using angle {self.angle}, self.right equals {self.right} (true is unchanged)')
-
-            # Higher positions = lower on screen, so negative y velocity is up        
-            self.up = self.velocity[1] < 0
-            self.x += self.velocity[0]
-            self.y += self.velocity[1]
-            if self.x > self.config.WIDTH:
-                self.x = self.config.WIDTH
-                self.bounce(x=True)
-            if self.x < 0:
-                self.x = 0
-                self.bounce(x=True)
+            else:
+                # Higher positions = lower on screen, so negative y velocity is up
+                self.up = self.velocity[1] < 0
+                self.x += self.velocity[0]
+                self.y += self.velocity[1]
+                if self.x > self.config.WIDTH:
+                    self.x = self.config.WIDTH
+                    self.bounce(x=True)
+                if self.x < 0:
+                    self.x = 0
+                    self.bounce(x=True)
 
     def __init__(self, config=None, hit_practice=False, level = 1, max_score = Config.instance().MAX_SCORE):
         """

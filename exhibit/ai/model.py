@@ -65,18 +65,21 @@ class PGAgent:
 
         return train_model, infer_model
 
-    def act(self, state):
+    def act(self, state, greedy=False):
         """
         Infer action from state
         :param state: ndarray representing game state
+        :param greedy: sample only the highest-confidence output (do not use during training)
         :return: (action id, confidence vector)
         """
         state = state.reshape([1, state.shape[0]])
         prob, activation = self.infer_model(state, training=False)
         self.last_hidden_activation = activation.numpy().squeeze()
         self.last_output = prob.numpy().flatten()
-
-        action = np.random.choice(self.action_size, 1, p=self.last_output)[0]
+        if greedy:
+            action = np.argmax(self.last_output)
+        else:
+            action = np.random.choice(self.action_size, 1, p=self.last_output)[0]
         state_ravel = state.reshape(Config.instance().CUSTOM_STATE_SHAPE)
         self.last_state = state_ravel.flatten()
 
