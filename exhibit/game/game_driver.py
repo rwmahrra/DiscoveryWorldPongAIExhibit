@@ -3,8 +3,6 @@ from exhibit.game.game_subscriber import GameSubscriber
 import numpy as np
 from exhibit.game.player import BotPlayer, AIPlayer, ControllerPlayer, MotionPlayer
 import time
-
-import pyrealsense2 as rs
 import cv2
 
 from exhibit.shared.config import Config

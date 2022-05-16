@@ -10,9 +10,6 @@ from exhibit.shared.config import Config
 
 from exhibit.shared.utils import Timer
 
-if Config.instance().USE_DEPTH_CAMERA:
-    import pyrealsense2 as rs
-
 if Config.instance().ENABLE_AUDIO:
     import pygame.mixer
 
