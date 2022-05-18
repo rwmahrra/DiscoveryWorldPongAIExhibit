@@ -1,27 +1,16 @@
-
 import {
     Scene,
     PerspectiveCamera,
     WebGLRenderer,
     AmbientLight,
 } from '/vendor/three/build/three.module.js';
-//} from 'C:/Users/"DW Pong"/Downloads/DiscoveryWorldPongAIExhibit-master/DiscoveryWorldPongAIExhibit-master/visualizer/vendor/three/build/three.module.js';
 import {
     GLTFLoader
 } from '/vendor/three/examples/jsm/loaders/GLTFLoader.js';
-//} from 'C:/Users/"DW Pong"/Downloads/DiscoveryWorldPongAIExhibit-master/DiscoveryWorldPongAIExhibit-master/visualizer/vendor/three/examples/jsm/loaders/GLTFLoader.js'
 import {
     GUI
 } from '/vendor/three/examples/jsm/libs/dat.gui.module.js';
-//} from 'C:/Users/"DW Pong"/Downloads/DiscoveryWorldPongAIExhibit-master/DiscoveryWorldPongAIExhibit-master/visualizer/vendor/three/examples/jsm/libs/dat.gui.module.js'
-// } from "https://threejs.org/build/three.module.js";
-// import {
-//     GLTFLoader
-// } from "https://threejs.org/examples/jsm/loaders/GLTFLoader.js";
-// import {
-//     GUI
-// } from "https://threejs.org/examples/jsm/libs/dat.gui.module.js";
-//import * from "/js/visualizer.js"
+
 
 let container, camera, scene, renderer, opponent;
 
@@ -44,9 +33,9 @@ function init() {
     //scene.position = window.innerWidth / 2,window.innerHeight /2,0;
     console.log(scene.position);
     //scene.setPosition() 
-    
-    camera = new PerspectiveCamera(75, document.body.clientWidth / document.body.clientHeight, 0.1, 1000);  //PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000); // LW 1
-    camera.position.z = 2;//2;
+
+    camera = new PerspectiveCamera(75, document.body.clientWidth / document.body.clientHeight, 0.1, 1000); //PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000); // LW 1
+    camera.position.z = 2; //2;
 
     scene.add(new AmbientLight(0x8FBCD4, 0.4));
 
@@ -57,41 +46,32 @@ function init() {
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(document.body.clientWidth, document.body.clientHeight);
 
-    
+
     //renderer = 500; // LW
 
     renderer.setAnimationLoop(function () {
         renderer.render(scene, camera);
     });
 
-    container = document.getElementById("opponent"); 
-    //renderer.setSize(container.clientWidth, container.clientHeight);
+    container = document.getElementById("opponent");
 
     container.appendChild(renderer.domElement);
-    // console.log("container opponent canvas pos:")
-    // console.log(renderer.domElement.style.top)   // doesn't work
 
     window.addEventListener('resize', onWindowResize, false);
 
-    // Might want to change the material for better visibility?
-    // const material = new MeshBasicMaterial({????????
-    //     color: 0x000000
-    // }????????);
     console.log("logging from opponent:")
     window.morphOp();
     window.morphOp = morph2;
     window.emptyAnimateFunction();
     window.emptyAnimateFunction = move;
-    //window.tester(3);
     loadOpponent(scene);
-
-
-    
 }
 
 async function loadOpponent(scene) {
     const loader = new GLTFLoader();
     const loadedData = await loader.loadAsync('AIOpponent.glb');
+    console.log("loaded scene: ")
+    console.log(loadedData.scene)
     opponent = loadedData.scene.children[2]; // data contain light and camera object - we can fix this in source at some point, 3rd object is actual mesh
     console.log(opponent);
     scene.add(opponent);
@@ -110,7 +90,6 @@ async function loadOpponent(scene) {
 }
 
 function move(value) {
-    
     opponent.position.y = value;
 }
 
@@ -136,21 +115,25 @@ function initGui() {
     }
 
 }
+
 function morph2(stringE, value) {
     //("morph2!");
-    if (value > 1) {value = 1}
+    if (value > 1) {
+        value = 1
+    }
     //console.log(opponent)
     morph(opponent, stringE, value)
 }
+
 function morph(mesh, target, value) {
     //console.log(target);
     mesh.morphTargetInfluences[mesh.morphTargetDictionary[target]] = value;
 }
 
 function onWindowResize() {
-    
+
     camera.aspect = document.body.clientWidth / document.body.clientHeight; // window.innerWidth / (window.innerHeight);
     camera.updateProjectionMatrix();
     renderer.setSize(document.body.clientWidth, document.body.clientHeight); //renderer.setSize(window.innerWidth, window.innerHeight);
-    
+
 }

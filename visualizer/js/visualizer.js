@@ -565,7 +565,7 @@ function init() {
     exist, and do any precomputing or sizing that aren't model dependent.
     */
     // Create a client instance
-    client = new Paho.MQTT.Client("localhost", 9001, "visualizer_module");
+    client = new Paho.MQTT.Client("localhost", 1883, "visualizer_module");
 
     // set callback handlers
     client.onConnectionLost = onConnectionLost;
