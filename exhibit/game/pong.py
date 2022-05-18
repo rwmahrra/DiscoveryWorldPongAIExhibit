@@ -199,7 +199,6 @@ class Pong:
                 self.y = round((self.config.HEIGHT / 2) - 1)
                 self.speed = self.config.BALL_SPEED * self.config.SPEEDUP
                 self.velocity = (0, 0)
-                self.start_up = True
                 self.w = self.config.BALL_DIAMETER
                 self.h = self.config.BALL_DIAMETER
                 self.up = None
@@ -289,9 +288,8 @@ class Pong:
                 # if self.start_up == True and self.delay_counter == 0:
                 if self.delay_counter == 0:
                     # change to your side
-                    self.y = round(self.config.HEIGHT / 2) # just spawn in the middle
-                    self.up = True
-                    self.start_up = True # Start down on the next volley
+                    self.y = round(self.config.HEIGHT * 0.75) # just spawn in the middle
+                    self.up = False
                 # elif self.delay_counter == 0:
                 #     self.y = round((self.config.HEIGHT / 6)*5)
                 #     self.up = False
