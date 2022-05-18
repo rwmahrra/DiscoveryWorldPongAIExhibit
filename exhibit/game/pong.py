@@ -288,7 +288,7 @@ class Pong:
                 # if self.start_up == True and self.delay_counter == 0:
                 if self.delay_counter == 0:
                     # change to your side
-                    self.y = round(self.config.HEIGHT * 0.75) # just spawn in the middle
+                    self.y = round(5 * self.config.HEIGHT / 6) # just spawn in the middle
                     self.up = False
                 # elif self.delay_counter == 0:
                 #     self.y = round((self.config.HEIGHT / 6)*5)
@@ -326,8 +326,8 @@ class Pong:
         config.SPEEDUP = 1 #+ 0.4 # (0.4*level) # uncomment this to make it faster each level
         config.MAX_SCORE = max_score
 
-        # if Pong.sounds == None:
-        #     Pong.load_sounds()
+        if Config.instance().ENABLE_AUDIO and Pong.sounds == None:
+            Pong.load_sounds()
 
         self.config = config
 

@@ -19,9 +19,9 @@ class AIDriver:
     # MODEL_3 = f'./validation/canstop_randomstart_10k.h5'
 
     # The locations of the three models used. 1 for each level.
-    MODEL_1 = "./validation/selfplay_batch21_7900.h5"#f'./validation/level1_4500.h5'
-    MODEL_2 = "./validation/selfplay_batch21_7900.h5" #f'./validation/level2_7500.h5'
-    MODEL_3 = "./validation/selfplay_batch21_7900.h5"#f'./validation/level3_10000.h5'
+    MODEL_1 = "./validation/smoothreward_s6_f5_d3_10000.h5"#f'./validation/level1_4500.h5'
+    MODEL_2 = "./validation/smoothreward_s6_f5_d3_17500.h5" #f'./validation/level2_7500.h5'
+    MODEL_3 = "./validation/smoothreward_s6_f5_d3_22850.h5"#f'./validation/level3_10000.h5'
     level = 1
     def publish_inference(self):
         #Timer.start('inf')
@@ -72,7 +72,7 @@ class AIDriver:
 
         # Infer on flattened state vector
         x = diff_state.ravel()
-        action, _, probs = self.agent.act(x, greedy=False)
+        action, _, probs = self.agent.act(x, greedy=True)
         # Publish prediction
         if self.paddle1:
             self.state.publish("paddle1/action", {"action": str(action)})
