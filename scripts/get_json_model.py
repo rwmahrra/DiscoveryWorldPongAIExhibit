@@ -14,8 +14,8 @@ import numpy as np
 from exhibit.shared.config import Config
 from exhibit.ai.model import PGAgent
 
-MODEL = './validation/level3_10000.h5'#'validation/canstop_randomstart_3k.h5'# 10k.h5'
-DIFFICULTY = 2  # Easy: 0, Medium: 1, Hard: 2
+MODEL = './validation/smoothreward_s6_f5_d3_10000.h5'#'validation/canstop_randomstart_3k.h5'# 10k.h5'
+DIFFICULTY = 0  # Easy: 0, Medium: 1, Hard: 2
 DIFFICULTY_OUTPUTS = ['visualizer/models/easy.js', 'visualizer/models/medium.js', 'visualizer/models/hard.js']
 DIFFICULTY_VARS = ['easy_model', 'medium_model', 'hard_model']
 agent = PGAgent(Config.CUSTOM_STATE_SIZE, Config.CUSTOM_ACTION_SIZE)

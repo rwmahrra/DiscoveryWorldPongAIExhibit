@@ -261,8 +261,9 @@ class MotionDriver:
                 arrayVals = np.array([]) # empty numpy array to store values to check if person is still
                 has_bad_values = False
 
+                print("starting human blob detection")
+
                 for counter in range(0,30):
-                    print(counter)
                     c_value = self.get_position()
                     if c_value == -0.5:
                         # c_value is our dummy value for not seeing a human blob
@@ -277,6 +278,7 @@ class MotionDriver:
                     self.subscriber.publish("motion/presence", False)  
                     continue
                 else:
+                    print("detected human blob")
                     self.subscriber.publish("motion/presence", True)    
 
             # let's run this about 60 times a second to approximately keep up with frame rate
