@@ -1,2 +1,2 @@
 cd C:\Program Files\mosquitto
-mosquitto -v -c .\mosquitto.conf
+.\mosquitto -v -c .\mosquitto.conf

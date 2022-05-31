@@ -55,3 +55,7 @@ class Config:
         self.BALL_SPEED = 2
         self.BALL_BOUNCE_ANGLES = [-90, -30, -45, -60, -120, -135, -150]  # True to original Atari Pong
         self.BALL_START_ANGLES = [-90]#[210]#[90]
+
+
+        self.CROP_PERCENTAGE_W = 0.5
+        self.CROP_PERCENTAGE_H = 1.0

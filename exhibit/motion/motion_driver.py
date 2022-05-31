@@ -1,3 +1,4 @@
+from ast import Subscript
 import sys
 from tabnanny import check
 from turtle import pos
@@ -243,6 +244,7 @@ class MotionDriver:
             #Timer.start("imgencode")
             buffer = cv2.imencode('.jpg', depth_cropped_3d_colormap)[1].tostring()
             self.depth_feed = base64.b64encode(buffer).decode()
+            self.subscriber.emit_depth_feed(self.depth_feed)
             #Timer.stop("imgencode")
             
 
@@ -293,8 +295,7 @@ class MotionDriver:
         # Realsense configuration
         self.pipeline = pipeline 
         self.decimation_filter = decimation_filter
-        self.crop_percentage_w = crop_percentage_w
-        self.crop_percentage_h = crop_percentage_h
+        
         self.clipping_distance_in_meters = clipping_distance_in_meters
         self.clipping_distance = clipping_distance_in_meters
 
@@ -302,6 +303,10 @@ class MotionDriver:
         self.align = rs.align(self.align_to)
 
         self.config = config
+
+        # just don't think about it
+        self.crop_percentage_w = config.CROP_PERCENTAGE_H
+        self.crop_percentage_h = config.CROP_PERCENTAGE_W
 
         self.configure_pipeline() # set up the pipeline for depth retrieval
 
