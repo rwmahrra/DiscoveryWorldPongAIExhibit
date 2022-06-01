@@ -289,7 +289,7 @@ class MotionDriver:
             self.subscriber.publish("motion/position", position)
             time.sleep(0.016) # wait so we're not spamming as fast as the system can - approx 60 per second is more than enough for a max
 
-    def __init__(self, config=Config.instance(), in_q = Queue(), pipeline = rs.pipeline(), decimation_filter = rs.decimation_filter(), crop_percentage_w = 1.0, crop_percentage_h = 1.0, clipping_distance_in_meters = 1.6):
+    def __init__(self, config=Config.instance(), in_q = Queue(), pipeline = rs.pipeline(), decimation_filter = rs.decimation_filter(), crop_percentage_w = 1.0, crop_percentage_h = 1.0, clipping_distance_in_meters = 2.6):
         self.q = in_q
 
         # Realsense configuration
@@ -304,9 +304,8 @@ class MotionDriver:
 
         self.config = config
 
-        # just don't think about it
-        self.crop_percentage_w = config.CROP_PERCENTAGE_H
-        self.crop_percentage_h = config.CROP_PERCENTAGE_W
+        self.crop_percentage_w = config.CROP_PERCENTAGE_W
+        self.crop_percentage_h = config.CROP_PERCENTAGE_H
 
         self.configure_pipeline() # set up the pipeline for depth retrieval
 

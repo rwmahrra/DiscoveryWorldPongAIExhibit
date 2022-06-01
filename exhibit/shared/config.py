@@ -57,5 +57,5 @@ class Config:
         self.BALL_START_ANGLES = [-90]#[210]#[90]
 
 
-        self.CROP_PERCENTAGE_W = 0.5
-        self.CROP_PERCENTAGE_H = 1.0
+        self.CROP_PERCENTAGE_W = 0.3
+        self.CROP_PERCENTAGE_H = 0.8
