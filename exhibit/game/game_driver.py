@@ -161,9 +161,17 @@ def main(in_q, config=Config.instance()):
 
         # set the game to a waiting state - enables the detection of a player entering motion area and any idle animations that we may want to implement
         # this should always be the case before starting any level - idle animations only when level == 0 and game state is waiting
-        subscriber.emit_game_state(0) # 0 waiting, 1 ready, 2 running   
+        subscriber.emit_game_state(0) # 0 waiting, 1 ready, 2 running 
+        time.sleep(2)  # gives a chance to catch the emitted message
         # wait to verify someone is playing     
+        reset_counter = 0
+        reset = False
         while not subscriber.motion_presence:
+            reset_counter += 1
+            if (reset_counter > 200):
+                print("no one detected, resetting game")
+                reset_counter = 0
+                level = 0
             time.sleep(0.1)
         print("motion detected, beginning game")
         print(f'level {level}')

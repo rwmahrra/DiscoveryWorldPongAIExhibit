@@ -156,8 +156,8 @@ class Pong:
             :param action: String representation of action ("UP", "DOWN", "NONE")
             :return:
             """
-            print(f'action {action}')
-            print(motion_position)
+            # print(f'action {action}')
+            # print(motion_position)
             if action == "LEFT":
                 self.left()
             elif action == "RIGHT":
