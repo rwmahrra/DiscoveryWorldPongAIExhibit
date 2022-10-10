@@ -166,13 +166,18 @@ def main(in_q, config=Config.instance()):
         # wait to verify someone is playing     
         reset_counter = 0
         reset = False
-        while not subscriber.motion_presence:
-            reset_counter += 1
-            if (reset_counter > 200):
-                print("no one detected, resetting game")
-                reset_counter = 0
-                level = 0
-            time.sleep(0.1)
+        
+        
+        # Commented out to avoid the need for a camera
+        # while not subscriber.motion_presence:
+        #     reset_counter += 1
+        #     if (reset_counter > 200):
+        #         print("no one detected, resetting game")
+        #         reset_counter = 0
+        #         level = 0
+        #     time.sleep(0.1)
+
+        
         print("motion detected, beginning game")
         print(f'level {level}')
 
