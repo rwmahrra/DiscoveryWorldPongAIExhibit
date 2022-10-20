@@ -11,8 +11,8 @@ import os
 from exhibit import motion
 import exhibit.game
 from exhibit.game import game_driver
-import exhibit.motion
-from exhibit.motion import motion_driver
+# import exhibit.motion
+# from exhibit.motion import motion_driver
 import exhibit.ai
 from exhibit.ai import ai_driver
 import exhibit.visualization
@@ -23,15 +23,15 @@ import importlib
 
 mqttActive = False
 gameActive = False
-motionActive = False
+# motionActive = False
 aiActive = False
 visualizationActive = False
 # emulate3DActive = False
 killObject = "endThreads"
 q_game = Queue()
 q_game.put('noneActive')
-q_motion = Queue()
-q_motion.put('noneActive')
+# q_motion = Queue()
+# q_motion.put('noneActive')
 q_ai = Queue()
 q_ai.put('noneActive')
 
@@ -66,7 +66,7 @@ sg.theme('DarkGrey')   #
 mqttButton = sg.Button('mqtt server',button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
 gameButton = sg.Button('game',button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
 visualizationButton = sg.Button('visualization',button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
-motionButton = sg.Button('motion',button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
+# motionButton = sg.Button('motion',button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
 aiButton = sg.Button('AI - only if single pc',button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
 emptyString = '  '
 updateWhenStr = 'Change will take effect after restarting game'
@@ -79,10 +79,10 @@ def startGameDriver():
     threading.Thread(target=game_driver.main, args=(q_game,), name='gameThread', daemon=True).start()
     time.sleep(0.5)
 
-def startMotionDriver():
-    varText.update(value=emptyString)
-    importlib.reload(motion_driver)
-    threading.Thread(target=motion_driver.main,args=(q_motion,), name='motionThread', daemon=True).start()
+# def startMotionDriver():
+#     varText.update(value=emptyString)
+#     importlib.reload(motion_driver)
+#     threading.Thread(target=motion_driver.main,args=(q_motion,), name='motionThread', daemon=True).start()
 
 def startAIDriver():
     threading.Thread(target=ai_driver.main, args=(q_ai,), name='ai_thread', daemon=True).start()
@@ -95,7 +95,7 @@ def openVisualizationBrowser():
     #os.system('start C:\\Users\\"DW Pong"\\Downloads\\DiscoveryWorldPongAIExhibit-master\\DiscoveryWorldPongAIExhibit-master\\visualizer\\index.html')
 
 layout = [  [sg.Text('Pong Placeholder Text')], 
-            [mqttButton, gameButton, visualizationButton, motionButton, aiButton], #Emulate3DButton left out
+            [mqttButton, gameButton, visualizationButton, aiButton], #Emulate3DButton left out
             [sg.Text('Change Points per Level:'), sg.InputText(size=(10, 1)), sg.Button('Accept')],
             [varText, sg.Button('Close')] ]
 
@@ -116,12 +116,12 @@ while True:
             gameActive = False
             gameButton.update(button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
 
-    if not q_motion.empty():
-        tempQ2 = q_motion.get()
-        q_motion.put(tempQ2)
-        if tempQ2 == 'noneActive':
-            motionActive = False
-            motionButton.update(button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
+    # if not q_motion.empty():
+    #     tempQ2 = q_motion.get()
+    #     q_motion.put(tempQ2)
+    #     if tempQ2 == 'noneActive':
+    #         motionActive = False
+    #         motionButton.update(button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
 
     if not q_ai.empty():
         tempQ2 = q_ai.get()
@@ -202,32 +202,32 @@ while True:
         print('Restart game_driver for new max score to take effect.')
         varText.update(value=updateWhenStr)
 
-    elif event == 'motion':
-        if motionActive:
+    # elif event == 'motion':
+    #     if motionActive:
             
-            if q_motion.empty():
-                print('shutting down motion driver')
-                q_motion.put("endThreads")
-                #z.join()                
+    #         if q_motion.empty():
+    #             print('shutting down motion driver')
+    #             q_motion.put("endThreads")
+    #             #z.join()                
                 
-                # gameActive = False
-                # gameButton.update(button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
-            else:
-                print('no motion thread active')
+    #             # gameActive = False
+    #             # gameButton.update(button_color=(sg.theme_element_text_color() +' on '+ sg.theme_background_color()))
+    #         else:
+    #             print('no motion thread active')
 
-        else:
+    #     else:
             
-            if not q_motion.empty():
-                tempQ = q_motion.get()
-                if tempQ == 'noneActive':
-                    while not q_motion.empty(): # clear the queue
-                        q_motion.get()
-                    print('starting up motion driver')
-                    motionActive = True
-                    startMotionDriver()
-                    motionButton.update(button_color=(sg.theme_element_text_color() +' on '+ sg.theme_button_color()[1]))
-                else:
-                    print('old ai thread is not exited yet')
+    #         if not q_motion.empty():
+    #             tempQ = q_motion.get()
+    #             if tempQ == 'noneActive':
+    #                 while not q_motion.empty(): # clear the queue
+    #                     q_motion.get()
+    #                 print('starting up motion driver')
+    #                 motionActive = True
+    #                 startMotionDriver()
+    #                 motionButton.update(button_color=(sg.theme_element_text_color() +' on '+ sg.theme_button_color()[1]))
+    #             else:
+    #                 print('old ai thread is not exited yet')
     
     elif event == 'AI - only if single pc':
         if aiActive:
